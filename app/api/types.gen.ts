@@ -48,6 +48,30 @@ export type UserVerifyContactHandlerRequestBody = {
     code: string;
 };
 
+export type GetAuthLoginByProviderData = {
+    body?: never;
+    path: {
+        /**
+         * OAuth provider: yandex, vk, keycloak
+         */
+        provider: string;
+    };
+    query?: never;
+    url: '/auth/login/{provider}';
+};
+
+export type GetAuthLoginByProviderCallbackData = {
+    body?: never;
+    path: {
+        /**
+         * OAuth provider: yandex, vk, keycloak
+         */
+        provider: string;
+    };
+    query?: never;
+    url: '/auth/login/{provider}/callback';
+};
+
 export type PostAuthLoginEmailData = {
     /**
      * Request JSON
@@ -128,6 +152,10 @@ export type PostAuthLogoutErrors = {
      * Unauthorized
      */
     401: ServerErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ServerErrorResponse;
 };
 
 export type PostAuthLogoutError = PostAuthLogoutErrors[keyof PostAuthLogoutErrors];
@@ -136,63 +164,39 @@ export type PostAuthLogoutResponses = {
     /**
      * No Content
      */
-    204: {
-        [key: string]: string;
-    };
+    204: unknown;
 };
-
-export type PostAuthLogoutResponse = PostAuthLogoutResponses[keyof PostAuthLogoutResponses];
 
 export type PostAuthRefreshData = {
     body?: never;
-    headers: {
-        /**
-         * Refresh JWT (Cookie)
-         */
-        refresh_jwt: string;
-    };
     path?: never;
     query?: never;
     url: '/auth/refresh';
 };
 
-export type GetLoginByProviderData = {
-    body?: never;
-    path: {
-        /**
-         * SSO provider: yandex, vk, keycloak
-         */
-        provider: string;
-    };
-    query?: never;
-    url: '/login/{provider}';
-};
-
-export type GetLoginByProviderErrors = {
+export type PostAuthRefreshErrors = {
     /**
-     * Not Implemented
+     * Unauthorized
      */
-    501: unknown;
-};
-
-export type GetLoginByProviderCallbackData = {
-    body?: never;
-    path: {
-        /**
-         * SSO provider: yandex, vk, keycloak
-         */
-        provider: string;
-    };
-    query?: never;
-    url: '/login/{provider}/callback';
-};
-
-export type GetLoginByProviderCallbackErrors = {
+    401: ServerErrorResponse;
     /**
-     * Not Implemented
+     * Internal Server Error
      */
-    501: unknown;
+    500: ServerErrorResponse;
 };
+
+export type PostAuthRefreshError = PostAuthRefreshErrors[keyof PostAuthRefreshErrors];
+
+export type PostAuthRefreshResponses = {
+    /**
+     * OK
+     */
+    200: {
+        [key: string]: string;
+    };
+};
+
+export type PostAuthRefreshResponse = PostAuthRefreshResponses[keyof PostAuthRefreshResponses];
 
 export type GetTenantsData = {
     body?: never;

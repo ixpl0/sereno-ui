@@ -103,14 +103,39 @@ host: localhost:8080
 info:
   contact: {}
   description: Duty компонент Sereno Systems
-  title: Sereno Systems Duty REST API
+  title: Sereno Duty REST API
 paths:
+  /auth/login/{provider}:
+    get:
+      description: Вход через поддерживаемых OAuth провайдеров
+      parameters:
+      - description: 'OAuth provider: yandex, vk, keycloak'
+        in: path
+        name: provider
+        required: true
+        type: string
+      responses: {}
+      summary: (NotImplemented) Вход через OAuth
+      tags:
+      - auth
+  /auth/login/{provider}/callback:
+    get:
+      description: Обработка OAuth Callback от провайдера
+      parameters:
+      - description: 'OAuth provider: yandex, vk, keycloak'
+        in: path
+        name: provider
+        required: true
+        type: string
+      responses: {}
+      summary: (NotImplemented) OAuth сallback
+      tags:
+      - auth
   /auth/login/email:
     post:
       consumes:
       - application/json
-      description: 'Проверяет Email и одноразовый код аутентификации и возвращает
-        Access JWT + "Set-Cookie: refresh_jwt=..."'
+      description: Проверяет Email и одноразовый код и отдает новые AccessJWT + RefreshJWT
       parameters:
       - description: Request JSON
         in: body
@@ -123,6 +148,11 @@ paths:
       responses:
         "200":
           description: OK
+          headers:
+            Set-Cookie:
+              description: jwt_refresh=...; Path=/api/v1/auth/refresh; Max-Age=864000;
+                Secure; HttpOnly
+              type: string
           schema:
             additionalProperties:
               type: string
@@ -175,12 +205,36 @@ paths:
     post:
       consumes:
       - application/json
-      description: Добавляет Access JWT в список отозванных
-      produces:
-      - application/json
+      description: Удаляет RefreshJWT из репозитория и Cookie
       responses:
         "204":
           description: No Content
+          headers:
+            Set-Cookie:
+              description: jwt_refresh=empty; Path=/api/v1/auth/refresh; Max-Age=-1;
+                Secure; HttpOnly
+              type: string
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+      security:
+      - AccessJWT: []
+      summary: Выход
+      tags:
+      - auth
+  /auth/refresh:
+    post:
+      description: Валидирует RefreshJWT и отдает новый AccessJWT
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
           schema:
             additionalProperties:
               type: string
@@ -189,52 +243,13 @@ paths:
           description: Unauthorized
           schema:
             $ref: '#/definitions/server.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
       security:
-      - BearerAuth: []
-      summary: Выход
-      tags:
-      - auth
-  /auth/refresh:
-    post:
-      description: Создает и возвращает новый Access JWT через Refresh JWT
-      parameters:
-      - description: Refresh JWT (Cookie)
-        in: header
-        name: refresh_jwt
-        required: true
-        type: string
-      responses: {}
-      summary: Новый Access JWT через Refresh JWT (NotImplemented)
-      tags:
-      - auth
-  /login/{provider}:
-    get:
-      description: Вход через поддерживаемого SSO провайдера
-      parameters:
-      - description: 'SSO provider: yandex, vk, keycloak'
-        in: path
-        name: provider
-        required: true
-        type: string
-      responses:
-        "501":
-          description: Not Implemented
-      summary: Вход через SSO (NotImplemented)
-      tags:
-      - auth
-  /login/{provider}/callback:
-    get:
-      description: Обработка Callback от SSO провайдера
-      parameters:
-      - description: 'SSO provider: yandex, vk, keycloak'
-        in: path
-        name: provider
-        required: true
-        type: string
-      responses:
-        "501":
-          description: Not Implemented
-      summary: SSO сallback для аутентификации (NotImplemented)
+      - RefreshJWT: []
+      summary: Новый AccessJWT
       tags:
       - auth
   /tenants:
@@ -259,7 +274,7 @@ paths:
           schema:
             $ref: '#/definitions/server.ErrorResponse'
       security:
-      - BearerAuth: []
+      - AccessJWT: []
       summary: Список тенантов пользователя
       tags:
       - tenants
@@ -288,7 +303,7 @@ paths:
           schema:
             $ref: '#/definitions/server.ErrorResponse'
       security:
-      - BearerAuth: []
+      - AccessJWT: []
       summary: Получение тенант по ID
       tags:
       - tenants
@@ -301,7 +316,7 @@ paths:
         "501":
           description: Not Implemented
       security:
-      - BearerAuth: []
+      - AccessJWT: []
       summary: Удаление тенант (NotImplemented)
       tags:
       - tenants
@@ -330,7 +345,7 @@ paths:
           schema:
             $ref: '#/definitions/server.ErrorResponse'
       security:
-      - BearerAuth: []
+      - AccessJWT: []
       summary: Список пользователей тенанта
       tags:
       - tenant/members
@@ -373,7 +388,7 @@ paths:
           schema:
             $ref: '#/definitions/server.ErrorResponse'
       security:
-      - BearerAuth: []
+      - AccessJWT: []
       summary: Удаление пользователя из тенанта
       tags:
       - tenant/members
@@ -416,8 +431,8 @@ paths:
           schema:
             $ref: '#/definitions/server.ErrorResponse'
       security:
-      - BearerAuth: []
-      summary: Добавление / изменение прав пользователя в тенанте
+      - AccessJWT: []
+      summary: Управление пользователями в тенанте
       tags:
       - tenant/members
   /tenants/{id}/tokens:
@@ -448,7 +463,7 @@ paths:
           schema:
             $ref: '#/definitions/server.ErrorResponse'
       security:
-      - BearerAuth: []
+      - AccessJWT: []
       summary: Список статичных токенов
       tags:
       - tenant/tokens
@@ -492,7 +507,7 @@ paths:
           schema:
             $ref: '#/definitions/server.ErrorResponse'
       security:
-      - BearerAuth: []
+      - AccessJWT: []
       summary: Создание статичного токена
       tags:
       - tenant/tokens
@@ -531,7 +546,7 @@ paths:
           schema:
             $ref: '#/definitions/server.ErrorResponse'
       security:
-      - BearerAuth: []
+      - AccessJWT: []
       summary: Удаление интеграционного токена
       tags:
       - tenant/tokens
@@ -546,7 +561,7 @@ paths:
         "501":
           description: Not Implemented
       security:
-      - BearerAuth: []
+      - AccessJWT: []
       summary: Обновление тенант (NotImplemented)
       tags:
       - tenants
@@ -584,7 +599,7 @@ paths:
           schema:
             $ref: '#/definitions/server.ErrorResponse'
       security:
-      - BearerAuth: []
+      - AccessJWT: []
       summary: Создание тенант
       tags:
       - tenants
@@ -615,7 +630,7 @@ paths:
           schema:
             $ref: '#/definitions/server.ErrorResponse'
       security:
-      - BearerAuth: []
+      - AccessJWT: []
       summary: Информацию о пользователе
       tags:
       - user
@@ -642,7 +657,7 @@ paths:
           schema:
             $ref: '#/definitions/server.ErrorResponse'
       security:
-      - BearerAuth: []
+      - AccessJWT: []
       summary: Список контактов пользователя
       tags:
       - user/contacts
@@ -675,7 +690,7 @@ paths:
           schema:
             $ref: '#/definitions/server.ErrorResponse'
       security:
-      - BearerAuth: []
+      - AccessJWT: []
       summary: Удаление контакта пользователя
       tags:
       - user/contacts
@@ -718,7 +733,7 @@ paths:
           schema:
             $ref: '#/definitions/server.ErrorResponse'
       security:
-      - BearerAuth: []
+      - AccessJWT: []
       summary: Верификация контакта пользователя
       tags:
       - user/contacts
@@ -756,7 +771,7 @@ paths:
           schema:
             $ref: '#/definitions/server.ErrorResponse'
       security:
-      - BearerAuth: []
+      - AccessJWT: []
       summary: Добавление контакта пользователя
       tags:
       - user/contacts
@@ -787,13 +802,21 @@ paths:
           schema:
             $ref: '#/definitions/server.ErrorResponse'
       security:
-      - BearerAuth: []
+      - AccessJWT: []
       summary: Обновление информации о пользователе
       tags:
       - user
 securityDefinitions:
-  BearerAuth:
+  AccessJWT:
     in: header
     name: Authorization
+    type: apiKey
+  RefreshJWT:
+    in: header
+    name: Cookie
+    type: apiKey
+  StaticAccessToken:
+    in: header
+    name: X-Static-Access-Token
     type: apiKey
 swagger: "2.0"

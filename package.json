@@ -8,6 +8,7 @@
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
+    "dev:mock": "cross-env NUXT_PUBLIC_MOCK_API=true nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
@@ -44,11 +45,18 @@
     "@storybook/vue3-vite": "^10.1.10",
     "@tailwindcss/vite": "^4.1.18",
     "@vitejs/plugin-vue": "^6.0.3",
+    "cross-env": "^10.1.0",
     "daisyui": "^5.5.14",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
+    "msw": "^2.12.4",
     "storybook": "^10.1.10",
     "tailwindcss": "^4.1.18",
     "vue-tsc": "^3.1.8"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
   }
 }
