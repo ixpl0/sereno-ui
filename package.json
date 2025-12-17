@@ -1,0 +1,54 @@
+{
+  "name": "sereno-ui",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "prepare": "husky",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "vue-tsc --noEmit",
+    "generate:api": "openapi-ts",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed"
+  },
+  "lint-staged": {
+    "*.{js,ts,vue,mjs}": [
+      "eslint --fix"
+    ]
+  },
+  "dependencies": {
+    "@hey-api/client-fetch": "^0.13.1",
+    "@nuxt/eslint": "1.12.1",
+    "@nuxt/icon": "2.1.1",
+    "@pinia/nuxt": "^0.11.3",
+    "eslint": "^9.39.2",
+    "nuxt": "^4.2.2",
+    "pinia": "^3.0.4",
+    "vue": "^3.5.25",
+    "vue-router": "^4.6.4"
+  },
+  "devDependencies": {
+    "@hey-api/openapi-ts": "^0.89.0",
+    "@playwright/test": "^1.57.0",
+    "@storybook/vue3-vite": "^10.1.10",
+    "@tailwindcss/vite": "^4.1.18",
+    "@vitejs/plugin-vue": "^6.0.3",
+    "daisyui": "^5.5.14",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "storybook": "^10.1.10",
+    "tailwindcss": "^4.1.18",
+    "vue-tsc": "^3.1.8"
+  }
+}

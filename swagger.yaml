@@ -1,0 +1,799 @@
+basePath: /api/v1
+definitions:
+  server.ErrorResponse:
+    properties:
+      error:
+        example: Incorrect request / Internal server error
+        type: string
+      request_id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+    type: object
+  tenant.CreateHandler.requestBody:
+    properties:
+      name:
+        maxLength: 64
+        minLength: 1
+        type: string
+    required:
+    - name
+    type: object
+  tenant.CreateTokenHandler.requestBody:
+    properties:
+      name:
+        maxLength: 64
+        minLength: 1
+        type: string
+    required:
+    - name
+    type: object
+  tenant.DeleteMembersHandler.requestBody:
+    properties:
+      id:
+        type: string
+    required:
+    - id
+    type: object
+  tenant.DeleteTokenHandler.requestBody:
+    properties:
+      id:
+        type: string
+    required:
+    - id
+    type: object
+  tenant.UpdateMembersHandler.requestBody:
+    properties:
+      id:
+        type: string
+      role:
+        enum:
+        - admin
+        - editor
+        - viewer
+        type: string
+    required:
+    - id
+    - role
+    type: object
+  user.AddContactHandler.requestBody:
+    properties:
+      kind:
+        enum:
+        - email
+        - telegram
+        - phone
+        example: phone
+        type: string
+      value:
+        example: "+79991234567"
+        type: string
+    required:
+    - kind
+    - value
+    type: object
+  user.EmailLoginHandler.requestBody:
+    properties:
+      code:
+        example: "12345678"
+        type: string
+      email:
+        example: user@example.com
+        type: string
+    required:
+    - code
+    - email
+    type: object
+  user.RequestEmailCodeHandler.requestBody:
+    properties:
+      email:
+        example: user@example.com
+        type: string
+    required:
+    - email
+    type: object
+  user.VerifyContactHandler.requestBody:
+    properties:
+      code:
+        example: "12345678"
+        type: string
+    required:
+    - code
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Duty компонент Sereno Systems
+  title: Sereno Systems Duty REST API
+paths:
+  /auth/login/email:
+    post:
+      consumes:
+      - application/json
+      description: 'Проверяет Email и одноразовый код аутентификации и возвращает
+        Access JWT + "Set-Cookie: refresh_jwt=..."'
+      parameters:
+      - description: Request JSON
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/user.EmailLoginHandler.requestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+      summary: Вход по Email
+      tags:
+      - auth
+  /auth/login/email/code:
+    post:
+      consumes:
+      - application/json
+      description: Формируется и отправляется на электронную почту одноразовый код
+        аутентификации по Email
+      parameters:
+      - description: Request JSON
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/user.RequestEmailCodeHandler.requestBody'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+      summary: Запрос кода на Email
+      tags:
+      - auth
+  /auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: Добавляет Access JWT в список отозванных
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Выход
+      tags:
+      - auth
+  /auth/refresh:
+    post:
+      description: Создает и возвращает новый Access JWT через Refresh JWT
+      parameters:
+      - description: Refresh JWT (Cookie)
+        in: header
+        name: refresh_jwt
+        required: true
+        type: string
+      responses: {}
+      summary: Новый Access JWT через Refresh JWT (NotImplemented)
+      tags:
+      - auth
+  /login/{provider}:
+    get:
+      description: Вход через поддерживаемого SSO провайдера
+      parameters:
+      - description: 'SSO provider: yandex, vk, keycloak'
+        in: path
+        name: provider
+        required: true
+        type: string
+      responses:
+        "501":
+          description: Not Implemented
+      summary: Вход через SSO (NotImplemented)
+      tags:
+      - auth
+  /login/{provider}/callback:
+    get:
+      description: Обработка Callback от SSO провайдера
+      parameters:
+      - description: 'SSO provider: yandex, vk, keycloak'
+        in: path
+        name: provider
+        required: true
+        type: string
+      responses:
+        "501":
+          description: Not Implemented
+      summary: SSO сallback для аутентификации (NotImplemented)
+      tags:
+      - auth
+  /tenants:
+    get:
+      description: Возвращает список тенантов текущего пользователя с указанием прав
+        доступа
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Список тенантов пользователя
+      tags:
+      - tenants
+  /tenants/{id}:
+    get:
+      description: Возвращает Tenant по ID
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Получение тенант по ID
+      tags:
+      - tenants
+  /tenants/{id}/delete:
+    post:
+      description: Удаляет Tenant по ID
+      produces:
+      - application/json
+      responses:
+        "501":
+          description: Not Implemented
+      security:
+      - BearerAuth: []
+      summary: Удаление тенант (NotImplemented)
+      tags:
+      - tenants
+  /tenants/{id}/members:
+    get:
+      description: Возвращает пользователей Tenant по его ID
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Список пользователей тенанта
+      tags:
+      - tenant/members
+  /tenants/{id}/members/delete:
+    post:
+      consumes:
+      - application/json
+      description: Удаляет пользователь из Tenant по его ID
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Request JSON
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/tenant.DeleteMembersHandler.requestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Удаление пользователя из тенанта
+      tags:
+      - tenant/members
+  /tenants/{id}/members/update:
+    post:
+      consumes:
+      - application/json
+      description: Добавляет / изменяет права пользователя в Tenant по его ID
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Request JSON
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/tenant.UpdateMembersHandler.requestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Добавление / изменение прав пользователя в тенанте
+      tags:
+      - tenant/members
+  /tenants/{id}/tokens:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список статичных токенов для Tenant по его ID используемые
+        сервисами алертинга и мониторинга
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Список статичных токенов
+      tags:
+      - tenant/tokens
+  /tenants/{id}/tokens/create:
+    post:
+      consumes:
+      - application/json
+      description: Создает статичный токен для Tenant по его ID используемый сервисами
+        алертинга и мониторинга
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Request JSON
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/tenant.CreateTokenHandler.requestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Создание статичного токена
+      tags:
+      - tenant/tokens
+  /tenants/{id}/tokens/delete:
+    post:
+      consumes:
+      - application/json
+      description: Удаляет интеграционный токен для Tenant по его ID
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Request JSON
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/tenant.DeleteTokenHandler.requestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Удаление интеграционного токена
+      tags:
+      - tenant/tokens
+  /tenants/{id}/update:
+    post:
+      consumes:
+      - application/json
+      description: 'Обновляет Tenant по ID: название, ...'
+      produces:
+      - application/json
+      responses:
+        "501":
+          description: Not Implemented
+      security:
+      - BearerAuth: []
+      summary: Обновление тенант (NotImplemented)
+      tags:
+      - tenants
+  /tenants/create:
+    post:
+      consumes:
+      - application/json
+      description: Создает новый Tenant с указанным названием
+      parameters:
+      - description: Request JSON
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/tenant.CreateHandler.requestBody'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Создание тенант
+      tags:
+      - tenants
+  /user:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает информацию о текущем пользователе
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Информацию о пользователе
+      tags:
+      - user
+  /user/contacts:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список контактов текущего пользователя
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Список контактов пользователя
+      tags:
+      - user/contacts
+  /user/contacts/{id}/delete:
+    post:
+      consumes:
+      - application/json
+      description: Удаляет контакт текущего пользователя
+      parameters:
+      - description: Contact ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Удаление контакта пользователя
+      tags:
+      - user/contacts
+  /user/contacts/{id}/verify:
+    post:
+      consumes:
+      - application/json
+      description: Верифицирует контакт текущего пользователя по одноразовому коду
+      parameters:
+      - description: Contact ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Request JSON
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/user.VerifyContactHandler.requestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Верификация контакта пользователя
+      tags:
+      - user/contacts
+  /user/contacts/add:
+    post:
+      consumes:
+      - application/json
+      description: Добавляет контакт текущему пользователю
+      parameters:
+      - description: Request JSON
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/user.AddContactHandler.requestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Добавление контакта пользователя
+      tags:
+      - user/contacts
+  /user/update:
+    post:
+      consumes:
+      - application/json
+      description: Обновляет информацию о текущем пользователе
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Обновление информации о пользователе
+      tags:
+      - user
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
