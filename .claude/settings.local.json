@@ -5,7 +5,8 @@
       "Bash(pnpm lint:*)",
       "Bash(pnpm build:*)",
       "Bash(pnpm nuxt:*)",
-      "Bash(pnpm lint:fix:*)"
+      "Bash(pnpm lint:fix:*)",
+      "Bash(ls:*)"
     ]
   }
 }

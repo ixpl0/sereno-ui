@@ -1,75 +1,35 @@
-# Nuxt Minimal Starter
+# Sereno UI
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+Frontend for Sereno platform built with Nuxt 4.
+
+## Tech Stack
+
+- Nuxt 4 (Vue 3)
+- Tailwind CSS 4 + DaisyUI 5
+- Pinia
+- Playwright (e2e)
+- Storybook
 
 ## Setup
 
-Make sure to install dependencies:
-
 ```bash
-# npm
-npm install
-
-# pnpm
 pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
 ```
 
-## Development Server
-
-Start the development server on `http://localhost:3000`:
+## Development
 
 ```bash
-# npm
-npm run dev
-
-# pnpm
 pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
 ```
 
-## Production
+## Scripts
 
-Build the application for production:
-
-```bash
-# npm
-npm run build
-
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
-```
-
-Locally preview production build:
-
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+| Command | Description |
+|---------|-------------|
+| `pnpm dev` | Start dev server |
+| `pnpm build` | Build for production |
+| `pnpm lint` | Run ESLint |
+| `pnpm typecheck` | Run TypeScript check |
+| `pnpm test:e2e` | Run e2e tests |
+| `pnpm storybook` | Start Storybook |
+| `pnpm generate:api` | Generate API client |
