@@ -3,10 +3,13 @@ import type {
   UserEmailLoginHandlerRequestBody,
   UserRequestEmailCodeHandlerRequestBody,
 } from '~/api/types.gen'
+import { useAuthStore } from '~/stores/auth'
 
 const API_BASE = 'http://localhost:8080/api/v1'
 
 export const useAuth = () => {
+  const store = useAuthStore()
+
   const requestEmailCode = async (email: string) => {
     const body: UserRequestEmailCodeHandlerRequestBody = { email }
     const response = await client.post({
@@ -22,6 +25,14 @@ export const useAuth = () => {
       url: `${API_BASE}/auth/login/email`,
       body,
     })
+
+    if ('data' in response && response.data) {
+      const accessToken = (response.data as { access_token?: string }).access_token
+      if (accessToken) {
+        store.setToken(accessToken)
+      }
+    }
+
     return response
   }
 
@@ -29,6 +40,9 @@ export const useAuth = () => {
     const response = await client.post({
       url: `${API_BASE}/auth/logout`,
     })
+
+    store.clearToken()
+
     return response
   }
 
@@ -36,6 +50,14 @@ export const useAuth = () => {
     const response = await client.post({
       url: `${API_BASE}/auth/refresh`,
     })
+
+    if ('data' in response && response.data) {
+      const accessToken = (response.data as { access_token?: string }).access_token
+      if (accessToken) {
+        store.setToken(accessToken)
+      }
+    }
+
     return response
   }
 
@@ -50,10 +72,19 @@ export const useAuth = () => {
     const response = await client.get({
       url: `${API_BASE}/auth/login/${provider}/callback`,
     })
+
+    if ('data' in response && response.data) {
+      const accessToken = (response.data as { access_token?: string }).access_token
+      if (accessToken) {
+        store.setToken(accessToken)
+      }
+    }
+
     return response
   }
 
   return {
+    store,
     requestEmailCode,
     loginWithEmail,
     logout,

@@ -57,13 +57,6 @@ const handleLogin = async () => {
     return
   }
 
-  if ('data' in response && response.data) {
-    const token = (response.data as { access_token?: string }).access_token
-    if (token) {
-      localStorage.setItem('auth_token', token)
-    }
-  }
-
   step.value = 'success'
 }
 
@@ -93,7 +86,6 @@ const handleLogout = async () => {
 
   await auth.logout()
 
-  localStorage.removeItem('auth_token')
   isLoading.value = false
   step.value = 'email'
   email.value = ''
@@ -111,13 +103,6 @@ const handleRefresh = async () => {
   if ('error' in response && response.error) {
     error.value = 'Ошибка обновления токена'
     return
-  }
-
-  if ('data' in response && response.data) {
-    const token = (response.data as { access_token?: string }).access_token
-    if (token) {
-      localStorage.setItem('auth_token', token)
-    }
   }
 }
 
