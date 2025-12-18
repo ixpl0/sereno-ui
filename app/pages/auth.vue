@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import type { AuthStep, OAuthProvider, OAuthProviderConfig } from '~/types/auth'
 
+definePageMeta({
+  middleware: 'guest',
+})
+
 const auth = useAuth()
 const router = useRouter()
 
@@ -112,8 +116,8 @@ const goBackToEmail = () => {
   clearError()
 }
 
-const goToHome = () => {
-  router.push('/')
+const goToDashboard = () => {
+  router.push('/dashboard')
 }
 
 const oauthProviders: OAuthProviderConfig[] = [
@@ -265,9 +269,9 @@ const oauthProviders: OAuthProviderConfig[] = [
           <div class="flex flex-col gap-2">
             <button
               class="btn btn-primary"
-              @click="goToHome"
+              @click="goToDashboard"
             >
-              На главную
+              В dashboard
             </button>
 
             <button
