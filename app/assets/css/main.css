@@ -48,3 +48,7 @@
 [data-theme="light"] .noise-overlay {
   background-image: radial-gradient(circle at center, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
 }
+
+[data-theme="light"] .card-glass {
+  --tw-ring-color: rgb(0 0 0 / 0.05);
+}

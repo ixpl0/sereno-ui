@@ -11,7 +11,10 @@
       "Bash(pnpm generate:api:*)",
       "Bash(cat:*)",
       "Bash(npx eslint:*)",
-      "WebFetch(domain:eslint.nuxt.com)"
+      "WebFetch(domain:eslint.nuxt.com)",
+      "Bash(pnpm test:e2e:headed:*)",
+      "WebFetch(domain:daisyui.com)",
+      "WebFetch(domain:github.com)"
     ]
   }
 }

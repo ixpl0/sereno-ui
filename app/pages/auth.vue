@@ -188,7 +188,7 @@ const title = computed(() => {
             v-model="email"
             type="email"
             label="Email"
-            placeholder="your@email.com"
+            placeholder="admin@example.ru"
             :disabled="isLoading"
             @keyup.enter="handleRequestCode"
           />
