@@ -44,3 +44,7 @@
   background-image: radial-gradient(circle at center, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
   background-size: 3px 3px;
 }
+
+[data-theme="light"] .noise-overlay {
+  background-image: radial-gradient(circle at center, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+}
