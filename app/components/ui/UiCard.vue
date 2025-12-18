@@ -25,10 +25,10 @@ const paddingClasses: Record<CardPadding, string> = {
 
 <template>
   <div
-    class="bg-base-100 rounded-2xl shadow-xl transition-all duration-200"
+    class="bg-base-100 rounded-2xl shadow-2xl ring-1 ring-white/10 transition-all duration-200"
     :class="{
       'border border-base-300': bordered,
-      'hover:shadow-2xl hover:scale-[1.01]': hoverable,
+      'hover:shadow-primary/20 hover:scale-[1.01]': hoverable,
     }"
   >
     <div
