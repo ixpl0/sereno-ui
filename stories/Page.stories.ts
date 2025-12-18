@@ -1,15 +1,15 @@
-import type { Meta, StoryObj } from '@storybook/vue3-vite';
+import type { Meta, StoryObj } from '@storybook/vue3-vite'
 
-import { expect, userEvent, within } from 'storybook/test';
+import { expect, userEvent, within } from 'storybook/test'
 
-import MyPage from './Page.vue';
+import UiPage from './UiPage.vue'
 
 const meta = {
   title: 'Example/Page',
-  component: MyPage,
+  component: UiPage,
   render: () => ({
-    components: { MyPage },
-    template: '<my-page />',
+    components: { UiPage },
+    template: '<UiPage />',
   }),
   parameters: {
     // More on how to position stories at: https://storybook.js.org/docs/configure/story-layout
@@ -17,23 +17,23 @@ const meta = {
   },
   // This component will have an automatically generated docsPage entry: https://storybook.js.org/docs/writing-docs/autodocs
   tags: ['autodocs'],
-} satisfies Meta<typeof MyPage>;
+} satisfies Meta<typeof UiPage>
 
-export default meta;
-type Story = StoryObj<typeof meta>;
+export default meta
+type Story = StoryObj<typeof meta>
 
 // More on component testing: https://storybook.js.org/docs/writing-tests/interaction-testing
 export const LoggedIn: Story = {
-  play: async ({ canvasElement }: any) => {
-    const canvas = within(canvasElement);
-    const loginButton = canvas.getByRole('button', { name: /Log in/i });
-    await expect(loginButton).toBeInTheDocument();
-    await userEvent.click(loginButton);
-    await expect(loginButton).not.toBeInTheDocument();
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const canvas = within(canvasElement)
+    const loginButton = canvas.getByRole('button', { name: /Log in/i })
+    await expect(loginButton).toBeInTheDocument()
+    await userEvent.click(loginButton)
+    await expect(loginButton).not.toBeInTheDocument()
 
-    const logoutButton = canvas.getByRole('button', { name: /Log out/i });
-    await expect(logoutButton).toBeInTheDocument();
+    const logoutButton = canvas.getByRole('button', { name: /Log out/i })
+    await expect(logoutButton).toBeInTheDocument()
   },
-};
+}
 
-export const LoggedOut: Story = {};
+export const LoggedOut: Story = {}

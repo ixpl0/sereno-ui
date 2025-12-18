@@ -6,7 +6,12 @@
       "Bash(pnpm build:*)",
       "Bash(pnpm nuxt:*)",
       "Bash(pnpm lint:fix:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "WebSearch",
+      "Bash(pnpm generate:api:*)",
+      "Bash(cat:*)",
+      "Bash(npx eslint:*)",
+      "WebFetch(domain:eslint.nuxt.com)"
     ]
   }
 }

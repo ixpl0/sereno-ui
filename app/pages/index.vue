@@ -1,4 +1,9 @@
 <script setup lang="ts">
+const router = useRouter()
+
+const goToAuth = () => {
+  router.push('/auth')
+}
 </script>
 
 <template>
@@ -10,8 +15,11 @@
       <p class="text-base-content/70">
         Nuxt 4 + DaisyUI + Pinia + OpenAPI
       </p>
-      <button class="btn btn-primary mt-6">
-        Get Started
+      <button
+        class="btn btn-primary mt-6"
+        @click="goToAuth"
+      >
+        Войти
       </button>
     </div>
   </div>

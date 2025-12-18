@@ -1,22 +1,18 @@
-import type { Meta, StoryObj } from '@storybook/vue3-vite';
+import type { Meta, StoryObj } from '@storybook/vue3-vite'
 
-import { fn } from 'storybook/test';
+import { fn } from 'storybook/test'
 
-import MyHeader from './Header.vue';
+import UiHeader from './UiHeader.vue'
 
 const meta = {
-  /* 👇 The title prop is optional.
-   * See https://storybook.js.org/docs/configure/#configure-story-loading
-   * to learn how to generate automatic titles
-   */
   title: 'Example/Header',
-  component: MyHeader,
-  render: (args: any) => ({
-    components: { MyHeader },
+  component: UiHeader,
+  render: (args: { user: { name: string } | null }) => ({
+    components: { UiHeader },
     setup() {
-      return { args };
+      return { args }
     },
-    template: '<my-header :user="args.user" />',
+    template: '<UiHeader :user="args.user" />',
   }),
   parameters: {
     // More on how to position stories at: https://storybook.js.org/docs/configure/story-layout
@@ -29,10 +25,10 @@ const meta = {
   },
   // This component will have an automatically generated docsPage entry: https://storybook.js.org/docs/writing-docs/autodocs
   tags: ['autodocs'],
-} satisfies Meta<typeof MyHeader>;
+} satisfies Meta<typeof UiHeader>
 
-export default meta;
-type Story = StoryObj<typeof meta>;
+export default meta
+type Story = StoryObj<typeof meta>
 
 export const LoggedIn: Story = {
   args: {
@@ -40,10 +36,10 @@ export const LoggedIn: Story = {
       name: 'Jane Doe',
     },
   },
-};
+}
 
 export const LoggedOut: Story = {
   args: {
     user: null,
   },
-};
+}
