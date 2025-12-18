@@ -22,9 +22,25 @@
   --glow-4: oklch(0.88 0.19 196.4 / 0.2);
 }
 
+.auth-gradient {
+  background: linear-gradient(
+    to bottom right in oklch,
+    oklch(0.25 0.02 260) 0%,
+    oklch(0.28 0.015 240) 50%,
+    oklch(0.25 0.02 260) 100%
+  );
+}
+
+[data-theme="light"] .auth-gradient {
+  background: linear-gradient(
+    to bottom right in oklch,
+    oklch(0.92 0.02 250) 0%,
+    oklch(0.96 0.01 240) 50%,
+    oklch(0.92 0.02 250) 100%
+  );
+}
+
 .noise-overlay {
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 24px 24px;
+  background-image: radial-gradient(circle at center, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 3px 3px;
 }

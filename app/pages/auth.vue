@@ -138,13 +138,13 @@ const title = computed(() => {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-base-300 via-base-200 to-base-300 relative overflow-hidden">
+  <div class="min-h-screen flex items-center justify-center auth-gradient relative overflow-hidden">
     <div class="absolute inset-0 overflow-hidden">
       <div class="absolute -bottom-[60rem] -right-[60rem] w-[85rem] h-[85rem] rounded-full blur-[180px] bg-[var(--glow-1)] transition-colors duration-500" />
       <div class="absolute -bottom-[60rem] -left-[60rem] w-[85rem] h-[85rem] rounded-full blur-[180px] bg-[var(--glow-2)] transition-colors duration-500" />
       <div class="absolute top-1/2 -left-[40rem] w-[60rem] h-[60rem] rounded-full blur-[180px] bg-[var(--glow-3)] transition-colors duration-500" />
       <div class="absolute -bottom-[40rem] right-1/4 w-[50rem] h-[50rem] rounded-full blur-[150px] bg-[var(--glow-4)] transition-colors duration-500" />
-      <div class="absolute inset-0 opacity-20 noise-overlay" />
+      <div class="absolute inset-0 opacity-60 noise-overlay" />
     </div>
 
     <UiTransition
