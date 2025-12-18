@@ -37,7 +37,7 @@ const emit = defineEmits<{
   'update:modelValue': [value: string]
 }>()
 
-const inputId = computed(() => props.name || `input-${Math.random().toString(36).slice(2, 9)}`)
+const inputId = computed(() => props.name || `input-${useId()}`)
 
 const variantClasses: Record<InputVariant, string> = {
   bordered: 'input-bordered',
@@ -83,20 +83,14 @@ const handleInput = (event: Event) => {
 </script>
 
 <template>
-  <div class="form-control w-full">
-    <label
+  <div class="w-full">
+    <UiLabel
       v-if="label"
       :for="inputId"
-      class="label"
+      :required="required"
     >
-      <span class="label-text">
-        {{ label }}
-        <span
-          v-if="required"
-          class="text-error"
-        >*</span>
-      </span>
-    </label>
+      {{ label }}
+    </UiLabel>
     <input
       :id="inputId"
       :type="type"
@@ -110,16 +104,12 @@ const handleInput = (event: Event) => {
       class="focus:scale-[1.01] focus:shadow-lg"
       @input="handleInput"
     >
-    <label
+    <p
       v-if="hint"
       class="label"
+      :class="hintColorClasses[state]"
     >
-      <span
-        class="label-text-alt transition-colors duration-200"
-        :class="hintColorClasses[state]"
-      >
-        {{ hint }}
-      </span>
-    </label>
+      {{ hint }}
+    </p>
   </div>
 </template>

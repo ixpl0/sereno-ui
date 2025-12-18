@@ -9,7 +9,7 @@
 }
 
 [data-theme="light"] {
-  --bc: 0.32 0.08 219.74;
+  --color-base-content: oklch(0.32 0.11 245.56 / 0.92);
 }
 
 .noise-overlay {

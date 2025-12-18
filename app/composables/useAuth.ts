@@ -5,15 +5,13 @@ import type {
 } from '~/api/types.gen'
 import { useAuthStore } from '~/stores/auth'
 
-const API_BASE = 'http://localhost:8080/api/v1'
-
 export const useAuth = () => {
   const store = useAuthStore()
 
   const requestEmailCode = async (email: string) => {
     const body: UserRequestEmailCodeHandlerRequestBody = { email }
     const response = await client.post({
-      url: `${API_BASE}/auth/login/email/code`,
+      url: '/auth/login/email/code',
       body,
     })
     return response
@@ -22,7 +20,7 @@ export const useAuth = () => {
   const loginWithEmail = async (email: string, code: string) => {
     const body: UserEmailLoginHandlerRequestBody = { email, code }
     const response = await client.post({
-      url: `${API_BASE}/auth/login/email`,
+      url: '/auth/login/email',
       body,
     })
 
@@ -38,7 +36,7 @@ export const useAuth = () => {
 
   const logout = async () => {
     const response = await client.post({
-      url: `${API_BASE}/auth/logout`,
+      url: '/auth/logout',
     })
 
     store.clearToken()
@@ -48,7 +46,7 @@ export const useAuth = () => {
 
   const refresh = async () => {
     const response = await client.post({
-      url: `${API_BASE}/auth/refresh`,
+      url: '/auth/refresh',
     })
 
     if ('data' in response && response.data) {
@@ -63,14 +61,14 @@ export const useAuth = () => {
 
   const getOAuthUrl = async (provider: 'yandex' | 'vk' | 'keycloak') => {
     const response = await client.get({
-      url: `${API_BASE}/auth/login/${provider}`,
+      url: `/auth/login/${provider}`,
     })
     return response
   }
 
   const handleOAuthCallback = async (provider: 'yandex' | 'vk' | 'keycloak') => {
     const response = await client.get({
-      url: `${API_BASE}/auth/login/${provider}/callback`,
+      url: `/auth/login/${provider}/callback`,
     })
 
     if ('data' in response && response.data) {
