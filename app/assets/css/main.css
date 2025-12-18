@@ -8,6 +8,10 @@
   --radius-selector: 0.375rem;
 }
 
+[data-theme="light"] {
+  --bc: 0.32 0.08 219.74;
+}
+
 .noise-overlay {
   background-image:
     linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),

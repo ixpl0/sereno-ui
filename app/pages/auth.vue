@@ -140,11 +140,11 @@ const title = computed(() => {
 <template>
   <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-base-300 via-base-200 to-base-300 relative overflow-hidden">
     <div class="absolute inset-0 overflow-hidden">
-      <div class="absolute -top-[60rem] -right-[60rem] w-[85rem] h-[85rem] bg-primary/25 rounded-full blur-[180px]" />
-      <div class="absolute -bottom-[60rem] -left-[60rem] w-[85rem] h-[85rem] bg-secondary/25 rounded-full blur-[180px]" />
-      <div class="absolute top-1/2 -left-[40rem] w-[60rem] h-[60rem] bg-accent/15 rounded-full blur-[180px]" />
-      <div class="absolute -bottom-[40rem] right-1/4 w-[50rem] h-[50rem] bg-info/15 rounded-full blur-[150px]" />
-      <div class="absolute inset-0 opacity-30 mix-blend-overlay noise-overlay" />
+      <div class="absolute -top-[60rem] -right-[60rem] w-[85rem] h-[85rem] bg-primary/40 rounded-full blur-[180px]" />
+      <div class="absolute -bottom-[60rem] -left-[60rem] w-[85rem] h-[85rem] bg-secondary/40 rounded-full blur-[180px]" />
+      <div class="absolute top-1/2 -left-[40rem] w-[60rem] h-[60rem] bg-accent/25 rounded-full blur-[180px]" />
+      <div class="absolute -bottom-[40rem] right-1/4 w-[50rem] h-[50rem] bg-info/25 rounded-full blur-[150px]" />
+      <div class="absolute inset-0 opacity-20 noise-overlay" />
     </div>
 
     <UiTransition
