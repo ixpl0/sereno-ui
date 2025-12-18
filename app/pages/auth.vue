@@ -121,7 +121,7 @@ const goToDashboard = () => {
 }
 
 const oauthProviders: OAuthProviderConfig[] = [
-  { id: 'yandex', name: 'Яндекс', icon: 'simple-icons:yandex' },
+  { id: 'yandex', name: 'Яндекс', icon: 'tabler:brand-yandex' },
   { id: 'vk', name: 'ВКонтакте', icon: 'simple-icons:vk' },
   { id: 'keycloak', name: 'Keycloak', icon: 'simple-icons:keycloak' },
 ]
