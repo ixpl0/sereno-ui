@@ -2,7 +2,10 @@ import type { StorybookConfig } from '@storybook/vue3-vite'
 import vue from '@vitejs/plugin-vue'
 
 const config: StorybookConfig = {
-  stories: ['../stories/**/*.stories.@(js|jsx|mjs|ts|tsx)'],
+  stories: [
+    '../stories/**/*.stories.@(js|jsx|mjs|ts|tsx)',
+    '../app/components/**/*.stories.@(js|jsx|mjs|ts|tsx)',
+  ],
   addons: [],
   framework: '@storybook/vue3-vite',
   viteFinal: (config) => {

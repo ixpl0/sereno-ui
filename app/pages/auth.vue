@@ -125,179 +125,168 @@ const oauthProviders: OAuthProviderConfig[] = [
   { id: 'vk', name: 'ВКонтакте', icon: 'simple-icons:vk' },
   { id: 'keycloak', name: 'Keycloak', icon: 'simple-icons:keycloak' },
 ]
+
+const title = computed(() => {
+  if (step.value === 'email') {
+    return 'Вход в систему'
+  }
+  if (step.value === 'code') {
+    return 'Введите код'
+  }
+  return 'Вы авторизованы'
+})
 </script>
 
 <template>
   <div class="min-h-screen flex items-center justify-center bg-base-200">
-    <div class="card w-full max-w-md bg-base-100 shadow-xl">
-      <div class="card-body">
-        <h2 class="card-title justify-center text-2xl mb-6">
-          <template v-if="step === 'email'">
-            Вход в систему
-          </template>
-          <template v-else-if="step === 'code'">
-            Введите код
-          </template>
-          <template v-else>
-            Вы авторизованы
-          </template>
+    <UiCard
+      :title="title"
+      class="w-full max-w-md"
+    >
+      <template #header>
+        <h2 class="text-2xl font-semibold text-center w-full">
+          {{ title }}
         </h2>
+      </template>
 
-        <div
-          v-if="error"
-          class="alert alert-error mb-4"
+      <div
+        v-if="error"
+        class="alert alert-error mb-4"
+      >
+        <Icon
+          name="heroicons:exclamation-circle"
+          class="w-5 h-5"
+        />
+        <span>{{ error }}</span>
+        <UiButton
+          variant="ghost"
+          size="sm"
+          @click="clearError"
         >
           <Icon
-            name="heroicons:exclamation-circle"
-            class="w-5 h-5"
+            name="heroicons:x-mark"
+            class="w-4 h-4"
           />
-          <span>{{ error }}</span>
-          <button
-            class="btn btn-ghost btn-sm"
-            @click="clearError"
-          >
-            <Icon
-              name="heroicons:x-mark"
-              class="w-4 h-4"
-            />
-          </button>
+        </UiButton>
+      </div>
+
+      <template v-if="step === 'email'">
+        <UiInput
+          v-model="email"
+          type="email"
+          label="Email"
+          placeholder="your@email.com"
+          :disabled="isLoading"
+          @keyup.enter="handleRequestCode"
+        />
+
+        <UiButton
+          variant="primary"
+          block
+          class="mt-4"
+          :disabled="!email"
+          :loading="isLoading"
+          @click="handleRequestCode"
+        >
+          Получить код
+        </UiButton>
+
+        <div class="divider">
+          или
         </div>
 
-        <template v-if="step === 'email'">
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">Email</span>
-            </label>
-            <input
-              v-model="email"
-              type="email"
-              placeholder="your@email.com"
-              class="input input-bordered w-full"
-              :disabled="isLoading"
-              @keyup.enter="handleRequestCode"
-            >
-          </div>
-
-          <button
-            class="btn btn-primary w-full mt-4"
-            :disabled="isLoading || !email"
-            @click="handleRequestCode"
-          >
-            <span
-              v-if="isLoading"
-              class="loading loading-spinner loading-sm"
-            />
-            <template v-else>
-              Получить код
-            </template>
-          </button>
-
-          <div class="divider">
-            или
-          </div>
-
-          <div class="flex flex-col gap-2">
-            <button
-              v-for="provider in oauthProviders"
-              :key="provider.id"
-              class="btn btn-outline"
-              :disabled="isLoading"
-              @click="handleOAuth(provider.id)"
-            >
-              <Icon
-                :name="provider.icon"
-                class="w-5 h-5"
-              />
-              {{ provider.name }}
-            </button>
-          </div>
-        </template>
-
-        <template v-else-if="step === 'code'">
-          <p class="text-sm text-base-content/70 mb-4">
-            Код отправлен на {{ email }}
-          </p>
-
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">Код подтверждения</span>
-            </label>
-            <input
-              v-model="code"
-              type="text"
-              placeholder="12345678"
-              class="input input-bordered w-full text-center tracking-widest"
-              :disabled="isLoading"
-              @keyup.enter="handleLogin"
-            >
-          </div>
-
-          <button
-            class="btn btn-primary w-full mt-4"
-            :disabled="isLoading || !code"
-            @click="handleLogin"
-          >
-            <span
-              v-if="isLoading"
-              class="loading loading-spinner loading-sm"
-            />
-            <template v-else>
-              Войти
-            </template>
-          </button>
-
-          <button
-            class="btn btn-ghost w-full mt-2"
+        <div class="flex flex-col gap-2">
+          <UiButton
+            v-for="provider in oauthProviders"
+            :key="provider.id"
+            variant="neutral"
+            outline
             :disabled="isLoading"
-            @click="goBackToEmail"
+            @click="handleOAuth(provider.id)"
           >
-            Назад
-          </button>
-        </template>
-
-        <template v-else>
-          <div class="text-center">
             <Icon
-              name="heroicons:check-circle"
-              class="w-16 h-16 text-success mx-auto mb-4"
+              :name="provider.icon"
+              class="w-5 h-5"
             />
-            <p class="text-base-content/70 mb-6">
-              Вы успешно вошли в систему
-            </p>
-          </div>
+            {{ provider.name }}
+          </UiButton>
+        </div>
+      </template>
 
-          <div class="flex flex-col gap-2">
-            <button
-              class="btn btn-primary"
-              @click="goToDashboard"
-            >
-              В dashboard
-            </button>
+      <template v-else-if="step === 'code'">
+        <p class="text-sm text-base-content/70 mb-4">
+          Код отправлен на {{ email }}
+        </p>
 
-            <button
-              class="btn btn-outline"
-              :disabled="isLoading"
-              @click="handleRefresh"
-            >
-              <span
-                v-if="isLoading"
-                class="loading loading-spinner loading-sm"
-              />
-              <template v-else>
-                Обновить токен
-              </template>
-            </button>
+        <UiInput
+          v-model="code"
+          type="text"
+          label="Код подтверждения"
+          placeholder="12345678"
+          :disabled="isLoading"
+          @keyup.enter="handleLogin"
+        />
 
-            <button
-              class="btn btn-ghost text-error"
-              :disabled="isLoading"
-              @click="handleLogout"
-            >
-              Выйти
-            </button>
-          </div>
-        </template>
-      </div>
-    </div>
+        <UiButton
+          variant="primary"
+          block
+          class="mt-4"
+          :disabled="!code"
+          :loading="isLoading"
+          @click="handleLogin"
+        >
+          Войти
+        </UiButton>
+
+        <UiButton
+          variant="ghost"
+          block
+          class="mt-2"
+          :disabled="isLoading"
+          @click="goBackToEmail"
+        >
+          Назад
+        </UiButton>
+      </template>
+
+      <template v-else>
+        <div class="text-center">
+          <Icon
+            name="heroicons:check-circle"
+            class="w-16 h-16 text-success mx-auto mb-4"
+          />
+          <p class="text-base-content/70 mb-6">
+            Вы успешно вошли в систему
+          </p>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <UiButton
+            variant="primary"
+            @click="goToDashboard"
+          >
+            В dashboard
+          </UiButton>
+
+          <UiButton
+            variant="neutral"
+            outline
+            :loading="isLoading"
+            @click="handleRefresh"
+          >
+            Обновить токен
+          </UiButton>
+
+          <UiButton
+            variant="ghost"
+            class="text-error"
+            :disabled="isLoading"
+            @click="handleLogout"
+          >
+            Выйти
+          </UiButton>
+        </div>
+      </template>
+    </UiCard>
   </div>
 </template>

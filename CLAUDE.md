@@ -36,11 +36,28 @@ pnpm test:e2e:headed  # Run Playwright in headed browser
 app/
 ├── api/           # Auto-generated API client (from swagger.yaml, do not edit manually)
 ├── assets/css/    # Global CSS (Tailwind + DaisyUI)
+├── components/ui/ # Reusable UI components (UiButton, UiInput, UiModal, etc.)
 ├── pages/         # Nuxt pages (file-based routing)
 └── app.vue        # Root component
 stories/           # Storybook stories (excluded from ESLint)
 tests/e2e/         # Playwright e2e tests
 ```
+
+## UI Components
+
+All visual/reusable UI elements must be placed in `app/components/ui/` with `Ui` prefix:
+
+- **UiButton** - Buttons with variants (primary, secondary, ghost, etc.)
+- **UiInput** - Text inputs with labels and validation states
+- **UiModal** - Modal dialogs with smooth open/close animations
+
+### Design Guidelines
+
+- Use smooth, elegant animations for interactions (hover, focus, open/close)
+- Leverage DaisyUI component classes as base, extend with custom animations
+- Modal animations: fade + scale for opening, reverse for closing
+- Inputs/buttons: subtle transitions on hover/focus states
+- Keep animations performant (use `transform` and `opacity`)
 
 ## Code Style
 
