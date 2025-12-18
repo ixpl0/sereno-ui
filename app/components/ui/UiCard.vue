@@ -25,7 +25,7 @@ const paddingClasses: Record<CardPadding, string> = {
 
 <template>
   <div
-    class="card-glass bg-base-100/30 backdrop-blur-xl rounded-2xl shadow-2xl ring-1 ring-white/5 transition-all duration-200"
+    class="card-glass backdrop-blur-xl rounded-2xl shadow-2xl ring-1 ring-white/5 transition-all duration-200"
     :class="{
       'border border-base-300': bordered,
       'hover:shadow-primary/20 hover:scale-[1.01]': hoverable,
@@ -33,7 +33,7 @@ const paddingClasses: Record<CardPadding, string> = {
   >
     <div
       v-if="title || $slots.header"
-      class="px-6 py-4 border-b border-base-300"
+      class="px-6 py-4"
     >
       <slot name="header">
         <h3 class="text-lg font-semibold">
@@ -48,7 +48,7 @@ const paddingClasses: Record<CardPadding, string> = {
 
     <div
       v-if="$slots.footer"
-      class="px-6 py-4 border-t border-base-300"
+      class="px-6 py-4"
     >
       <slot name="footer" />
     </div>

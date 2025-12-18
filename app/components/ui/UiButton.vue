@@ -45,7 +45,6 @@ const buttonClasses = computed(() => [
   {
     'btn-outline': props.outline,
     'btn-block': props.block,
-    'btn-disabled': props.disabled,
   },
 ])
 </script>
@@ -55,7 +54,7 @@ const buttonClasses = computed(() => [
     :type="type"
     :disabled="disabled || loading"
     :class="buttonClasses"
-    class="transition-all duration-200 ease-out active:scale-95"
+    class="transition-all duration-200 ease-out active:scale-[0.98] hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
   >
     <span
       v-if="loading"

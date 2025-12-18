@@ -189,6 +189,7 @@ const title = computed(() => {
             type="email"
             label="Email"
             placeholder="admin@example.ru"
+            autocomplete="email"
             :disabled="isLoading"
             @keyup.enter="handleRequestCode"
           />
@@ -213,7 +214,6 @@ const title = computed(() => {
               v-for="provider in oauthProviders"
               :key="provider.id"
               variant="ghost"
-              class="border border-base-300 hover:border-primary"
               :disabled="isLoading"
               @click="handleOAuth(provider.id)"
             >
@@ -236,6 +236,7 @@ const title = computed(() => {
             type="text"
             label="Код подтверждения"
             placeholder="12345678"
+            autocomplete="one-time-code"
             :disabled="isLoading"
             @keyup.enter="handleLogin"
           />
