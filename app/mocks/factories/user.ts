@@ -3,12 +3,12 @@ import type { User, Contact } from '~/mocks/types'
 type UserOverrides = Partial<User>
 type ContactOverrides = Partial<Contact>
 
-let userIdCounter = 1
-let contactIdCounter = 1
+let userIdCounter = 0
+let contactIdCounter = 0
 
 export const createUser = (overrides: UserOverrides = {}): User => {
-  const id = `user-${userIdCounter}`
   userIdCounter = userIdCounter + 1
+  const id = `user-${userIdCounter}`
 
   return {
     id,
@@ -20,8 +20,8 @@ export const createUser = (overrides: UserOverrides = {}): User => {
 }
 
 export const createContact = (overrides: ContactOverrides = {}): Contact => {
-  const id = `contact-${contactIdCounter}`
   contactIdCounter = contactIdCounter + 1
+  const id = `contact-${contactIdCounter}`
 
   return {
     id,
@@ -34,6 +34,6 @@ export const createContact = (overrides: ContactOverrides = {}): Contact => {
 }
 
 export const resetUserFactory = (): void => {
-  userIdCounter = 1
-  contactIdCounter = 1
+  userIdCounter = 0
+  contactIdCounter = 0
 }

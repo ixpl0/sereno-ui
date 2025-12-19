@@ -25,6 +25,9 @@ const emit = defineEmits<{
   'update:modelValue': [value: boolean]
 }>()
 
+const modalRef = ref<HTMLElement | null>(null)
+const previousActiveElement = ref<HTMLElement | null>(null)
+
 const sizeClasses: Record<ModalSize, string> = {
   sm: 'max-w-sm',
   md: 'max-w-md',
@@ -46,10 +49,81 @@ const handleBackdropClick = () => {
 }
 
 const handleKeydown = (event: KeyboardEvent) => {
-  if (event.key === 'Escape' && props.closeOnEscape && props.modelValue) {
+  if (!props.modelValue) {
+    return
+  }
+
+  if (event.key === 'Escape' && props.closeOnEscape) {
     close()
+    return
+  }
+
+  if (event.key === 'Tab') {
+    trapFocus(event)
   }
 }
+
+const getFocusableElements = (): HTMLElement[] => {
+  if (!modalRef.value) {
+    return []
+  }
+
+  const selector = [
+    'button:not([disabled])',
+    'input:not([disabled])',
+    'select:not([disabled])',
+    'textarea:not([disabled])',
+    'a[href]',
+    '[tabindex]:not([tabindex="-1"])',
+  ].join(', ')
+
+  return Array.from(modalRef.value.querySelectorAll<HTMLElement>(selector))
+}
+
+const trapFocus = (event: KeyboardEvent) => {
+  const focusableElements = getFocusableElements()
+
+  if (focusableElements.length === 0) {
+    return
+  }
+
+  const firstElement = focusableElements[0]
+  const lastElement = focusableElements[focusableElements.length - 1]
+
+  if (!firstElement || !lastElement) {
+    return
+  }
+
+  if (event.shiftKey && document.activeElement === firstElement) {
+    event.preventDefault()
+    lastElement.focus()
+  }
+  else if (!event.shiftKey && document.activeElement === lastElement) {
+    event.preventDefault()
+    firstElement.focus()
+  }
+}
+
+const focusFirstElement = () => {
+  nextTick(() => {
+    const focusableElements = getFocusableElements()
+    const firstElement = focusableElements[0]
+    if (firstElement) {
+      firstElement.focus()
+    }
+  })
+}
+
+watch(() => props.modelValue, (isOpen) => {
+  if (isOpen) {
+    previousActiveElement.value = document.activeElement as HTMLElement
+    focusFirstElement()
+  }
+  else if (previousActiveElement.value) {
+    previousActiveElement.value.focus()
+    previousActiveElement.value = null
+  }
+})
 
 onMounted(() => {
   document.addEventListener('keydown', handleKeydown)
@@ -68,10 +142,15 @@ onUnmounted(() => {
     >
       <div
         v-if="modelValue"
+        ref="modalRef"
+        role="dialog"
+        aria-modal="true"
+        :aria-labelledby="title ? 'modal-title' : undefined"
         class="fixed inset-0 z-50 flex items-center justify-center p-4"
       >
         <div
           class="absolute inset-0 bg-black/50 backdrop-blur-sm"
+          aria-hidden="true"
           @click="handleBackdropClick"
         />
 
@@ -94,6 +173,7 @@ onUnmounted(() => {
               <div class="flex items-center justify-between">
                 <h3
                   v-if="title"
+                  id="modal-title"
                   class="text-lg font-semibold"
                 >
                   {{ title }}
@@ -106,7 +186,7 @@ onUnmounted(() => {
                   v-if="closable"
                   type="button"
                   class="btn btn-ghost btn-sm btn-circle transition-transform duration-200 hover:scale-110 hover:rotate-90"
-                  aria-label="Close"
+                  aria-label="Закрыть"
                   @click="close"
                 >
                   <svg
@@ -115,6 +195,7 @@ onUnmounted(() => {
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
+                    aria-hidden="true"
                   >
                     <path
                       stroke-linecap="round"

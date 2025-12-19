@@ -16,6 +16,10 @@ interface Props {
   required?: boolean
   name?: string
   autocomplete?: string
+  maxlength?: number
+  minlength?: number
+  pattern?: string
+  ariaDescribedby?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -31,6 +35,10 @@ const props = withDefaults(defineProps<Props>(), {
   required: false,
   name: '',
   autocomplete: 'off',
+  maxlength: undefined,
+  minlength: undefined,
+  pattern: undefined,
+  ariaDescribedby: undefined,
 })
 
 const emit = defineEmits<{
@@ -38,6 +46,7 @@ const emit = defineEmits<{
 }>()
 
 const inputId = computed(() => props.name || `input-${useId()}`)
+const hintId = computed(() => props.hint ? `${inputId.value}-hint` : undefined)
 
 const variantClasses: Record<InputVariant, string> = {
   bordered: 'input-bordered',
@@ -76,6 +85,17 @@ const inputClasses = computed(() => [
   stateClasses[props.state],
 ])
 
+const ariaDescribedbyComputed = computed(() => {
+  const ids: string[] = []
+  if (props.ariaDescribedby) {
+    ids.push(props.ariaDescribedby)
+  }
+  if (hintId.value) {
+    ids.push(hintId.value)
+  }
+  return ids.length > 0 ? ids.join(' ') : undefined
+})
+
 const handleInput = (event: Event) => {
   const target = event.target as HTMLInputElement
   emit('update:modelValue', target.value)
@@ -100,12 +120,18 @@ const handleInput = (event: Event) => {
       :required="required"
       :name="name"
       :autocomplete="autocomplete"
+      :maxlength="maxlength"
+      :minlength="minlength"
+      :pattern="pattern"
+      :aria-describedby="ariaDescribedbyComputed"
+      :aria-invalid="state === 'error'"
       :class="inputClasses"
       class="focus:scale-[1.01] focus:shadow-lg"
       @input="handleInput"
     >
     <p
       v-if="hint"
+      :id="hintId"
       class="label"
       :class="hintColorClasses[state]"
     >

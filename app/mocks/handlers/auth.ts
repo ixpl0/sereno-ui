@@ -6,13 +6,11 @@ import type {
 import { withDelay } from '~/mocks/utils/delay'
 import { createErrorResponse } from '~/mocks/utils/error'
 import { setAuthToken } from '~/mocks/db'
-
-const BASE_URL = 'http://localhost:8080/api/v1'
-const VALID_CODE = '12345678'
+import { MOCK_API_BASE_URL, MOCK_VERIFICATION_CODES, MOCK_OAUTH_PROVIDERS } from '~/mocks/utils/constants'
 
 export const authHandlers = [
   http.post<never, UserRequestEmailCodeHandlerRequestBody>(
-    `${BASE_URL}/auth/login/email/code`,
+    `${MOCK_API_BASE_URL}/auth/login/email/code`,
     async ({ request }) => {
       await withDelay('realistic')
 
@@ -30,7 +28,7 @@ export const authHandlers = [
   ),
 
   http.post<never, UserEmailLoginHandlerRequestBody>(
-    `${BASE_URL}/auth/login/email`,
+    `${MOCK_API_BASE_URL}/auth/login/email`,
     async ({ request }) => {
       await withDelay('realistic')
 
@@ -40,7 +38,7 @@ export const authHandlers = [
         return createErrorResponse('badRequest', 'Email and code are required')
       }
 
-      if (body.code !== VALID_CODE) {
+      if (body.code !== MOCK_VERIFICATION_CODES.email) {
         return createErrorResponse('badRequest', 'Invalid verification code')
       }
 
@@ -54,13 +52,13 @@ export const authHandlers = [
     },
   ),
 
-  http.post(`${BASE_URL}/auth/logout`, async () => {
+  http.post(`${MOCK_API_BASE_URL}/auth/logout`, async () => {
     await withDelay('fast')
     setAuthToken(null)
     return new HttpResponse(null, { status: 204 })
   }),
 
-  http.post(`${BASE_URL}/auth/refresh`, async () => {
+  http.post(`${MOCK_API_BASE_URL}/auth/refresh`, async () => {
     await withDelay('fast')
 
     const newToken = `mock-jwt-${crypto.randomUUID()}`
@@ -73,12 +71,11 @@ export const authHandlers = [
   }),
 
   http.get<{ provider: string }>(
-    `${BASE_URL}/auth/login/:provider`,
+    `${MOCK_API_BASE_URL}/auth/login/:provider`,
     async ({ params }) => {
       await withDelay('fast')
 
-      const validProviders = ['yandex', 'vk', 'keycloak']
-      if (!validProviders.includes(params.provider)) {
+      if (!MOCK_OAUTH_PROVIDERS.includes(params.provider as typeof MOCK_OAUTH_PROVIDERS[number])) {
         return createErrorResponse('badRequest', `Unknown provider: ${params.provider}`)
       }
 
@@ -90,12 +87,11 @@ export const authHandlers = [
   ),
 
   http.get<{ provider: string }>(
-    `${BASE_URL}/auth/login/:provider/callback`,
+    `${MOCK_API_BASE_URL}/auth/login/:provider/callback`,
     async ({ params }) => {
       await withDelay('realistic')
 
-      const validProviders = ['yandex', 'vk', 'keycloak']
-      if (!validProviders.includes(params.provider)) {
+      if (!MOCK_OAUTH_PROVIDERS.includes(params.provider as typeof MOCK_OAUTH_PROVIDERS[number])) {
         return createErrorResponse('badRequest', `Unknown provider: ${params.provider}`)
       }
 

@@ -19,6 +19,7 @@ const meta = {
     closeOnEscape: { control: 'boolean' },
   },
   args: {
+    modelValue: false,
     size: 'md',
     title: 'Modal Title',
     closable: true,
@@ -31,6 +32,9 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
+  args: {
+    modelValue: false,
+  },
   render: args => ({
     components: { UiModal, UiButton },
     setup: () => {
@@ -49,6 +53,9 @@ export const Default: Story = {
 }
 
 export const WithFooter: Story = {
+  args: {
+    modelValue: false,
+  },
   render: args => ({
     components: { UiModal, UiButton },
     setup: () => {
@@ -73,6 +80,9 @@ export const WithFooter: Story = {
 }
 
 export const WithForm: Story = {
+  args: {
+    modelValue: false,
+  },
   render: () => ({
     components: { UiModal, UiButton, UiInput },
     setup: () => {
@@ -114,6 +124,9 @@ export const WithForm: Story = {
 }
 
 export const Small: Story = {
+  args: {
+    modelValue: false,
+  },
   render: () => ({
     components: { UiModal, UiButton },
     setup: () => {
@@ -132,6 +145,9 @@ export const Small: Story = {
 }
 
 export const Large: Story = {
+  args: {
+    modelValue: false,
+  },
   render: () => ({
     components: { UiModal, UiButton },
     setup: () => {
@@ -151,6 +167,9 @@ export const Large: Story = {
 }
 
 export const ExtraLarge: Story = {
+  args: {
+    modelValue: false,
+  },
   render: () => ({
     components: { UiModal, UiButton },
     setup: () => {
@@ -170,6 +189,9 @@ export const ExtraLarge: Story = {
 }
 
 export const NotClosable: Story = {
+  args: {
+    modelValue: false,
+  },
   render: () => ({
     components: { UiModal, UiButton },
     setup: () => {
@@ -199,6 +221,9 @@ export const NotClosable: Story = {
 }
 
 export const NoTitle: Story = {
+  args: {
+    modelValue: false,
+  },
   render: () => ({
     components: { UiModal, UiButton },
     setup: () => {
@@ -221,6 +246,9 @@ export const NoTitle: Story = {
 }
 
 export const AllSizes: Story = {
+  args: {
+    modelValue: false,
+  },
   render: () => ({
     components: { UiModal, UiButton },
     setup: () => {

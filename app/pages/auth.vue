@@ -1,8 +1,16 @@
 <script setup lang="ts">
 import type { AuthStep, OAuthProvider, OAuthProviderConfig } from '~/types/auth'
+import { isApiError, extractApiError, getApiData } from '~/utils/api'
+import { safeRedirect } from '~/utils/url'
 
 definePageMeta({
+  layout: 'auth',
   middleware: 'guest',
+})
+
+useSeoMeta({
+  title: 'Вход в систему',
+  description: 'Авторизуйтесь для доступа к личному кабинету',
 })
 
 const auth = useAuth()
@@ -31,10 +39,8 @@ const handleRequestCode = async () => {
 
   isLoading.value = false
 
-  if ('error' in response && response.error) {
-    error.value = typeof response.error === 'object' && 'error' in response.error
-      ? String(response.error.error)
-      : 'Ошибка отправки кода'
+  if (isApiError(response)) {
+    error.value = extractApiError(response, 'Ошибка отправки кода')
     return
   }
 
@@ -54,10 +60,8 @@ const handleLogin = async () => {
 
   isLoading.value = false
 
-  if ('error' in response && response.error) {
-    error.value = typeof response.error === 'object' && 'error' in response.error
-      ? String(response.error.error)
-      : 'Неверный код'
+  if (isApiError(response)) {
+    error.value = extractApiError(response, 'Неверный код')
     return
   }
 
@@ -72,15 +76,16 @@ const handleOAuth = async (provider: OAuthProvider) => {
 
   isLoading.value = false
 
-  if ('error' in response && response.error) {
+  if (isApiError(response)) {
     error.value = `Ошибка авторизации через ${provider}`
     return
   }
 
-  if ('data' in response && response.data) {
-    const redirectUrl = (response.data as { redirect_url?: string }).redirect_url
-    if (redirectUrl) {
-      window.location.href = redirectUrl
+  const data = getApiData(response)
+  if (data?.redirect_url) {
+    const redirected = safeRedirect(data.redirect_url)
+    if (!redirected) {
+      error.value = 'Недопустимый URL для редиректа'
     }
   }
 }
@@ -94,6 +99,7 @@ const handleLogout = async () => {
   step.value = 'email'
   email.value = ''
   code.value = ''
+  clearError()
 }
 
 const handleRefresh = async () => {
@@ -104,9 +110,8 @@ const handleRefresh = async () => {
 
   isLoading.value = false
 
-  if ('error' in response && response.error) {
+  if (isApiError(response)) {
     error.value = 'Ошибка обновления токена'
-    return
   }
 }
 
@@ -138,170 +143,201 @@ const title = computed(() => {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center auth-gradient relative overflow-hidden">
-    <div class="absolute inset-0 overflow-hidden">
-      <div class="absolute -bottom-[60rem] -right-[60rem] w-[85rem] h-[85rem] rounded-full blur-[180px] bg-[var(--glow-1)] transition-colors duration-500" />
-      <div class="absolute -bottom-[60rem] -left-[60rem] w-[85rem] h-[85rem] rounded-full blur-[180px] bg-[var(--glow-2)] transition-colors duration-500" />
-      <div class="absolute top-1/2 -left-[40rem] w-[60rem] h-[60rem] rounded-full blur-[180px] bg-[var(--glow-3)] transition-colors duration-500" />
-      <div class="absolute -bottom-[40rem] right-1/4 w-[50rem] h-[50rem] rounded-full blur-[150px] bg-[var(--glow-4)] transition-colors duration-500" />
-      <div class="absolute inset-0 opacity-60 noise-overlay" />
-    </div>
-
-    <UiTransition
-      preset="scale-bounce"
-      :duration="300"
-      appear
+  <UiTransition
+    preset="scale-bounce"
+    :duration="300"
+    appear
+  >
+    <UiCard
+      :title="title"
+      class="w-full max-w-md"
     >
-      <UiCard
-        :title="title"
-        class="w-full max-w-md relative z-10"
-      >
-        <template #header>
-          <h2 class="text-2xl font-semibold text-center w-full">
-            {{ title }}
-          </h2>
-        </template>
+      <template #header>
+        <h1 class="text-2xl font-semibold text-center w-full">
+          {{ title }}
+        </h1>
+      </template>
 
-        <div
-          v-if="error"
-          class="alert alert-error mb-4"
+      <div
+        v-if="error"
+        role="alert"
+        aria-live="polite"
+        class="alert alert-error mb-4"
+      >
+        <Icon
+          name="heroicons:exclamation-circle"
+          class="w-5 h-5"
+          aria-hidden="true"
+        />
+        <span>{{ error }}</span>
+        <UiButton
+          variant="ghost"
+          size="sm"
+          aria-label="Закрыть сообщение об ошибке"
+          @click="clearError"
         >
           <Icon
-            name="heroicons:exclamation-circle"
-            class="w-5 h-5"
+            name="heroicons:x-mark"
+            class="w-4 h-4"
+            aria-hidden="true"
           />
-          <span>{{ error }}</span>
-          <UiButton
-            variant="ghost"
-            size="sm"
-            @click="clearError"
-          >
-            <Icon
-              name="heroicons:x-mark"
-              class="w-4 h-4"
-            />
-          </UiButton>
+        </UiButton>
+      </div>
+
+      <section
+        v-if="step === 'email'"
+        aria-labelledby="auth-email-heading"
+      >
+        <h2
+          id="auth-email-heading"
+          class="sr-only"
+        >
+          Форма входа по email
+        </h2>
+        <UiInput
+          v-model="email"
+          type="email"
+          label="Email"
+          placeholder="admin@example.ru"
+          autocomplete="email"
+          :disabled="isLoading"
+          @keyup.enter="handleRequestCode"
+        />
+
+        <UiButton
+          variant="primary"
+          block
+          class="mt-4"
+          :disabled="!email"
+          :loading="isLoading"
+          @click="handleRequestCode"
+        >
+          Получить код
+        </UiButton>
+
+        <div class="divider">
+          или
         </div>
 
-        <template v-if="step === 'email'">
-          <UiInput
-            v-model="email"
-            type="email"
-            label="Email"
-            placeholder="admin@example.ru"
-            autocomplete="email"
+        <nav
+          class="flex flex-col gap-2"
+          aria-label="Войти через социальные сети"
+        >
+          <UiButton
+            v-for="provider in oauthProviders"
+            :key="provider.id"
+            variant="ghost"
             :disabled="isLoading"
-            @keyup.enter="handleRequestCode"
-          />
+            :aria-label="`Войти через ${provider.name}`"
+            @click="handleOAuth(provider.id)"
+          >
+            <Icon
+              :name="provider.icon"
+              class="w-5 h-5"
+              aria-hidden="true"
+            />
+            {{ provider.name }}
+          </UiButton>
+        </nav>
+      </section>
 
+      <section
+        v-else-if="step === 'code'"
+        aria-labelledby="auth-code-heading"
+      >
+        <h2
+          id="auth-code-heading"
+          class="sr-only"
+        >
+          Ввод кода подтверждения
+        </h2>
+        <p class="text-sm text-base-content/70 mb-4">
+          Код отправлен на {{ email }}
+        </p>
+
+        <UiInput
+          v-model="code"
+          type="text"
+          label="Код подтверждения"
+          placeholder="12345678"
+          autocomplete="one-time-code"
+          :disabled="isLoading"
+          @keyup.enter="handleLogin"
+        />
+
+        <UiButton
+          variant="primary"
+          block
+          class="mt-4"
+          :disabled="!code"
+          :loading="isLoading"
+          @click="handleLogin"
+        >
+          Войти
+        </UiButton>
+
+        <UiButton
+          variant="ghost"
+          block
+          class="mt-2"
+          :disabled="isLoading"
+          @click="goBackToEmail"
+        >
+          Назад
+        </UiButton>
+      </section>
+
+      <section
+        v-else
+        aria-labelledby="auth-success-heading"
+      >
+        <h2
+          id="auth-success-heading"
+          class="sr-only"
+        >
+          Успешная авторизация
+        </h2>
+        <div class="text-center">
+          <Icon
+            name="heroicons:check-circle"
+            class="w-16 h-16 text-success mx-auto mb-4"
+            aria-hidden="true"
+          />
+          <p class="text-base-content/70 mb-6">
+            Вы успешно вошли в систему
+          </p>
+        </div>
+
+        <nav
+          class="flex flex-col gap-2"
+          aria-label="Действия после входа"
+        >
           <UiButton
             variant="primary"
-            block
-            class="mt-4"
-            :disabled="!email"
-            :loading="isLoading"
-            @click="handleRequestCode"
+            @click="goToDashboard"
           >
-            Получить код
+            В dashboard
           </UiButton>
 
-          <div class="divider">
-            или
-          </div>
-
-          <div class="flex flex-col gap-2">
-            <UiButton
-              v-for="provider in oauthProviders"
-              :key="provider.id"
-              variant="ghost"
-              :disabled="isLoading"
-              @click="handleOAuth(provider.id)"
-            >
-              <Icon
-                :name="provider.icon"
-                class="w-5 h-5"
-              />
-              {{ provider.name }}
-            </UiButton>
-          </div>
-        </template>
-
-        <template v-else-if="step === 'code'">
-          <p class="text-sm text-base-content/70 mb-4">
-            Код отправлен на {{ email }}
-          </p>
-
-          <UiInput
-            v-model="code"
-            type="text"
-            label="Код подтверждения"
-            placeholder="12345678"
-            autocomplete="one-time-code"
-            :disabled="isLoading"
-            @keyup.enter="handleLogin"
-          />
-
           <UiButton
-            variant="primary"
-            block
-            class="mt-4"
-            :disabled="!code"
+            variant="neutral"
+            outline
             :loading="isLoading"
-            @click="handleLogin"
+            @click="handleRefresh"
           >
-            Войти
+            Обновить токен
           </UiButton>
 
           <UiButton
             variant="ghost"
-            block
-            class="mt-2"
+            class="text-error"
             :disabled="isLoading"
-            @click="goBackToEmail"
+            @click="handleLogout"
           >
-            Назад
+            Выйти
           </UiButton>
-        </template>
-
-        <template v-else>
-          <div class="text-center">
-            <Icon
-              name="heroicons:check-circle"
-              class="w-16 h-16 text-success mx-auto mb-4"
-            />
-            <p class="text-base-content/70 mb-6">
-              Вы успешно вошли в систему
-            </p>
-          </div>
-
-          <div class="flex flex-col gap-2">
-            <UiButton
-              variant="primary"
-              @click="goToDashboard"
-            >
-              В dashboard
-            </UiButton>
-
-            <UiButton
-              variant="neutral"
-              outline
-              :loading="isLoading"
-              @click="handleRefresh"
-            >
-              Обновить токен
-            </UiButton>
-
-            <UiButton
-              variant="ghost"
-              class="text-error"
-              :disabled="isLoading"
-              @click="handleLogout"
-            >
-              Выйти
-            </UiButton>
-          </div>
-        </template>
-      </UiCard>
-    </UiTransition>
-  </div>
+        </nav>
+      </section>
+    </UiCard>
+  </UiTransition>
 </template>

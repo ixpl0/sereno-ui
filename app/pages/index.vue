@@ -1,4 +1,9 @@
 <script setup lang="ts">
+useSeoMeta({
+  title: 'Главная',
+  description: 'Sereno UI - современный интерфейс на Nuxt 4, DaisyUI и Pinia',
+})
+
 const router = useRouter()
 
 const goToAuth = () => {
@@ -7,20 +12,21 @@ const goToAuth = () => {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center">
-    <div class="text-center">
+  <main class="min-h-screen flex items-center justify-center">
+    <article class="text-center">
       <h1 class="text-4xl font-bold mb-4">
         Sereno UI
       </h1>
       <p class="text-base-content/70">
         Nuxt 4 + DaisyUI + Pinia + OpenAPI
       </p>
-      <button
-        class="btn btn-primary mt-6"
+      <UiButton
+        variant="primary"
+        class="mt-6"
         @click="goToAuth"
       >
         Войти
-      </button>
-    </div>
-  </div>
+      </UiButton>
+    </article>
+  </main>
 </template>

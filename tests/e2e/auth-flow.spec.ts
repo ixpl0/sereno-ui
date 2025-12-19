@@ -6,7 +6,7 @@ test.describe('Auth Flow Demo', () => {
 
     await expect(page.getByRole('heading', { name: 'Вход в систему' })).toBeVisible()
 
-    const emailInput = page.getByPlaceholder('your@email.com')
+    const emailInput = page.getByPlaceholder('admin@example.ru')
     await expect(emailInput).toBeVisible()
     await emailInput.fill('demo@example.com')
 

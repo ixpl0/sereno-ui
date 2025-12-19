@@ -11,18 +11,27 @@ interface MockDatabase {
   authToken: string | null
 }
 
+const copyMembers = (members: ReadonlyArray<TenantMember>): Array<TenantMember> =>
+  members.map(m => ({ ...m }))
+
+const copyTokens = (tokens: ReadonlyArray<TenantToken>): Array<TenantToken> =>
+  tokens.map(t => ({ ...t }))
+
+const copyContacts = (contacts: ReadonlyArray<Contact>): Array<Contact> =>
+  contacts.map(c => ({ ...c }))
+
 const createInitialState = (): MockDatabase => ({
   currentUser: { ...mockCurrentUser },
-  contacts: [...mockUserContacts],
-  tenants: [...mockTenants],
-  tenantMembers: new Map([
-    ['tenant-1', [...mockTenantMembers]],
-    ['tenant-2', mockTenantMembers.slice(0, 2).map(m => ({ ...m }))],
-    ['tenant-3', [{ ...mockTenantMembers[0] }]],
+  contacts: copyContacts(mockUserContacts),
+  tenants: mockTenants.map(t => ({ ...t })),
+  tenantMembers: new Map<string, Array<TenantMember>>([
+    ['tenant-1', copyMembers(mockTenantMembers)],
+    ['tenant-2', copyMembers(mockTenantMembers.slice(0, 2))],
+    ['tenant-3', copyMembers(mockTenantMembers.slice(0, 1))],
   ]),
-  tenantTokens: new Map([
-    ['tenant-1', [...mockTenantTokens]],
-    ['tenant-2', [{ ...mockTenantTokens[0] }]],
+  tenantTokens: new Map<string, Array<TenantToken>>([
+    ['tenant-1', copyTokens(mockTenantTokens)],
+    ['tenant-2', copyTokens(mockTenantTokens.slice(0, 1))],
     ['tenant-3', []],
   ]),
   authToken: null,
@@ -55,7 +64,11 @@ export const updateContact = (contactId: string, updates: Partial<Contact>): Con
   if (index === -1) {
     return undefined
   }
-  const updated = { ...db.contacts[index], ...updates }
+  const existingContact = db.contacts[index]
+  if (!existingContact) {
+    return undefined
+  }
+  const updated: Contact = { ...existingContact, ...updates }
   db.contacts = [...db.contacts.slice(0, index), updated, ...db.contacts.slice(index + 1)]
   return updated
 }
@@ -93,7 +106,11 @@ export const updateTenantMember = (
   if (index === -1) {
     return undefined
   }
-  const updated = { ...members[index], role }
+  const existingMember = members[index]
+  if (!existingMember) {
+    return undefined
+  }
+  const updated: TenantMember = { ...existingMember, role }
   db.tenantMembers.set(tenantId, [
     ...members.slice(0, index),
     updated,

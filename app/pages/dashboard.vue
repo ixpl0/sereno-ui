@@ -3,31 +3,44 @@ definePageMeta({
   middleware: 'auth',
 })
 
-const { store, logout } = useAuth()
+useSeoMeta({
+  title: 'Dashboard',
+  description: 'Личный кабинет пользователя',
+})
+
+const { token, logout } = useAuth()
 const router = useRouter()
 
 const handleLogout = async () => {
   await logout()
   router.push('/auth')
 }
+
+const maskedToken = computed(() => {
+  if (!token.value) {
+    return ''
+  }
+  return `${token.value.slice(0, 20)}...`
+})
 </script>
 
 <template>
-  <div class="min-h-screen bg-base-200 p-8">
+  <main class="min-h-screen bg-base-200 p-8">
     <div class="max-w-4xl mx-auto">
-      <div class="flex justify-between items-center mb-8">
+      <header class="flex justify-between items-center mb-8">
         <h1 class="text-3xl font-bold">
           Dashboard
         </h1>
-        <button
-          class="btn btn-ghost"
+        <UiButton
+          variant="ghost"
+          aria-label="Выйти из аккаунта"
           @click="handleLogout"
         >
           Выйти
-        </button>
-      </div>
+        </UiButton>
+      </header>
 
-      <div class="card bg-base-100 shadow-xl">
+      <article class="card bg-base-100 shadow-xl">
         <div class="card-body">
           <h2 class="card-title">
             Добро пожаловать!
@@ -37,11 +50,11 @@ const handleLogout = async () => {
           </p>
           <div class="mt-4">
             <code class="bg-base-200 px-2 py-1 rounded">
-              Token: {{ store.token?.slice(0, 20) }}...
+              Token: {{ maskedToken }}
             </code>
           </div>
         </div>
-      </div>
+      </article>
     </div>
-  </div>
+  </main>
 </template>

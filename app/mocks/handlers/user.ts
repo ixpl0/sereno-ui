@@ -14,11 +14,10 @@ import {
   removeContact,
 } from '~/mocks/db'
 import { createContact } from '~/mocks/factories/user'
-
-const BASE_URL = 'http://localhost:8080/api/v1'
+import { MOCK_API_BASE_URL, MOCK_VERIFICATION_CODES } from '~/mocks/utils/constants'
 
 export const userHandlers = [
-  http.get(`${BASE_URL}/user`, async () => {
+  http.get(`${MOCK_API_BASE_URL}/user`, async () => {
     await withDelay('realistic')
 
     if (!isAuthenticated()) {
@@ -29,7 +28,7 @@ export const userHandlers = [
     return HttpResponse.json({ user }, { status: 200 })
   }),
 
-  http.post(`${BASE_URL}/user/update`, async () => {
+  http.post(`${MOCK_API_BASE_URL}/user/update`, async () => {
     await withDelay('realistic')
 
     if (!isAuthenticated()) {
@@ -42,7 +41,7 @@ export const userHandlers = [
     )
   }),
 
-  http.get(`${BASE_URL}/user/contacts`, async () => {
+  http.get(`${MOCK_API_BASE_URL}/user/contacts`, async () => {
     await withDelay('realistic')
 
     if (!isAuthenticated()) {
@@ -54,7 +53,7 @@ export const userHandlers = [
   }),
 
   http.post<never, UserAddContactHandlerRequestBody>(
-    `${BASE_URL}/user/contacts/add`,
+    `${MOCK_API_BASE_URL}/user/contacts/add`,
     async ({ request }) => {
       await withDelay('realistic')
 
@@ -81,7 +80,7 @@ export const userHandlers = [
   ),
 
   http.post<{ id: string }, UserVerifyContactHandlerRequestBody>(
-    `${BASE_URL}/user/contacts/:id/verify`,
+    `${MOCK_API_BASE_URL}/user/contacts/:id/verify`,
     async ({ params, request }) => {
       await withDelay('realistic')
 
@@ -96,7 +95,7 @@ export const userHandlers = [
         return createErrorResponse('badRequest', 'Verification code is required')
       }
 
-      if (body.code !== '123456') {
+      if (body.code !== MOCK_VERIFICATION_CODES.contact) {
         return createErrorResponse('badRequest', 'Invalid verification code')
       }
 
@@ -111,7 +110,7 @@ export const userHandlers = [
   ),
 
   http.post<{ id: string }>(
-    `${BASE_URL}/user/contacts/:id/delete`,
+    `${MOCK_API_BASE_URL}/user/contacts/:id/delete`,
     async ({ params }) => {
       await withDelay('realistic')
 

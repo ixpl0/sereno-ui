@@ -1,4 +1,7 @@
 import { defineStore } from 'pinia'
+import { safeStorage } from '~/utils/storage'
+
+const AUTH_TOKEN_KEY = 'auth_token'
 
 export const useAuthStore = defineStore('auth', () => {
   const token = ref<string | null>(null)
@@ -7,16 +10,16 @@ export const useAuthStore = defineStore('auth', () => {
   const setToken = (newToken: string | null) => {
     token.value = newToken
     if (newToken) {
-      localStorage.setItem('auth_token', newToken)
+      safeStorage.setItem(AUTH_TOKEN_KEY, newToken)
     }
     else {
-      localStorage.removeItem('auth_token')
+      safeStorage.removeItem(AUTH_TOKEN_KEY)
     }
   }
 
   const loadToken = () => {
     if (import.meta.client) {
-      token.value = localStorage.getItem('auth_token')
+      token.value = safeStorage.getItem(AUTH_TOKEN_KEY)
     }
   }
 
