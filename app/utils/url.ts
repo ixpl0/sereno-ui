@@ -5,20 +5,15 @@ const ALLOWED_REDIRECT_HOSTS = [
   'id.vk.com',
 ]
 
-const DEV_ALLOWED_HOSTS = [
-  'localhost',
-  '127.0.0.1',
-]
-
 export const isValidRedirectUrl = (url: string): boolean => {
   try {
     const parsed = new URL(url)
 
-    const isDev = import.meta.dev
-    const isDevHost = DEV_ALLOWED_HOSTS.includes(parsed.hostname)
-
-    if (isDev && isDevHost) {
-      return parsed.protocol === 'http:' || parsed.protocol === 'https:'
+    if (import.meta.client) {
+      const currentHost = window.location.hostname
+      if (parsed.hostname === currentHost) {
+        return true
+      }
     }
 
     if (parsed.protocol !== 'https:') {
