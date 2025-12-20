@@ -68,9 +68,16 @@ export const useAuth = () => {
     return response as ApiResponse<OAuthRedirectResponse>
   }
 
-  const handleOAuthCallback = async (provider: OAuthProvider): Promise<ApiResponse<AuthTokenResponse>> => {
+  const handleOAuthCallback = async (
+    provider: OAuthProvider,
+    params?: Record<string, string>,
+  ): Promise<ApiResponse<AuthTokenResponse>> => {
+    const queryString = params
+      ? `?${new URLSearchParams(params).toString()}`
+      : ''
+
     const response = await client.get({
-      url: `/auth/login/${provider}/callback`,
+      url: `/auth/login/${provider}/callback${queryString}`,
     })
 
     const data = getApiData(response as ApiResponse<AuthTokenResponse>)

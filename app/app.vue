@@ -24,6 +24,8 @@ onUnmounted(() => {
 <template>
   <div :data-theme="theme">
     <NuxtRouteAnnouncer />
-    <NuxtPage />
+    <NuxtLayout>
+      <NuxtPage />
+    </NuxtLayout>
   </div>
 </template>

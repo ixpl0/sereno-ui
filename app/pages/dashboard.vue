@@ -40,7 +40,7 @@ const maskedToken = computed(() => {
         </UiButton>
       </header>
 
-      <article class="card bg-base-100 shadow-xl">
+      <article class="card bg-base-100 shadow-xl animate-slide-up">
         <div class="card-body">
           <h2 class="card-title">
             Добро пожаловать!

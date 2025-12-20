@@ -200,6 +200,183 @@ test.describe('Auth - OAuth Providers', () => {
   }
 })
 
+test.describe('Auth - OAuth Flow', () => {
+  const providers = [
+    { name: 'Яндекс', id: 'yandex' },
+    { name: 'ВКонтакте', id: 'vk' },
+    { name: 'Keycloak', id: 'keycloak' },
+  ]
+
+  test.beforeEach(async ({ page }) => {
+    await navigateToAuth(page)
+  })
+
+  test.describe('Mock OAuth Page', () => {
+    test('redirects to mock OAuth page on provider click', async ({ page }) => {
+      await page.getByRole('button', { name: 'Войти через Яндекс' }).click()
+
+      await expect(page).toHaveURL(/\/mock-oauth\/yandex/)
+      await expect(page.getByRole('heading', { name: 'Яндекс' })).toBeVisible()
+    })
+
+    test('displays scenario tabs', async ({ page }) => {
+      await page.getByRole('button', { name: 'Войти через Яндекс' }).click()
+
+      const tabsContainer = page.locator('.tabs')
+      await expect(tabsContainer.getByRole('button', { name: /Успешный вход/i })).toBeVisible()
+      await expect(tabsContainer.getByRole('button', { name: /Отмена/i })).toBeVisible()
+      await expect(tabsContainer.getByRole('button', { name: /Ошибка/i })).toBeVisible()
+      await expect(tabsContainer.getByRole('button', { name: /Таймаут/i })).toBeVisible()
+    })
+
+    test('cancel button returns to auth page', async ({ page }) => {
+      await page.getByRole('button', { name: 'Войти через Яндекс' }).click()
+      await page.locator('.btn-ghost.btn-block').getByText('Отмена').click()
+
+      await expect(page).toHaveURL('/auth')
+      await expect(page.getByRole('heading', { name: 'Вход в систему' })).toBeVisible()
+    })
+
+    for (const provider of providers) {
+      test(`shows correct branding for ${provider.name}`, async ({ page }) => {
+        await page.getByRole('button', { name: `Войти через ${provider.name}` }).click()
+
+        await expect(page).toHaveURL(new RegExp(`/mock-oauth/${provider.id}`))
+        await expect(page.getByRole('heading', { name: provider.name })).toBeVisible()
+      })
+    }
+  })
+
+  test.describe('Successful OAuth Flow', () => {
+    test('completes OAuth login', async ({ page }) => {
+      await page.getByRole('button', { name: 'Войти через Яндекс' }).click()
+      await expect(page).toHaveURL(/\/mock-oauth\/yandex/)
+
+      await page.getByRole('button', { name: 'Выполнить сценарий' }).click()
+
+      await expect(page).toHaveURL(/\/auth\/callback\/yandex/)
+      await expect(page.getByText('Авторизация успешна!')).toBeVisible({ timeout: 10000 })
+
+      await expect(page).toHaveURL('/dashboard', { timeout: 5000 })
+    })
+
+    for (const provider of providers) {
+      test(`successful login via ${provider.name}`, async ({ page }) => {
+        await page.getByRole('button', { name: `Войти через ${provider.name}` }).click()
+
+        await page.getByRole('button', { name: 'Выполнить сценарий' }).click()
+
+        await expect(page.getByText('Авторизация успешна!')).toBeVisible({ timeout: 10000 })
+        await expect(page).toHaveURL('/dashboard', { timeout: 5000 })
+      })
+    }
+  })
+
+  test.describe('OAuth Error Scenarios', () => {
+    test('handles cancel scenario', async ({ page }) => {
+      await page.getByRole('button', { name: 'Войти через Яндекс' }).click()
+
+      const tabsContainer = page.locator('.tabs')
+      await tabsContainer.getByRole('button', { name: /Отмена/i }).click()
+      await page.getByRole('button', { name: 'Выполнить сценарий' }).click()
+
+      await expect(page).toHaveURL(/\/auth\/callback\/yandex/)
+      await expect(page.getByText('Ошибка авторизации')).toBeVisible()
+      await expect(page.getByText(/cancelled/i)).toBeVisible()
+    })
+
+    test('handles error scenario', async ({ page }) => {
+      await page.getByRole('button', { name: 'Войти через Яндекс' }).click()
+
+      const tabsContainer = page.locator('.tabs')
+      await tabsContainer.getByRole('button', { name: /Ошибка/i }).click()
+      await page.getByRole('button', { name: 'Выполнить сценарий' }).click()
+
+      await expect(page).toHaveURL(/\/auth\/callback\/yandex/, { timeout: 15000 })
+      await expect(page.getByText('Ошибка авторизации')).toBeVisible()
+    })
+
+    test('back button returns to auth page after error', async ({ page }) => {
+      await page.getByRole('button', { name: 'Войти через Яндекс' }).click()
+
+      const tabsContainer = page.locator('.tabs')
+      await tabsContainer.getByRole('button', { name: /Отмена/i }).click()
+      await page.getByRole('button', { name: 'Выполнить сценарий' }).click()
+
+      await expect(page.getByText('Ошибка авторизации')).toBeVisible()
+
+      await page.getByRole('button', { name: 'Назад' }).click()
+
+      await expect(page).toHaveURL('/auth')
+      await expect(page.getByRole('heading', { name: 'Вход в систему' })).toBeVisible()
+    })
+  })
+
+  test.describe('OAuth Callback Page', () => {
+    test('shows loading state initially', async ({ page }) => {
+      await page.getByRole('button', { name: 'Войти через Яндекс' }).click()
+      await page.getByRole('button', { name: 'Выполнить сценарий' }).click()
+
+      await expect(page.getByText('Завершаем авторизацию...')).toBeVisible()
+    })
+
+    test('shows success state after login', async ({ page }) => {
+      await page.getByRole('button', { name: 'Войти через Яндекс' }).click()
+      await page.getByRole('button', { name: 'Выполнить сценарий' }).click()
+
+      await expect(page.getByText('Авторизация успешна!')).toBeVisible({ timeout: 10000 })
+      await expect(page.getByText('Переходим в dashboard...')).toBeVisible()
+    })
+
+    test('displays provider branding on callback page', async ({ page }) => {
+      await page.getByRole('button', { name: 'Войти через Яндекс' }).click()
+      await page.getByRole('button', { name: 'Выполнить сценарий' }).click()
+
+      await expect(page.getByRole('heading', { name: 'Яндекс' })).toBeVisible()
+    })
+
+    test('handles unknown provider gracefully', async ({ page }) => {
+      await page.goto('/auth/callback/unknown-provider')
+
+      await expect(page.getByText('Ошибка авторизации')).toBeVisible()
+      await expect(page.getByText(/unknown-provider/i)).toBeVisible()
+    })
+  })
+
+  test.describe('OAuth Complete Flow', () => {
+    test('full OAuth flow from auth to dashboard', async ({ page }) => {
+      await navigateToAuth(page)
+
+      await page.getByRole('button', { name: 'Войти через ВКонтакте' }).click()
+
+      await expect(page).toHaveURL(/\/mock-oauth\/vk/)
+      await expect(page.getByRole('heading', { name: 'ВКонтакте' })).toBeVisible()
+
+      await page.getByText('Пётр Вконтактов').click()
+
+      await expect(page).toHaveURL(/\/auth\/callback\/vk/)
+      await expect(page.getByText('Авторизация успешна!')).toBeVisible({ timeout: 10000 })
+
+      await expect(page).toHaveURL('/dashboard', { timeout: 5000 })
+    })
+
+    test('OAuth flow with scenario switch before login', async ({ page }) => {
+      await page.getByRole('button', { name: 'Войти через Keycloak' }).click()
+
+      const tabsContainer = page.locator('.tabs')
+      await tabsContainer.getByRole('button', { name: /Ошибка/i }).click()
+      await expect(page.getByText('Произошла ошибка на стороне провайдера')).toBeVisible()
+
+      await tabsContainer.getByRole('button', { name: /Успешный вход/i }).click()
+      await expect(page.getByText('Авторизация пройдёт успешно')).toBeVisible()
+
+      await page.getByText('Корпоративный Пользователь').click()
+
+      await expect(page.getByText('Авторизация успешна!')).toBeVisible({ timeout: 10000 })
+    })
+  })
+})
+
 test.describe('Auth - Error Handling', () => {
   test.beforeEach(async ({ page }) => {
     await navigateToAuth(page)

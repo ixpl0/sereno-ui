@@ -53,6 +53,20 @@ export const setAuthToken = (token: string | null): void => {
 
 export const getCurrentUser = (): User => db.currentUser
 
+export const setCurrentUserFromOAuth = (data: {
+  id: string
+  email: string
+  name: string
+  provider: string
+}): void => {
+  db.currentUser = {
+    id: data.id,
+    email: data.email,
+    name: data.name,
+    createdAt: new Date().toISOString(),
+  }
+}
+
 export const getContacts = (): ReadonlyArray<Contact> => db.contacts
 
 export const addContact = (contact: Contact): void => {

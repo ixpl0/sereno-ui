@@ -5,8 +5,19 @@ import type {
 } from '~/api/types.gen'
 import { withDelay } from '~/mocks/utils/delay'
 import { createErrorResponse } from '~/mocks/utils/error'
-import { setAuthToken } from '~/mocks/db'
-import { MOCK_API_BASE_URL, MOCK_VERIFICATION_CODES, MOCK_OAUTH_PROVIDERS } from '~/mocks/utils/constants'
+import { setAuthToken, setCurrentUserFromOAuth } from '~/mocks/db'
+import {
+  MOCK_API_BASE_URL,
+  MOCK_VERIFICATION_CODES,
+  MOCK_OAUTH_PROVIDERS,
+  MOCK_OAUTH_USERS,
+  type MockOAuthScenario,
+} from '~/mocks/utils/constants'
+
+const getMockOAuthRedirectUrl = (provider: string): string => {
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'
+  return `${baseUrl}/mock-oauth/${provider}`
+}
 
 export const authHandlers = [
   http.post<never, UserRequestEmailCodeHandlerRequestBody>(
@@ -75,12 +86,13 @@ export const authHandlers = [
     async ({ params }) => {
       await withDelay('fast')
 
-      if (!MOCK_OAUTH_PROVIDERS.includes(params.provider as typeof MOCK_OAUTH_PROVIDERS[number])) {
+      const providerKey = params.provider as typeof MOCK_OAUTH_PROVIDERS[number]
+      if (!MOCK_OAUTH_PROVIDERS.includes(providerKey)) {
         return createErrorResponse('badRequest', `Unknown provider: ${params.provider}`)
       }
 
       return HttpResponse.json(
-        { redirect_url: `https://oauth.example.com/${params.provider}/authorize` },
+        { redirect_url: getMockOAuthRedirectUrl(params.provider) },
         { status: 200 },
       )
     },
@@ -88,15 +100,56 @@ export const authHandlers = [
 
   http.get<{ provider: string }>(
     `${MOCK_API_BASE_URL}/auth/login/:provider/callback`,
-    async ({ params }) => {
+    async ({ params, request }) => {
       await withDelay('realistic')
 
-      if (!MOCK_OAUTH_PROVIDERS.includes(params.provider as typeof MOCK_OAUTH_PROVIDERS[number])) {
+      const providerKey = params.provider as typeof MOCK_OAUTH_PROVIDERS[number]
+      if (!MOCK_OAUTH_PROVIDERS.includes(providerKey)) {
         return createErrorResponse('badRequest', `Unknown provider: ${params.provider}`)
       }
 
-      const token = `mock-jwt-oauth-${crypto.randomUUID()}`
+      const url = new URL(request.url)
+      const scenario = url.searchParams.get('scenario') as MockOAuthScenario | null
+      const userId = url.searchParams.get('user_id')
+      const email = url.searchParams.get('email')
+      const name = url.searchParams.get('name')
+
+      if (scenario === 'cancel') {
+        return createErrorResponse('badRequest', 'User cancelled authorization')
+      }
+
+      if (scenario === 'error') {
+        return createErrorResponse('serverError', 'OAuth provider returned an error')
+      }
+
+      if (scenario === 'timeout') {
+        await withDelay('slow')
+        await withDelay('slow')
+        return createErrorResponse('serverError', 'Request timed out')
+      }
+
+      const token = `mock-jwt-oauth-${providerKey}-${crypto.randomUUID()}`
       setAuthToken(token)
+
+      if (userId && email && name) {
+        setCurrentUserFromOAuth({
+          id: userId,
+          email,
+          name,
+          provider: providerKey,
+        })
+      }
+      else {
+        const defaultUser = MOCK_OAUTH_USERS[providerKey][0]
+        if (defaultUser) {
+          setCurrentUserFromOAuth({
+            id: defaultUser.id,
+            email: defaultUser.email,
+            name: defaultUser.name,
+            provider: providerKey,
+          })
+        }
+      }
 
       return HttpResponse.json(
         { access_token: token },

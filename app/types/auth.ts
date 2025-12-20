@@ -1,4 +1,4 @@
-export type AuthStep = 'email' | 'code' | 'success'
+export type AuthStep = 'email' | 'code'
 export type OAuthProvider = 'yandex' | 'vk' | 'keycloak'
 
 export interface OAuthProviderConfig {

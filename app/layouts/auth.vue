@@ -15,7 +15,7 @@ useSeoMeta({
       <div class="absolute -bottom-[40rem] right-1/4 w-[50rem] h-[50rem] rounded-full blur-[150px] bg-[var(--glow-4)] transition-colors duration-500" />
       <div class="absolute inset-0 opacity-60 noise-overlay" />
     </div>
-    <main class="relative z-10 min-h-screen flex items-center justify-center">
+    <main class="relative z-10 min-h-screen flex items-center justify-center p-4">
       <slot />
     </main>
   </div>

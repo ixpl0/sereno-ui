@@ -65,7 +65,7 @@ const handleLogin = async () => {
     return
   }
 
-  step.value = 'success'
+  router.push('/dashboard')
 }
 
 const handleOAuth = async (provider: OAuthProvider) => {
@@ -90,39 +90,10 @@ const handleOAuth = async (provider: OAuthProvider) => {
   }
 }
 
-const handleLogout = async () => {
-  isLoading.value = true
-
-  await auth.logout()
-
-  isLoading.value = false
-  step.value = 'email'
-  email.value = ''
-  code.value = ''
-  clearError()
-}
-
-const handleRefresh = async () => {
-  isLoading.value = true
-  clearError()
-
-  const response = await auth.refresh()
-
-  isLoading.value = false
-
-  if (isApiError(response)) {
-    error.value = 'Ошибка обновления токена'
-  }
-}
-
 const goBackToEmail = () => {
   step.value = 'email'
   code.value = ''
   clearError()
-}
-
-const goToDashboard = () => {
-  router.push('/dashboard')
 }
 
 const oauthProviders: OAuthProviderConfig[] = [
@@ -131,26 +102,16 @@ const oauthProviders: OAuthProviderConfig[] = [
   { id: 'keycloak', name: 'Keycloak', icon: 'simple-icons:keycloak' },
 ]
 
-const title = computed(() => {
-  if (step.value === 'email') {
-    return 'Вход в систему'
-  }
-  if (step.value === 'code') {
-    return 'Введите код'
-  }
-  return 'Вы авторизованы'
-})
+const title = computed(() =>
+  step.value === 'email' ? 'Вход в систему' : 'Введите код',
+)
 </script>
 
 <template>
-  <UiTransition
-    preset="scale-bounce"
-    :duration="300"
-    appear
-  >
+  <div class="w-full max-w-md">
     <UiCard
       :title="title"
-      class="w-full max-w-md"
+      class="animate-slide-up"
     >
       <template #header>
         <h1 class="text-2xl font-semibold text-center w-full">
@@ -242,7 +203,7 @@ const title = computed(() => {
       </section>
 
       <section
-        v-else-if="step === 'code'"
+        v-else
         aria-labelledby="auth-code-heading"
       >
         <h2
@@ -286,58 +247,6 @@ const title = computed(() => {
           Назад
         </UiButton>
       </section>
-
-      <section
-        v-else
-        aria-labelledby="auth-success-heading"
-      >
-        <h2
-          id="auth-success-heading"
-          class="sr-only"
-        >
-          Успешная авторизация
-        </h2>
-        <div class="text-center">
-          <Icon
-            name="heroicons:check-circle"
-            class="w-16 h-16 text-success mx-auto mb-4"
-            aria-hidden="true"
-          />
-          <p class="text-base-content/70 mb-6">
-            Вы успешно вошли в систему
-          </p>
-        </div>
-
-        <nav
-          class="flex flex-col gap-2"
-          aria-label="Действия после входа"
-        >
-          <UiButton
-            variant="primary"
-            @click="goToDashboard"
-          >
-            В dashboard
-          </UiButton>
-
-          <UiButton
-            variant="neutral"
-            outline
-            :loading="isLoading"
-            @click="handleRefresh"
-          >
-            Обновить токен
-          </UiButton>
-
-          <UiButton
-            variant="ghost"
-            class="text-error"
-            :disabled="isLoading"
-            @click="handleLogout"
-          >
-            Выйти
-          </UiButton>
-        </nav>
-      </section>
     </UiCard>
-  </UiTransition>
+  </div>
 </template>
