@@ -7,6 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 pnpm install          # Install dependencies
 pnpm dev              # Start dev server (http://localhost:3000)
+pnpm dev:mock         # Start dev server with mock API
 pnpm build            # Build for production
 pnpm preview          # Preview production build
 pnpm lint             # Run ESLint
@@ -22,42 +23,70 @@ pnpm test:e2e:headed  # Run Playwright in headed browser
 
 ## Tech Stack
 
-- **Framework**: Nuxt 4 (Vue 3 Composition API)
-- **State**: Pinia
+- **Framework**: Nuxt 4 (Vue 3 Composition API) with SSR
+- **State**: Pinia (SSR-compatible)
 - **Styling**: Tailwind CSS 4 (@tailwindcss/vite) + DaisyUI 5
 - **API Client**: @hey-api/openapi-ts (generated from swagger.yaml)
+- **Mocking**: MSW (Mock Service Worker)
 - **Icons**: @nuxt/icon
 - **Testing**: Playwright (e2e)
+- **Deployment**: Vercel (auto-deploy)
 - **Node**: >=22.12.0
 
 ## Project Structure
 
 ```
 app/
-├── api/           # Auto-generated API client (from swagger.yaml, do not edit manually)
-├── assets/css/    # Global CSS (Tailwind + DaisyUI)
-├── components/ui/ # Reusable UI components (UiButton, UiInput, UiModal, etc.)
-├── pages/         # Nuxt pages (file-based routing)
-└── app.vue        # Root component
-stories/           # Storybook stories (excluded from ESLint)
-tests/e2e/         # Playwright e2e tests
+├── api/              # Auto-generated API client (from swagger.yaml, do not edit)
+├── assets/css/       # Global CSS (Tailwind, DaisyUI, animations)
+├── components/ui/    # Reusable UI components (UiButton, UiInput, UiCard, etc.)
+├── composables/      # Vue composables (useAuth, etc.)
+├── layouts/          # Nuxt layouts (default, auth)
+├── middleware/       # Route middleware (auth, guest)
+├── mocks/            # MSW mock handlers and data
+├── pages/            # Nuxt pages (file-based routing)
+├── stores/           # Pinia stores
+├── types/            # TypeScript types
+├── utils/            # Utility functions
+└── app.vue           # Root component
+stories/              # Storybook stories
+tests/e2e/            # Playwright e2e tests
 ```
+
+## Key Features
+
+### SSR Support
+- Full server-side rendering with Nuxt 4
+- Cookie-based auth (works on SSR, no localStorage)
+- Route middleware runs on server
+
+### Mock API
+- Run `pnpm dev:mock` to use MSW mocks instead of real API
+- OAuth mock with multiple providers (Yandex, VK, Keycloak)
+- Supports scenarios: success, cancel, error, timeout
+
+### API Generation
+- API client generated from `swagger.yaml` to `app/api/`
+- Run `pnpm generate:api` after updating swagger
+- Generated directory excluded from ESLint
 
 ## UI Components
 
-All visual/reusable UI elements must be placed in `app/components/ui/` with `Ui` prefix:
+All reusable UI elements in `app/components/ui/` with `Ui` prefix:
 
 - **UiButton** - Buttons with variants (primary, secondary, ghost, etc.)
-- **UiInput** - Text inputs with labels and validation states
-- **UiModal** - Modal dialogs with smooth open/close animations
+- **UiInput** - Text inputs with labels, validation states, autofocus
+- **UiCard** - Cards with header/footer slots
+- **UiModal** - Modal dialogs with animations
+- **UiTransition** - Transition wrapper with presets
+- **UiLabel** - Form labels
 
-### Design Guidelines
+### Global Animations
 
-- Use smooth, elegant animations for interactions (hover, focus, open/close)
-- Leverage DaisyUI component classes as base, extend with custom animations
-- Modal animations: fade + scale for opening, reverse for closing
-- Inputs/buttons: subtle transitions on hover/focus states
-- Keep animations performant (use `transform` and `opacity`)
+CSS animations in `app/assets/css/animations.css`:
+- `animate-appear` - Scale + fade in with bounce
+- `animate-fade-in` - Simple fade in
+- `animate-slide-up` - Slide up + fade in
 
 ## Code Style
 
@@ -74,7 +103,3 @@ All visual/reusable UI elements must be placed in `app/components/ui/` with `Ui`
 ## Pre-commit
 
 Husky runs `lint-staged` on commit, which applies ESLint fix to `*.{js,ts,vue,mjs}` files.
-
-## API Generation
-
-API client is generated from `swagger.yaml` to `app/api/`. Run `pnpm generate:api` after updating the swagger file. The generated `app/api/` directory is excluded from ESLint.
