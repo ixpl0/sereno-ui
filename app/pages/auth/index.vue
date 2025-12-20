@@ -21,6 +21,14 @@ const email = ref('')
 const code = ref('')
 const isLoading = ref(false)
 const error = ref<string | null>(null)
+const codeInputRef = ref<{ focus: () => void } | null>(null)
+
+watch(step, async (newStep) => {
+  if (newStep === 'code') {
+    await nextTick()
+    codeInputRef.value?.focus()
+  }
+})
 
 const clearError = () => {
   error.value = null
@@ -161,6 +169,7 @@ const title = computed(() =>
           label="Email"
           placeholder="admin@example.ru"
           autocomplete="email"
+          autofocus
           :disabled="isLoading"
           @keyup.enter="handleRequestCode"
         />
@@ -216,6 +225,7 @@ const title = computed(() =>
         </p>
 
         <UiInput
+          ref="codeInputRef"
           v-model="code"
           type="text"
           label="Код подтверждения"

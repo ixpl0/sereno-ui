@@ -14,6 +14,7 @@ interface Props {
   state?: InputState
   disabled?: boolean
   required?: boolean
+  autofocus?: boolean
   name?: string
   autocomplete?: string
   maxlength?: number
@@ -33,6 +34,7 @@ const props = withDefaults(defineProps<Props>(), {
   state: 'default',
   disabled: false,
   required: false,
+  autofocus: false,
   name: '',
   autocomplete: 'off',
   maxlength: undefined,
@@ -96,10 +98,24 @@ const ariaDescribedbyComputed = computed(() => {
   return ids.length > 0 ? ids.join(' ') : undefined
 })
 
+const inputRef = ref<HTMLInputElement | null>(null)
+
 const handleInput = (event: Event) => {
   const target = event.target as HTMLInputElement
   emit('update:modelValue', target.value)
 }
+
+const focus = () => {
+  inputRef.value?.focus()
+}
+
+onMounted(() => {
+  if (props.autofocus) {
+    focus()
+  }
+})
+
+defineExpose({ focus })
 </script>
 
 <template>
@@ -113,6 +129,7 @@ const handleInput = (event: Event) => {
     </UiLabel>
     <input
       :id="inputId"
+      ref="inputRef"
       :type="type"
       :value="modelValue"
       :placeholder="placeholder"
