@@ -169,8 +169,7 @@ const title = computed(() =>
           variant="primary"
           block
           class="mt-4"
-          :disabled="!email"
-          :loading="isLoading"
+          :disabled="!email || isLoading"
           @click="handleRequestCode"
         >
           Получить код
