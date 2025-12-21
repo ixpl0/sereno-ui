@@ -84,7 +84,6 @@ All reusable UI elements in `app/components/ui/` with `Ui` prefix:
 - **UiInput** - Text inputs with labels, validation states, autofocus
 - **UiPinInput** - PIN/OTP code input with grouping and auto-focus
 - **UiCard** - Cards with header/footer slots
-- **UiModal** - Modal dialogs with focus trap and animations
 - **UiTransition** - Transition wrapper with presets (fade, scale, slide)
 - **UiLabel** - Form labels with required indicator
 - **UiToast** - Toast notifications (success, error, warning, info)
