@@ -8,6 +8,10 @@ const INVALID_CODE = '00000000'
 const navigateToAuth = async (page: Page) => {
   await page.goto('/auth')
   await expect(page.getByRole('heading', { name: 'Вход в систему' })).toBeVisible()
+  await page.waitForLoadState('networkidle')
+  const emailInput = page.getByPlaceholder('admin@example.ru')
+  await emailInput.waitFor({ state: 'attached' })
+  await page.waitForTimeout(100)
 }
 
 const fillEmailAndSubmit = async (page: Page, email: string) => {

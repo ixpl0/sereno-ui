@@ -34,29 +34,39 @@ describe('UiTransition', () => {
   })
 
   describe('duration', () => {
-    it('uses 200ms by default', () => {
+    it('uses normal duration by default', () => {
       const wrapper = mount(UiTransition, {
         slots: { default: '<div>Content</div>' },
       })
-      expect(wrapper.vm.$props.duration).toBe(200)
-      expect(wrapper.html()).toContain('--ui-transition-duration: 200ms')
+      expect(wrapper.vm.$props.duration).toBe('normal')
+      expect(wrapper.classes()).toContain('ui-duration-normal')
     })
 
-    it('uses custom duration', () => {
+    it('accepts fast duration', () => {
       const wrapper = mount(UiTransition, {
-        props: { duration: 500 },
+        props: { duration: 'fast' },
         slots: { default: '<div>Content</div>' },
       })
-      expect(wrapper.vm.$props.duration).toBe(500)
-      expect(wrapper.html()).toContain('--ui-transition-duration: 500ms')
+      expect(wrapper.vm.$props.duration).toBe('fast')
+      expect(wrapper.classes()).toContain('ui-duration-fast')
     })
 
-    it('accepts very short duration', () => {
+    it('accepts slow duration', () => {
       const wrapper = mount(UiTransition, {
-        props: { duration: 50 },
+        props: { duration: 'slow' },
         slots: { default: '<div>Content</div>' },
       })
-      expect(wrapper.html()).toContain('--ui-transition-duration: 50ms')
+      expect(wrapper.vm.$props.duration).toBe('slow')
+      expect(wrapper.classes()).toContain('ui-duration-slow')
+    })
+
+    it('accepts slower duration', () => {
+      const wrapper = mount(UiTransition, {
+        props: { duration: 'slower' },
+        slots: { default: '<div>Content</div>' },
+      })
+      expect(wrapper.vm.$props.duration).toBe('slower')
+      expect(wrapper.classes()).toContain('ui-duration-slower')
     })
   })
 

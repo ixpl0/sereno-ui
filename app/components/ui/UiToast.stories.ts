@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import UiToast from './UiToast.vue'
 import UiButton from './UiButton.vue'
-import { useToast } from '~/composables/useToast'
+import { useToast } from '../../composables/useToast'
 
 const meta = {
   title: 'UI/UiToast',
