@@ -19,6 +19,10 @@ pnpm build-storybook  # Build Storybook
 pnpm test:e2e         # Run Playwright e2e tests
 pnpm test:e2e:ui      # Run Playwright with UI mode
 pnpm test:e2e:headed  # Run Playwright in headed browser
+pnpm test:unit        # Run Vitest unit tests (watch mode)
+pnpm test:unit:run    # Run Vitest unit tests once
+pnpm test:unit:ui     # Run Vitest with UI mode
+pnpm test:unit:coverage # Run Vitest with coverage
 ```
 
 ## Tech Stack
@@ -29,7 +33,7 @@ pnpm test:e2e:headed  # Run Playwright in headed browser
 - **API Client**: @hey-api/openapi-ts (generated from swagger.yaml)
 - **Mocking**: MSW (Mock Service Worker)
 - **Icons**: @nuxt/icon
-- **Testing**: Playwright (e2e)
+- **Testing**: Vitest (unit) + Playwright (e2e)
 - **Deployment**: Vercel (auto-deploy)
 - **Node**: >=22.12.0
 
@@ -50,7 +54,9 @@ app/
 ├── utils/            # Utility functions
 └── app.vue           # Root component
 stories/              # Storybook stories
-tests/e2e/            # Playwright e2e tests
+tests/
+├── unit/             # Vitest unit tests
+└── e2e/              # Playwright e2e tests
 ```
 
 ## Key Features

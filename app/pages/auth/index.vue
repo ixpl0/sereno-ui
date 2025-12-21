@@ -21,12 +21,12 @@ const email = ref('')
 const code = ref('')
 const isLoading = ref(false)
 const error = ref<string | null>(null)
-const codeInputRef = ref<{ focus: () => void } | null>(null)
+const pinInputRef = ref<{ focus: () => void } | null>(null)
 
 watch(step, async (newStep) => {
   if (newStep === 'code') {
     await nextTick()
-    codeInputRef.value?.focus()
+    pinInputRef.value?.focus()
   }
 })
 
@@ -224,16 +224,17 @@ const title = computed(() =>
           Код отправлен на {{ email }}
         </p>
 
-        <UiInput
-          ref="codeInputRef"
-          v-model="code"
-          type="text"
-          label="Код подтверждения"
-          placeholder="12345678"
-          autocomplete="one-time-code"
-          :disabled="isLoading"
-          @keyup.enter="handleLogin"
-        />
+        <div class="mb-2">
+          <UiLabel>Код подтверждения</UiLabel>
+          <UiPinInput
+            ref="pinInputRef"
+            v-model="code"
+            :length="8"
+            :group-size="4"
+            :disabled="isLoading"
+            @complete="handleLogin"
+          />
+        </div>
 
         <UiButton
           variant="primary"

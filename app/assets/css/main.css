@@ -83,3 +83,7 @@
 [data-theme="light"] .btn {
   --tw-shadow-color: color-mix(in oklch, var(--color-base-content) 15%, transparent);
 }
+
+.input {
+  outline: none;
+}
