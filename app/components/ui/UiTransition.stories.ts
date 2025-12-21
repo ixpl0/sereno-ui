@@ -14,7 +14,8 @@ const meta = {
       options: ['fade', 'scale', 'scale-bounce', 'slide-up', 'slide-down', 'slide-left', 'slide-right'],
     },
     duration: {
-      control: { type: 'range', min: 100, max: 500, step: 50 },
+      control: 'select',
+      options: ['fast', 'normal', 'slow', 'slower'],
     },
     appear: { control: 'boolean' },
     mode: {
@@ -24,7 +25,7 @@ const meta = {
   },
   args: {
     preset: 'fade',
-    duration: 200,
+    duration: 'normal',
     appear: false,
     mode: 'default',
   },
@@ -83,7 +84,7 @@ export const ScaleBounce: Story = {
     template: `
       <div>
         <UiButton @click="show = !show" class="mb-4">Toggle</UiButton>
-        <UiTransition preset="scale-bounce" :duration="250">
+        <UiTransition preset="scale-bounce" duration="normal">
           <UiCard v-if="show" title="Scale Bounce" class="max-w-sm">
             <p>This card has a bouncy scale animation</p>
           </UiCard>
@@ -177,7 +178,7 @@ export const WithAppear: Story = {
   render: () => ({
     components: { UiTransition, UiCard },
     template: `
-      <UiTransition preset="scale-bounce" :duration="300" appear>
+      <UiTransition preset="scale-bounce" duration="slow" appear>
         <UiCard title="Appears on Mount" class="max-w-sm">
           <p>This card animates when the component first mounts</p>
         </UiCard>
@@ -196,9 +197,9 @@ export const CustomDuration: Story = {
     template: `
       <div>
         <UiButton @click="show = !show" class="mb-4">Toggle (slow)</UiButton>
-        <UiTransition preset="scale" :duration="500">
+        <UiTransition preset="scale" duration="slower">
           <UiCard v-if="show" title="Slow Animation" class="max-w-sm">
-            <p>This card has a 500ms animation</p>
+            <p>This card has a slower (500ms) animation</p>
           </UiCard>
         </UiTransition>
       </div>

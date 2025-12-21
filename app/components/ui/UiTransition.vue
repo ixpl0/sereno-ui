@@ -1,25 +1,23 @@
 <script setup lang="ts">
 type TransitionPreset = 'fade' | 'scale' | 'scale-bounce' | 'slide-up' | 'slide-down' | 'slide-left' | 'slide-right'
+type TransitionDuration = 'fast' | 'normal' | 'slow' | 'slower'
 
 interface Props {
   preset?: TransitionPreset
-  duration?: number
+  duration?: TransitionDuration
   appear?: boolean
   mode?: 'in-out' | 'out-in' | 'default'
 }
 
 const props = withDefaults(defineProps<Props>(), {
   preset: 'fade',
-  duration: 200,
+  duration: 'normal',
   appear: false,
   mode: 'default',
 })
 
 const transitionName = computed(() => `ui-${props.preset}`)
-
-const transitionStyle = computed(() => ({
-  '--ui-transition-duration': `${props.duration}ms`,
-}))
+const durationClass = computed(() => `ui-duration-${props.duration}`)
 </script>
 
 <template>
@@ -27,15 +25,27 @@ const transitionStyle = computed(() => ({
     :name="transitionName"
     :appear="appear"
     :mode="mode === 'default' ? undefined : mode"
-    :style="transitionStyle"
+    :class="durationClass"
   >
     <slot />
   </Transition>
 </template>
 
 <style>
-:root {
+.ui-duration-fast {
+  --ui-transition-duration: 150ms;
+}
+
+.ui-duration-normal {
   --ui-transition-duration: 200ms;
+}
+
+.ui-duration-slow {
+  --ui-transition-duration: 300ms;
+}
+
+.ui-duration-slower {
+  --ui-transition-duration: 500ms;
 }
 
 .ui-fade-enter-active,

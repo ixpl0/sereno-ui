@@ -36,7 +36,7 @@ const props = withDefaults(defineProps<Props>(), {
   required: false,
   autofocus: false,
   name: '',
-  autocomplete: 'off',
+  autocomplete: undefined,
   maxlength: undefined,
   minlength: undefined,
   pattern: undefined,
@@ -98,6 +98,23 @@ const ariaDescribedbyComputed = computed(() => {
   return ids.length > 0 ? ids.join(' ') : undefined
 })
 
+const inputAttrs = computed(() => {
+  const attrs: Record<string, string | number | boolean | undefined> = {}
+  if (props.autocomplete) {
+    attrs.autocomplete = props.autocomplete
+  }
+  if (props.maxlength !== undefined) {
+    attrs.maxlength = props.maxlength
+  }
+  if (props.minlength !== undefined) {
+    attrs.minlength = props.minlength
+  }
+  if (props.pattern !== undefined) {
+    attrs.pattern = props.pattern
+  }
+  return attrs
+})
+
 const inputRef = ref<HTMLInputElement | null>(null)
 
 const handleInput = (event: Event) => {
@@ -136,10 +153,7 @@ defineExpose({ focus })
       :disabled="disabled"
       :required="required"
       :name="name"
-      :autocomplete="autocomplete"
-      :maxlength="maxlength"
-      :minlength="minlength"
-      :pattern="pattern"
+      v-bind="inputAttrs"
       :aria-describedby="ariaDescribedbyComputed"
       :aria-invalid="state === 'error'"
       :class="inputClasses"

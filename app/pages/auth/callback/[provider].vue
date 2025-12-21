@@ -98,7 +98,7 @@ onMounted(() => {
 <template>
   <UiTransition
     preset="scale-bounce"
-    :duration="300"
+    duration="slow"
     appear
   >
     <UiCard class="w-full max-w-md">

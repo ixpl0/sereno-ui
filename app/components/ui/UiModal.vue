@@ -138,7 +138,7 @@ onUnmounted(() => {
   <Teleport to="body">
     <UiTransition
       preset="fade"
-      :duration="150"
+      duration="fast"
     >
       <div
         v-if="modelValue"
@@ -156,7 +156,6 @@ onUnmounted(() => {
 
         <UiTransition
           preset="scale-bounce"
-          :duration="250"
           appear
         >
           <UiCard

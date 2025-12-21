@@ -13,7 +13,7 @@ withDefaults(defineProps<Props>(), {
 <template>
   <label
     :for="$props.for"
-    class="label text-base-content/60"
+    class="label text-base-content/60 pb-1"
   >
     <slot />
     <span
