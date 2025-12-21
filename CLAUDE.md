@@ -82,10 +82,12 @@ All reusable UI elements in `app/components/ui/` with `Ui` prefix:
 
 - **UiButton** - Buttons with variants (primary, secondary, ghost, etc.)
 - **UiInput** - Text inputs with labels, validation states, autofocus
+- **UiPinInput** - PIN/OTP code input with grouping and auto-focus
 - **UiCard** - Cards with header/footer slots
-- **UiModal** - Modal dialogs with animations
-- **UiTransition** - Transition wrapper with presets
-- **UiLabel** - Form labels
+- **UiModal** - Modal dialogs with focus trap and animations
+- **UiTransition** - Transition wrapper with presets (fade, scale, slide)
+- **UiLabel** - Form labels with required indicator
+- **UiToast** - Toast notifications (success, error, warning, info)
 
 ### Global Animations
 
@@ -105,6 +107,14 @@ CSS animations in `app/assets/css/animations.css`:
 - No comments (except ESLint disables and TODOs)
 - Always use blocks for `if`/`else`/`for`
 - Empty line at end of files
+
+## Testing Strategy
+
+- **E2E tests (Playwright)** - UI components, pages, user flows
+- **Unit tests (Vitest)** - utils, composables, pure functions
+- **Storybook** - visual testing and component documentation
+
+UI components are thin wrappers over DaisyUI with minimal logic. Testing DOM interactions (keyboard navigation, focus management) is more reliable with e2e tests than unit tests.
 
 ## Pre-commit
 
