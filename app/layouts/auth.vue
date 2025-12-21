@@ -18,5 +18,6 @@ useSeoMeta({
     <main class="relative z-10 min-h-screen flex items-center justify-center p-4">
       <slot />
     </main>
+    <UiToast />
   </div>
 </template>

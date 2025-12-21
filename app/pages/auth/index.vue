@@ -15,12 +15,12 @@ useSeoMeta({
 
 const auth = useAuth()
 const router = useRouter()
+const toast = useToast()
 
 const step = ref<AuthStep>('email')
 const email = ref('')
 const code = ref('')
 const isLoading = ref(false)
-const error = ref<string | null>(null)
 const pinInputRef = ref<{ focus: () => void } | null>(null)
 
 watch(step, async (newStep) => {
@@ -30,25 +30,20 @@ watch(step, async (newStep) => {
   }
 })
 
-const clearError = () => {
-  error.value = null
-}
-
 const handleRequestCode = async () => {
   if (!email.value) {
-    error.value = 'Введите email'
+    toast.error('Введите email')
     return
   }
 
   isLoading.value = true
-  clearError()
 
   const response = await auth.requestEmailCode(email.value)
 
   isLoading.value = false
 
   if (isApiError(response)) {
-    error.value = extractApiError(response, 'Ошибка отправки кода')
+    toast.error(extractApiError(response, 'Ошибка отправки кода'))
     return
   }
 
@@ -57,19 +52,18 @@ const handleRequestCode = async () => {
 
 const handleLogin = async () => {
   if (!code.value) {
-    error.value = 'Введите код'
+    toast.error('Введите код')
     return
   }
 
   isLoading.value = true
-  clearError()
 
   const response = await auth.loginWithEmail(email.value, code.value)
 
   isLoading.value = false
 
   if (isApiError(response)) {
-    error.value = extractApiError(response, 'Неверный код')
+    toast.error(extractApiError(response, 'Неверный код'))
     return
   }
 
@@ -78,14 +72,13 @@ const handleLogin = async () => {
 
 const handleOAuth = async (provider: OAuthProvider) => {
   isLoading.value = true
-  clearError()
 
   const response = await auth.getOAuthUrl(provider)
 
   isLoading.value = false
 
   if (isApiError(response)) {
-    error.value = `Ошибка авторизации через ${provider}`
+    toast.error(`Ошибка авторизации через ${provider}`)
     return
   }
 
@@ -93,7 +86,7 @@ const handleOAuth = async (provider: OAuthProvider) => {
   if (data?.redirect_url) {
     const redirected = safeRedirect(data.redirect_url)
     if (!redirected) {
-      error.value = 'Недопустимый URL для редиректа'
+      toast.error('Недопустимый URL для редиректа')
     }
   }
 }
@@ -101,7 +94,6 @@ const handleOAuth = async (provider: OAuthProvider) => {
 const goBackToEmail = () => {
   step.value = 'email'
   code.value = ''
-  clearError()
 }
 
 const oauthProviders: OAuthProviderConfig[] = [
@@ -126,32 +118,6 @@ const title = computed(() =>
           {{ title }}
         </h1>
       </template>
-
-      <div
-        v-if="error"
-        role="alert"
-        aria-live="polite"
-        class="alert alert-error mb-4"
-      >
-        <Icon
-          name="heroicons:exclamation-circle"
-          class="w-5 h-5"
-          aria-hidden="true"
-        />
-        <span>{{ error }}</span>
-        <UiButton
-          variant="ghost"
-          size="sm"
-          aria-label="Закрыть сообщение об ошибке"
-          @click="clearError"
-        >
-          <Icon
-            name="heroicons:x-mark"
-            class="w-4 h-4"
-            aria-hidden="true"
-          />
-        </UiButton>
-      </div>
 
       <section
         v-if="step === 'email'"
