@@ -348,7 +348,7 @@ test.describe('Auth - OAuth Flow', () => {
       await expect(page).toHaveURL(/\/mock-oauth\/vk/)
       await expect(page.getByRole('heading', { name: 'ВКонтакте' })).toBeVisible()
 
-      await page.getByText('Пётр Вконтактов').click()
+      await page.getByRole('button', { name: 'Выполнить сценарий' }).click()
 
       await expect(page).toHaveURL(/\/auth\/callback\/vk/)
       await expect(page.getByText('Авторизация успешна!')).toBeVisible({ timeout: 10000 })
@@ -357,7 +357,10 @@ test.describe('Auth - OAuth Flow', () => {
     })
 
     test('OAuth flow with scenario switch before login', async ({ page }) => {
+      await navigateToAuth(page)
+
       await page.getByRole('button', { name: 'Войти через Keycloak' }).click()
+      await expect(page).toHaveURL(/\/mock-oauth\/keycloak/)
 
       const tabsContainer = page.locator('.tabs')
       await tabsContainer.getByRole('button', { name: /Ошибка/i }).click()
@@ -366,7 +369,7 @@ test.describe('Auth - OAuth Flow', () => {
       await tabsContainer.getByRole('button', { name: /Успешный вход/i }).click()
       await expect(page.getByText('Авторизация пройдёт успешно')).toBeVisible()
 
-      await page.getByText('Корпоративный Пользователь').click()
+      await page.getByRole('button', { name: 'Выполнить сценарий' }).click()
 
       await expect(page.getByText('Авторизация успешна!')).toBeVisible({ timeout: 10000 })
     })
@@ -378,14 +381,14 @@ test.describe('Auth - Error Handling', () => {
     await navigateToAuth(page)
   })
 
-  test('closes error alert', async ({ page }) => {
+  test('closes error toast by clicking', async ({ page }) => {
     await fillEmailAndSubmit(page, 'invalid-email')
 
-    const errorAlert = page.locator('.alert-error')
-    await expect(errorAlert).toBeVisible()
+    const errorToast = page.locator('.alert-error')
+    await expect(errorToast).toBeVisible()
 
-    await errorAlert.getByRole('button').click()
-    await expect(errorAlert).not.toBeVisible()
+    await errorToast.click()
+    await expect(errorToast).not.toBeVisible()
   })
 
   test('clears error when navigating between steps', async ({ page }) => {
