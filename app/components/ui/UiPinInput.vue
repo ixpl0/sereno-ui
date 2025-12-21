@@ -157,6 +157,7 @@ defineExpose({ focus })
             :value="values[index]"
             :disabled="disabled"
             :class="stateClasses"
+            :aria-label="`Цифра ${index + 1} из ${length}`"
             class="bg-base-100"
             @input="handleInput(index, $event)"
             @keydown="handleKeydown(index, $event)"
