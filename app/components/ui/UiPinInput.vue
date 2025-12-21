@@ -6,6 +6,8 @@ interface Props {
   disabled?: boolean
   autofocus?: boolean
   state?: 'default' | 'error' | 'success'
+  label?: string
+  required?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -15,6 +17,8 @@ const props = withDefaults(defineProps<Props>(), {
   disabled: false,
   autofocus: false,
   state: 'default',
+  label: '',
+  required: false,
 })
 
 const emit = defineEmits<{
@@ -123,34 +127,42 @@ defineExpose({ focus })
 </script>
 
 <template>
-  <div
-    class="flex items-center justify-center gap-2"
-    @paste="handlePaste"
-  >
-    <template
-      v-for="(group, groupIndex) in groups"
-      :key="groupIndex"
+  <div class="w-full">
+    <UiLabel
+      v-if="label"
+      :required="required"
     >
-      <div
-        v-if="groupIndex > 0"
-        class="w-3 h-0.5 bg-base-content/30 rounded-full"
-      />
-      <div class="flex gap-1.5">
-        <input
-          v-for="index in group"
-          :key="index"
-          :ref="(el) => inputRefs[index] = el as HTMLInputElement"
-          type="text"
-          inputmode="numeric"
-          maxlength="1"
-          :value="values[index]"
-          :disabled="disabled"
-          :class="stateClasses"
-          class="bg-base-100"
-          @input="handleInput(index, $event)"
-          @keydown="handleKeydown(index, $event)"
-        >
-      </div>
-    </template>
+      {{ label }}
+    </UiLabel>
+    <div
+      class="flex items-center justify-center gap-2"
+      @paste="handlePaste"
+    >
+      <template
+        v-for="(group, groupIndex) in groups"
+        :key="groupIndex"
+      >
+        <div
+          v-if="groupIndex > 0"
+          class="w-3 h-0.5 bg-base-content/30 rounded-full"
+        />
+        <div class="flex gap-1.5">
+          <input
+            v-for="index in group"
+            :key="index"
+            :ref="(el) => inputRefs[index] = el as HTMLInputElement"
+            type="text"
+            inputmode="numeric"
+            maxlength="1"
+            :value="values[index]"
+            :disabled="disabled"
+            :class="stateClasses"
+            class="bg-base-100"
+            @input="handleInput(index, $event)"
+            @keydown="handleKeydown(index, $event)"
+          >
+        </div>
+      </template>
+    </div>
   </div>
 </template>

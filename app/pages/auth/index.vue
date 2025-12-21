@@ -134,7 +134,6 @@ const title = computed(() =>
           type="email"
           label="Email"
           placeholder="admin@example.ru"
-          autocomplete="email"
           autofocus
           :disabled="isLoading"
           @keyup.enter="handleRequestCode"
@@ -190,17 +189,16 @@ const title = computed(() =>
           Код отправлен на {{ email }}
         </p>
 
-        <div class="mb-2">
-          <UiLabel>Код подтверждения</UiLabel>
-          <UiPinInput
-            ref="pinInputRef"
-            v-model="code"
-            :length="8"
-            :group-size="4"
-            :disabled="isLoading"
-            @complete="handleLogin"
-          />
-        </div>
+        <UiPinInput
+          ref="pinInputRef"
+          v-model="code"
+          label="Код подтверждения"
+          :length="8"
+          :group-size="4"
+          :disabled="isLoading"
+          class="mb-2"
+          @complete="handleLogin"
+        />
 
         <UiButton
           variant="primary"
