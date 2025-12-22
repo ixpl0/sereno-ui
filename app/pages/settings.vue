@@ -140,7 +140,7 @@ const formatDate = (timestamp: number | undefined): string => {
 </script>
 
 <template>
-  <main class="min-h-screen bg-base-200 p-8">
+  <main class="min-h-screen p-8">
     <div class="max-w-3xl mx-auto space-y-6">
       <header class="flex justify-between items-center animate-fade-in">
         <h1 class="text-3xl font-bold">

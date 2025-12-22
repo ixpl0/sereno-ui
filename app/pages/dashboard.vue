@@ -25,9 +25,9 @@ const maskedToken = computed(() => {
 </script>
 
 <template>
-  <main class="min-h-screen bg-base-200 p-8">
+  <main class="min-h-screen p-8">
     <div class="max-w-4xl mx-auto">
-      <header class="flex justify-between items-center mb-8">
+      <header class="flex justify-between items-center mb-8 animate-fade-in">
         <h1 class="text-3xl font-bold">
           Dashboard
         </h1>
@@ -48,21 +48,19 @@ const maskedToken = computed(() => {
         </div>
       </header>
 
-      <article class="card bg-base-100 shadow-xl animate-slide-up">
-        <div class="card-body">
-          <h2 class="card-title">
-            Добро пожаловать!
-          </h2>
-          <p class="text-base-content/70">
-            Это защищённая страница. Вы авторизованы.
-          </p>
-          <div class="mt-4">
-            <code class="bg-base-200 px-2 py-1 rounded">
-              Token: {{ maskedToken }}
-            </code>
-          </div>
+      <UiCard
+        title="Добро пожаловать!"
+        class="animate-slide-up"
+      >
+        <p class="text-base-content/70">
+          Это защищённая страница. Вы авторизованы.
+        </p>
+        <div class="mt-4">
+          <code class="bg-base-200/50 px-2 py-1 rounded">
+            Token: {{ maskedToken }}
+          </code>
         </div>
-      </article>
+      </UiCard>
     </div>
   </main>
 </template>
