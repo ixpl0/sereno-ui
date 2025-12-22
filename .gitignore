@@ -32,5 +32,8 @@ storybook-static
 test-results/
 playwright-report/
 
+# Vitest coverage
+coverage/
+
 # Local config files
 *.local.*
