@@ -142,7 +142,7 @@ const formatDate = (timestamp: number | undefined): string => {
 <template>
   <main class="min-h-screen bg-base-200 p-8">
     <div class="max-w-3xl mx-auto space-y-6">
-      <header class="flex justify-between items-center">
+      <header class="flex justify-between items-center animate-fade-in">
         <h1 class="text-3xl font-bold">
           Настройки
         </h1>
@@ -162,7 +162,10 @@ const formatDate = (timestamp: number | undefined): string => {
         </div>
       </header>
 
-      <UiCard title="Профиль">
+      <UiCard
+        title="Профиль"
+        class="animate-slide-up"
+      >
         <div
           v-if="userLoading"
           class="flex justify-center py-8"
@@ -335,7 +338,11 @@ const formatDate = (timestamp: number | undefined): string => {
         </div>
       </UiCard>
 
-      <UiCard title="Активные сессии">
+      <UiCard
+        title="Активные сессии"
+        class="animate-slide-up"
+        style="animation-delay: 100ms; animation-fill-mode: backwards"
+      >
         <div
           v-if="sessionsLoading"
           class="flex justify-center py-8"
