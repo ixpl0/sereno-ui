@@ -1,7 +1,7 @@
 import { http, HttpResponse } from 'msw'
 import type {
-  UserEmailLoginHandlerRequestBody,
-  UserRequestEmailCodeHandlerRequestBody,
+  UserRequestEmail,
+  UserRequestEmailCode,
 } from '~/api/types.gen'
 import { withDelay } from '~/mocks/utils/delay'
 import { createErrorResponse } from '~/mocks/utils/error'
@@ -20,7 +20,7 @@ const getMockOAuthRedirectUrl = (provider: string): string => {
 }
 
 export const authHandlers = [
-  http.post<never, UserRequestEmailCodeHandlerRequestBody>(
+  http.post<never, UserRequestEmail>(
     `${MOCK_API_BASE_URL}/auth/login/email/code`,
     async ({ request }) => {
       await withDelay('realistic')
@@ -31,14 +31,11 @@ export const authHandlers = [
         return createErrorResponse('badRequest', 'Invalid email format')
       }
 
-      return HttpResponse.json(
-        { message: 'Code sent to email' },
-        { status: 201 },
-      )
+      return new HttpResponse(null, { status: 204 })
     },
   ),
 
-  http.post<never, UserEmailLoginHandlerRequestBody>(
+  http.post<never, UserRequestEmailCode>(
     `${MOCK_API_BASE_URL}/auth/login/email`,
     async ({ request }) => {
       await withDelay('realistic')
@@ -53,11 +50,11 @@ export const authHandlers = [
         return createErrorResponse('badRequest', 'Invalid verification code')
       }
 
-      const token = `mock-jwt-${crypto.randomUUID()}`
-      setAuthToken(token)
+      const accessToken = `mock-jwt-${crypto.randomUUID()}`
+      setAuthToken(accessToken)
 
       return HttpResponse.json(
-        { access_token: token },
+        { token: accessToken, type: 'bearer' },
         { status: 200 },
       )
     },
@@ -76,7 +73,7 @@ export const authHandlers = [
     setAuthToken(newToken)
 
     return HttpResponse.json(
-      { access_token: newToken },
+      { token: newToken, type: 'bearer' },
       { status: 200 },
     )
   }),
@@ -128,8 +125,8 @@ export const authHandlers = [
         return createErrorResponse('serverError', 'Request timed out')
       }
 
-      const token = `mock-jwt-oauth-${providerKey}-${crypto.randomUUID()}`
-      setAuthToken(token)
+      const accessToken = `mock-jwt-oauth-${providerKey}-${crypto.randomUUID()}`
+      setAuthToken(accessToken)
 
       if (userId && email && name) {
         setCurrentUserFromOAuth({
@@ -152,7 +149,7 @@ export const authHandlers = [
       }
 
       return HttpResponse.json(
-        { access_token: token },
+        { token: accessToken, type: 'bearer' },
         { status: 200 },
       )
     },

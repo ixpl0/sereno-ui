@@ -1,77 +1,134 @@
 basePath: /api/v1
+schemes:
+  - http
 definitions:
-  server.ErrorResponse:
+  server.ResponseError:
     properties:
       error:
-        example: Incorrect request / Internal server error
         type: string
       request_id:
-        example: 550e8400-e29b-41d4-a716-446655440000
+        example: 00112233-4455-6677-8899-aabbccddeeff
         type: string
     type: object
-  tenant.CreateHandler.requestBody:
-    properties:
-      name:
-        maxLength: 64
-        minLength: 1
-        type: string
-    required:
-    - name
-    type: object
-  tenant.CreateTokenHandler.requestBody:
-    properties:
-      name:
-        maxLength: 64
-        minLength: 1
-        type: string
-    required:
-    - name
-    type: object
-  tenant.DeleteMembersHandler.requestBody:
+  tenant.RequestID:
     properties:
       id:
+        example: 00112233-4455-6677-8899-aabbccddeeff
         type: string
     required:
     - id
     type: object
-  tenant.DeleteTokenHandler.requestBody:
+  tenant.RequestIDRole:
     properties:
       id:
-        type: string
-    required:
-    - id
-    type: object
-  tenant.UpdateMembersHandler.requestBody:
-    properties:
-      id:
+        example: 00112233-4455-6677-8899-aabbccddeeff
         type: string
       role:
         enum:
         - admin
-        - editor
-        - viewer
+        - member
+        example: admin
         type: string
     required:
     - id
     - role
     type: object
-  user.AddContactHandler.requestBody:
+  tenant.RequestName:
+    properties:
+      name:
+        example: Name of this subject
+        maxLength: 64
+        minLength: 1
+        type: string
+    required:
+    - name
+    type: object
+  tenant.ResponseMember:
+    properties:
+      id:
+        example: 00112233-4455-6677-8899-aabbccddeeff
+        type: string
+      name:
+        example: Ivan Ivanov
+        type: string
+      role:
+        example: admin
+        type: string
+      since:
+        example: 1766412596
+        type: integer
+    type: object
+  tenant.ResponseMembersList:
+    properties:
+      members:
+        items:
+          $ref: '#/definitions/tenant.ResponseMember'
+        type: array
+    type: object
+  tenant.ResponseSingleMember:
+    properties:
+      member:
+        $ref: '#/definitions/tenant.ResponseMember'
+    type: object
+  tenant.ResponseSingleTenant:
+    properties:
+      tenant:
+        $ref: '#/definitions/tenant.ResponseTenant'
+    type: object
+  tenant.ResponseTenant:
+    properties:
+      id:
+        example: 00112233-4455-6677-8899-aabbccddeeff
+        type: string
+      name:
+        example: My first tenant
+        type: string
+      role:
+        example: admin
+        type: string
+      since:
+        example: 1766412596
+        type: integer
+    type: object
+  tenant.ResponseTenantsList:
+    properties:
+      tenants:
+        items:
+          $ref: '#/definitions/tenant.ResponseTenant'
+        type: array
+    type: object
+  user.RequestCode:
+    properties:
+      code:
+        example: "12345678"
+        type: string
+    required:
+    - code
+    type: object
+  user.RequestContact:
     properties:
       kind:
         enum:
         - email
         - telegram
-        - phone
-        example: phone
+        example: email
         type: string
       value:
-        example: "+79991234567"
+        example: admin@example.com
         type: string
     required:
     - kind
     - value
     type: object
-  user.EmailLoginHandler.requestBody:
+  user.RequestEmail:
+    properties:
+      email:
+        example: user@example.com
+        type: string
+    required:
+    - email
+    type: object
+  user.RequestEmailCode:
     properties:
       code:
         example: "12345678"
@@ -83,25 +140,96 @@ definitions:
     - code
     - email
     type: object
-  user.RequestEmailCodeHandler.requestBody:
+  user.RequestParameter:
     properties:
-      email:
+      kind:
+        enum:
+        - first_name
+        - last_name
+        - timezone
+        example: first_name
+        type: string
+      value:
+        example: Ivan
+        type: string
+    required:
+    - kind
+    - value
+    type: object
+  user.ResponseAccessJWT:
+    properties:
+      token:
+        example: eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJ0...ZiJ9.MFrP...ddBw
+        type: string
+      type:
+        example: bearer
+        type: string
+    type: object
+  user.ResponseContact:
+    properties:
+      id:
+        example: 00112233-4455-6677-8899-aabbccddeeff
+        type: string
+      kind:
+        example: email
+        type: string
+      value:
         example: user@example.com
         type: string
-    required:
-    - email
+      verified:
+        example: true
+        type: boolean
     type: object
-  user.VerifyContactHandler.requestBody:
+  user.ResponseContactsList:
     properties:
-      code:
-        example: "12345678"
+      contacts:
+        items:
+          $ref: '#/definitions/user.ResponseContact'
+        type: array
+    type: object
+  user.ResponseSession:
+    properties:
+      current:
+        example: true
+        type: boolean
+      device:
+        example: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:45.0) Gecko/20100101 Firefox/45.0
         type: string
-    required:
-    - code
+      id:
+        example: 00112233-4455-6677-8899-aabbccddeeff
+        type: string
+      since:
+        example: 1766412596
+        type: integer
+    type: object
+  user.ResponseSessions:
+    properties:
+      sessions:
+        items:
+          $ref: '#/definitions/user.ResponseSession'
+        type: array
+    type: object
+  user.ResponseSingleContact:
+    properties:
+      contact:
+        $ref: '#/definitions/user.ResponseContact'
+    type: object
+  user.ResponseUser:
+    properties:
+      first_name:
+        example: Ivan
+        type: string
+      id:
+        example: 00112233-4455-6677-8899-aabbccddeeff
+        type: string
+      last_name:
+        example: Ivanov
+        type: string
+      timezone:
+        example: Europe/Moscow
+        type: string
     type: object
 host: localhost:8080
-schemes:
-  - http
 info:
   contact: {}
   description: Duty компонент Sereno Systems
@@ -137,14 +265,15 @@ paths:
     post:
       consumes:
       - application/json
-      description: Проверяет Email и одноразовый код и отдает новые AccessJWT + RefreshJWT
+      description: Проверяет Email и одноразовый код, создает/обновляет сессию и отдает
+        новые AccessJWT + RefreshJWT
       parameters:
       - description: Request JSON
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/user.EmailLoginHandler.requestBody'
+          $ref: '#/definitions/user.RequestEmailCode'
       produces:
       - application/json
       responses:
@@ -156,17 +285,15 @@ paths:
                 Secure; HttpOnly
               type: string
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/user.ResponseAccessJWT'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
       summary: Вход по Email
       tags:
       - auth
@@ -182,24 +309,20 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/user.RequestEmailCodeHandler.requestBody'
+          $ref: '#/definitions/user.RequestEmail'
       produces:
       - application/json
       responses:
-        "201":
-          description: Created
-          schema:
-            additionalProperties:
-              type: string
-            type: object
+        "204":
+          description: No Content
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
       summary: Запрос кода на Email
       tags:
       - auth
@@ -207,7 +330,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Удаляет RefreshJWT из репозитория и Cookie
+      description: Удаляет сессию из репозитория и Cookie
       responses:
         "204":
           description: No Content
@@ -219,11 +342,11 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
       security:
       - AccessJWT: []
       summary: Выход
@@ -231,24 +354,23 @@ paths:
       - auth
   /auth/refresh:
     post:
-      description: Валидирует RefreshJWT и отдает новый AccessJWT
+      description: Валидирует RefreshJWT, обновляет существующую сессию и отдает новый
+        AccessJWT
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/user.ResponseAccessJWT'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
       security:
       - RefreshJWT: []
       summary: Новый AccessJWT
@@ -264,62 +386,18 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/tenant.ResponseTenantsList'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
       security:
       - AccessJWT: []
       summary: Список тенантов пользователя
-      tags:
-      - tenants
-  /tenants/{id}:
-    get:
-      description: Возвращает Tenant по ID
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/server.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/server.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/server.ErrorResponse'
-      security:
-      - AccessJWT: []
-      summary: Получение тенант по ID
-      tags:
-      - tenants
-  /tenants/{id}/delete:
-    post:
-      description: Удаляет Tenant по ID
-      produces:
-      - application/json
-      responses:
-        "501":
-          description: Not Implemented
-      security:
-      - AccessJWT: []
-      summary: Удаление тенант (NotImplemented)
       tags:
       - tenants
   /tenants/{id}/members:
@@ -331,21 +409,19 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/tenant.ResponseMembersList'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
       security:
       - AccessJWT: []
       summary: Список пользователей тенанта
@@ -367,28 +443,22 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/tenant.DeleteMembersHandler.requestBody'
-      produces:
-      - application/json
+          $ref: '#/definitions/tenant.RequestID'
       responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties:
-              type: string
-            type: object
+        "204":
+          description: No Content
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
       security:
       - AccessJWT: []
       summary: Удаление пользователя из тенанта
@@ -410,28 +480,26 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/tenant.UpdateMembersHandler.requestBody'
+          $ref: '#/definitions/tenant.RequestIDRole'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/tenant.ResponseSingleMember'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
       security:
       - AccessJWT: []
       summary: Управление пользователями в тенанте
@@ -439,8 +507,6 @@ paths:
       - tenant/members
   /tenants/{id}/tokens:
     get:
-      consumes:
-      - application/json
       description: Возвращает список статичных токенов для Tenant по его ID используемые
         сервисами алертинга и мониторинга
       produces:
@@ -455,15 +521,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
       security:
       - AccessJWT: []
       summary: Список статичных токенов
@@ -473,8 +539,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Создает статичный токен для Tenant по его ID используемый сервисами
-        алертинга и мониторинга
+      description: Создает статичный токен, используемый сервисами алертинга и мониторинга
       parameters:
       - description: Tenant ID
         in: path
@@ -486,7 +551,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/tenant.CreateTokenHandler.requestBody'
+          $ref: '#/definitions/tenant.RequestName'
       produces:
       - application/json
       responses:
@@ -499,15 +564,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
       security:
       - AccessJWT: []
       summary: Создание статичного токена
@@ -515,9 +580,7 @@ paths:
       - tenant/tokens
   /tenants/{id}/tokens/delete:
     post:
-      consumes:
-      - application/json
-      description: Удаляет интеграционный токен для Tenant по его ID
+      description: Удаляет интеграционный токен по его ID
       parameters:
       - description: Tenant ID
         in: path
@@ -529,7 +592,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/tenant.DeleteTokenHandler.requestBody'
+          $ref: '#/definitions/tenant.RequestID'
       produces:
       - application/json
       responses:
@@ -542,11 +605,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
       security:
       - AccessJWT: []
       summary: Удаление интеграционного токена
@@ -556,15 +619,36 @@ paths:
     post:
       consumes:
       - application/json
-      description: 'Обновляет Tenant по ID: название, ...'
+      description: 'Изменяет Tenant: название, ...'
+      parameters:
+      - description: Request JSON
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/tenant.RequestName'
       produces:
       - application/json
       responses:
-        "501":
-          description: Not Implemented
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/tenant.ResponseSingleTenant'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ResponseError'
       security:
       - AccessJWT: []
-      summary: Обновление тенант (NotImplemented)
+      summary: Изменение тенант
       tags:
       - tenants
   /tenants/create:
@@ -578,28 +662,26 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/tenant.CreateHandler.requestBody'
+          $ref: '#/definitions/tenant.RequestName'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/tenant.ResponseSingleTenant'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
       security:
       - AccessJWT: []
       summary: Создание тенант
@@ -607,8 +689,6 @@ paths:
       - tenants
   /user:
     get:
-      consumes:
-      - application/json
       description: Возвращает информацию о текущем пользователе
       produces:
       - application/json
@@ -616,21 +696,19 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/user.ResponseUser'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
       security:
       - AccessJWT: []
       summary: Информацию о пользователе
@@ -638,8 +716,6 @@ paths:
       - user
   /user/contacts:
     get:
-      consumes:
-      - application/json
       description: Возвращает список контактов текущего пользователя
       produces:
       - application/json
@@ -647,17 +723,15 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/user.ResponseContactsList'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
       security:
       - AccessJWT: []
       summary: Список контактов пользователя
@@ -665,8 +739,6 @@ paths:
       - user/contacts
   /user/contacts/{id}/delete:
     post:
-      consumes:
-      - application/json
       description: Удаляет контакт текущего пользователя
       parameters:
       - description: Contact ID
@@ -674,23 +746,21 @@ paths:
         name: id
         required: true
         type: string
-      produces:
-      - application/json
       responses:
         "204":
           description: No Content
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
       security:
       - AccessJWT: []
       summary: Удаление контакта пользователя
@@ -712,28 +782,26 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/user.VerifyContactHandler.requestBody'
+          $ref: '#/definitions/user.RequestCode'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/user.ResponseSingleContact'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
       security:
       - AccessJWT: []
       summary: Верификация контакта пользователя
@@ -750,62 +818,109 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/user.AddContactHandler.requestBody'
+          $ref: '#/definitions/user.RequestContact'
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Created
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/user.ResponseSingleContact'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
       security:
       - AccessJWT: []
       summary: Добавление контакта пользователя
       tags:
       - user/contacts
-  /user/update:
-    post:
-      consumes:
-      - application/json
-      description: Обновляет информацию о текущем пользователе
+  /user/sessions:
+    get:
+      description: Возвращает список сессий текущего пользователя
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/user.ResponseSessions'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/server.ErrorResponse'
+            $ref: '#/definitions/server.ResponseError'
       security:
       - AccessJWT: []
-      summary: Обновление информации о пользователе
+      summary: Список сессий пользователя
+      tags:
+      - user/sessions
+  /user/sessions/close:
+    post:
+      description: Закрывает все сессии пользователя кроме текущей
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+      security:
+      - AccessJWT: []
+      summary: Заркытие сессий пользователя
+      tags:
+      - user/sessions
+  /user/update:
+    post:
+      consumes:
+      - application/json
+      description: Обновляет параметры в профиле текущего пользователя
+      parameters:
+      - description: Request JSON
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/user.RequestParameter'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.ResponseUser'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+      security:
+      - AccessJWT: []
+      summary: Обновление профиль пользователе
       tags:
       - user
 securityDefinitions:

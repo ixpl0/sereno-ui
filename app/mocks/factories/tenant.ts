@@ -30,7 +30,7 @@ export const createTenantMember = (overrides: MemberOverrides = {}): TenantMembe
     userId: `user-${memberIdCounter}`,
     email: `member${memberIdCounter}@example.com`,
     name: `Member ${memberIdCounter}`,
-    role: 'viewer',
+    role: 'member',
     ...overrides,
   }
 }

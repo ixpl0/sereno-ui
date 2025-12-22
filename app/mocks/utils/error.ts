@@ -1,5 +1,5 @@
 import { HttpResponse } from 'msw'
-import type { ServerErrorResponse } from '~/api/types.gen'
+import type { ServerResponseError } from '~/api/types.gen'
 
 export type ErrorType = 'badRequest' | 'unauthorized' | 'forbidden' | 'notFound' | 'serverError'
 
@@ -22,8 +22,8 @@ const errorMessageMap: Record<ErrorType, string> = {
 export const createErrorResponse = (
   type: ErrorType,
   customMessage?: string,
-): ReturnType<typeof HttpResponse.json<ServerErrorResponse>> => {
-  const errorBody: ServerErrorResponse = {
+): ReturnType<typeof HttpResponse.json<ServerResponseError>> => {
+  const errorBody: ServerResponseError = {
     error: customMessage ?? errorMessageMap[type],
     request_id: crypto.randomUUID(),
   }
@@ -34,8 +34,8 @@ export const createErrorResponse = (
 export const createValidationError = (
   field: string,
   message: string,
-): ReturnType<typeof HttpResponse.json<ServerErrorResponse>> => {
-  return HttpResponse.json<ServerErrorResponse>(
+): ReturnType<typeof HttpResponse.json<ServerResponseError>> => {
+  return HttpResponse.json<ServerResponseError>(
     {
       error: `Validation error: ${field} - ${message}`,
       request_id: crypto.randomUUID(),

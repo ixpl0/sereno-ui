@@ -1,13 +1,15 @@
 import { http, HttpResponse } from 'msw'
 import type {
-  UserAddContactHandlerRequestBody,
-  UserVerifyContactHandlerRequestBody,
+  UserRequestContact,
+  UserRequestCode,
+  UserRequestParameter,
 } from '~/api/types.gen'
 import { withDelay } from '~/mocks/utils/delay'
 import { createErrorResponse } from '~/mocks/utils/error'
 import {
   isAuthenticated,
   getCurrentUser,
+  updateCurrentUser,
   getContacts,
   addContact,
   updateContact,
@@ -25,21 +27,52 @@ export const userHandlers = [
     }
 
     const user = getCurrentUser()
-    return HttpResponse.json({ user }, { status: 200 })
+    return HttpResponse.json({
+      id: user.id,
+      first_name: user.firstName ?? user.name.split(' ')[0] ?? '',
+      last_name: user.lastName ?? user.name.split(' ')[1] ?? '',
+      timezone: user.timezone ?? 'Europe/Moscow',
+    }, { status: 200 })
   }),
 
-  http.post(`${MOCK_API_BASE_URL}/user/update`, async () => {
-    await withDelay('realistic')
+  http.post<never, UserRequestParameter>(
+    `${MOCK_API_BASE_URL}/user/update`,
+    async ({ request }) => {
+      await withDelay('realistic')
 
-    if (!isAuthenticated()) {
-      return createErrorResponse('unauthorized')
-    }
+      if (!isAuthenticated()) {
+        return createErrorResponse('unauthorized')
+      }
 
-    return HttpResponse.json(
-      { error: 'Not implemented' },
-      { status: 501 },
-    )
-  }),
+      const body = await request.json()
+
+      if (!body.kind || !body.value) {
+        return createErrorResponse('badRequest', 'Kind and value are required')
+      }
+
+      const updates: Record<string, string> = {}
+      if (body.kind === 'first_name') {
+        updates.firstName = body.value
+      }
+      else if (body.kind === 'last_name') {
+        updates.lastName = body.value
+      }
+      else if (body.kind === 'timezone') {
+        updates.timezone = body.value
+      }
+      else {
+        return createErrorResponse('badRequest', 'Invalid parameter kind')
+      }
+
+      const user = updateCurrentUser(updates)
+      return HttpResponse.json({
+        id: user.id,
+        first_name: user.firstName ?? user.name.split(' ')[0] ?? '',
+        last_name: user.lastName ?? user.name.split(' ')[1] ?? '',
+        timezone: user.timezone ?? 'Europe/Moscow',
+      }, { status: 200 })
+    },
+  ),
 
   http.get(`${MOCK_API_BASE_URL}/user/contacts`, async () => {
     await withDelay('realistic')
@@ -52,7 +85,7 @@ export const userHandlers = [
     return HttpResponse.json({ contacts }, { status: 200 })
   }),
 
-  http.post<never, UserAddContactHandlerRequestBody>(
+  http.post<never, UserRequestContact>(
     `${MOCK_API_BASE_URL}/user/contacts/add`,
     async ({ request }) => {
       await withDelay('realistic')
@@ -75,11 +108,18 @@ export const userHandlers = [
 
       addContact(newContact)
 
-      return HttpResponse.json({ contact: newContact }, { status: 200 })
+      return HttpResponse.json({
+        contact: {
+          id: newContact.id,
+          kind: newContact.kind,
+          value: newContact.value,
+          verified: newContact.verified,
+        },
+      }, { status: 201 })
     },
   ),
 
-  http.post<{ id: string }, UserVerifyContactHandlerRequestBody>(
+  http.post<{ id: string }, UserRequestCode>(
     `${MOCK_API_BASE_URL}/user/contacts/:id/verify`,
     async ({ params, request }) => {
       await withDelay('realistic')
@@ -105,7 +145,14 @@ export const userHandlers = [
         return createErrorResponse('notFound', 'Contact not found')
       }
 
-      return HttpResponse.json({ contact: updated }, { status: 200 })
+      return HttpResponse.json({
+        contact: {
+          id: updated.id,
+          kind: updated.kind,
+          value: updated.value,
+          verified: updated.verified,
+        },
+      }, { status: 200 })
     },
   ),
 

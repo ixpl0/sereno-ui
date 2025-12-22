@@ -6,6 +6,9 @@ export interface ApiSuccessResponse<T> {
 export interface ApiErrorDetail {
   error: string
   message?: string
+  code?: string
+  statusMessage?: string
+  statusCode?: number
 }
 
 export interface ApiErrorResponse {
@@ -15,14 +18,6 @@ export interface ApiErrorResponse {
 
 export type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse
 
-export interface AuthTokenResponse {
-  access_token: string
-}
-
 export interface OAuthRedirectResponse {
   redirect_url: string
-}
-
-export interface MessageResponse {
-  message: string
 }

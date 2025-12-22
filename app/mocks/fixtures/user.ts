@@ -1,4 +1,4 @@
-import type { User, Contact } from '~/mocks/types'
+import type { User, Contact, Session } from '~/mocks/types'
 
 export const mockCurrentUser: User = {
   id: 'user-1',
@@ -22,11 +22,25 @@ export const mockUserContacts: ReadonlyArray<Contact> = [
     verified: false,
     createdAt: '2024-02-20T14:30:00Z',
   },
+]
+
+export const mockUserSessions: ReadonlyArray<Session> = [
   {
-    id: 'contact-3',
-    kind: 'phone',
-    value: '+79991234567',
-    verified: true,
-    createdAt: '2024-03-10T09:15:00Z',
+    id: 'session-1',
+    device: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0',
+    since: 1703152800,
+    current: true,
+  },
+  {
+    id: 'session-2',
+    device: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0) Safari/605.1.15',
+    since: 1702548000,
+    current: false,
+  },
+  {
+    id: 'session-3',
+    device: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Firefox/121.0',
+    since: 1701943200,
+    current: false,
   },
 ]

@@ -10,13 +10,13 @@ export const mockTenants: ReadonlyArray<Tenant> = [
   {
     id: 'tenant-2',
     name: 'Beta Labs',
-    role: 'editor',
+    role: 'member',
     createdAt: '2024-02-15T12:00:00Z',
   },
   {
     id: 'tenant-3',
     name: 'Gamma Inc',
-    role: 'viewer',
+    role: 'member',
     createdAt: '2024-03-20T16:00:00Z',
   },
 ]
@@ -34,14 +34,14 @@ export const mockTenantMembers: ReadonlyArray<TenantMember> = [
     userId: 'user-2',
     email: 'maria.ivanova@example.com',
     name: 'Мария Иванова',
-    role: 'editor',
+    role: 'member',
   },
   {
     id: 'member-3',
     userId: 'user-3',
     email: 'alexey.smirnov@example.com',
     name: 'Алексей Смирнов',
-    role: 'viewer',
+    role: 'member',
   },
 ]
 

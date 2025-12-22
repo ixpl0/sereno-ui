@@ -38,7 +38,7 @@ const groups = computed(() => {
 })
 
 const stateClasses = computed(() => {
-  const baseClasses = 'w-10 h-12 text-center text-lg font-medium rounded-lg border transition-all duration-200'
+  const baseClasses = 'w-8 h-10 sm:w-10 sm:h-12 text-center text-base sm:text-lg font-medium rounded-lg border transition-all duration-200'
   const stateMap = {
     default: 'border-base-content/20 focus:border-primary focus:ring-2 focus:ring-primary/20',
     error: 'border-error focus:border-error focus:ring-2 focus:ring-error/20',
@@ -135,7 +135,7 @@ defineExpose({ focus })
       {{ label }}
     </UiLabel>
     <div
-      class="flex items-center justify-center gap-2"
+      class="flex items-center justify-center gap-1 sm:gap-2"
       @paste="handlePaste"
     >
       <template
@@ -144,9 +144,9 @@ defineExpose({ focus })
       >
         <div
           v-if="groupIndex > 0"
-          class="w-3 h-0.5 bg-base-content/30 rounded-full"
+          class="w-2 sm:w-3 h-0.5 bg-base-content/30 rounded-full"
         />
-        <div class="flex gap-1.5">
+        <div class="flex gap-1 sm:gap-1.5">
           <input
             v-for="index in group"
             :key="index"

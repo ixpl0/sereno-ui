@@ -31,13 +31,21 @@ const maskedToken = computed(() => {
         <h1 class="text-3xl font-bold">
           Dashboard
         </h1>
-        <UiButton
-          variant="ghost"
-          aria-label="Выйти из аккаунта"
-          @click="handleLogout"
-        >
-          Выйти
-        </UiButton>
+        <div class="flex gap-2">
+          <UiButton
+            variant="ghost"
+            @click="router.push('/settings')"
+          >
+            Настройки
+          </UiButton>
+          <UiButton
+            variant="ghost"
+            aria-label="Выйти из аккаунта"
+            @click="handleLogout"
+          >
+            Выйти
+          </UiButton>
+        </div>
       </header>
 
       <article class="card bg-base-100 shadow-xl animate-slide-up">

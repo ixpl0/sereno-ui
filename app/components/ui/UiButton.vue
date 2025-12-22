@@ -1,5 +1,5 @@
 <script setup lang="ts">
-type ButtonVariant = 'primary' | 'secondary' | 'accent' | 'ghost' | 'link' | 'neutral'
+type ButtonVariant = 'primary' | 'secondary' | 'accent' | 'ghost' | 'link' | 'neutral' | 'error'
 type ButtonSize = 'xs' | 'sm' | 'md' | 'lg'
 
 interface Props {
@@ -31,6 +31,7 @@ const variantClasses: Record<ButtonVariant, string> = {
   ghost: 'btn-ghost',
   link: 'btn-link',
   neutral: 'btn-neutral',
+  error: 'btn-error',
 }
 
 const sizeClasses: Record<ButtonSize, string> = {

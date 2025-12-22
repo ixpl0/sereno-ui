@@ -1,7 +1,7 @@
 import { http, HttpResponse } from 'msw'
 import type {
-  TenantCreateTokenHandlerRequestBody,
-  TenantDeleteTokenHandlerRequestBody,
+  TenantRequestName,
+  TenantRequestId,
 } from '~/api/types.gen'
 import { withDelay } from '~/mocks/utils/delay'
 import { createErrorResponse } from '~/mocks/utils/error'
@@ -37,7 +37,7 @@ export const tokensHandlers = [
     },
   ),
 
-  http.post<{ id: string }, TenantCreateTokenHandlerRequestBody>(
+  http.post<{ id: string }, TenantRequestName>(
     `${BASE_URL}/tenants/:id/tokens/create`,
     async ({ params, request }) => {
       await withDelay('realistic')
@@ -65,7 +65,7 @@ export const tokensHandlers = [
     },
   ),
 
-  http.post<{ id: string }, TenantDeleteTokenHandlerRequestBody>(
+  http.post<{ id: string }, TenantRequestId>(
     `${BASE_URL}/tenants/:id/tokens/delete`,
     async ({ params, request }) => {
       await withDelay('realistic')

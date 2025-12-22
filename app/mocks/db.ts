@@ -1,10 +1,11 @@
-import type { User, Contact, Tenant, TenantMember, TenantToken } from './types'
-import { mockCurrentUser, mockUserContacts } from './fixtures/user'
+import type { User, Contact, Tenant, TenantMember, TenantToken, Session } from './types'
+import { mockCurrentUser, mockUserContacts, mockUserSessions } from './fixtures/user'
 import { mockTenants, mockTenantMembers, mockTenantTokens } from './fixtures/tenant'
 
 interface MockDatabase {
   currentUser: User
   contacts: Array<Contact>
+  sessions: Array<Session>
   tenants: Array<Tenant>
   tenantMembers: Map<string, Array<TenantMember>>
   tenantTokens: Map<string, Array<TenantToken>>
@@ -20,9 +21,13 @@ const copyTokens = (tokens: ReadonlyArray<TenantToken>): Array<TenantToken> =>
 const copyContacts = (contacts: ReadonlyArray<Contact>): Array<Contact> =>
   contacts.map(c => ({ ...c }))
 
+const copySessions = (sessions: ReadonlyArray<Session>): Array<Session> =>
+  sessions.map(s => ({ ...s }))
+
 const createInitialState = (): MockDatabase => ({
   currentUser: { ...mockCurrentUser },
   contacts: copyContacts(mockUserContacts),
+  sessions: copySessions(mockUserSessions),
   tenants: mockTenants.map(t => ({ ...t })),
   tenantMembers: new Map<string, Array<TenantMember>>([
     ['tenant-1', copyMembers(mockTenantMembers)],
@@ -65,6 +70,11 @@ export const setCurrentUserFromOAuth = (data: {
     name: data.name,
     createdAt: new Date().toISOString(),
   }
+}
+
+export const updateCurrentUser = (updates: Partial<User>): User => {
+  db.currentUser = { ...db.currentUser, ...updates }
+  return db.currentUser
 }
 
 export const getContacts = (): ReadonlyArray<Contact> => db.contacts
@@ -110,7 +120,7 @@ export const getTenantMembers = (tenantId: string): ReadonlyArray<TenantMember> 
 export const updateTenantMember = (
   tenantId: string,
   memberId: string,
-  role: 'admin' | 'editor' | 'viewer',
+  role: 'admin' | 'member',
 ): TenantMember | undefined => {
   const members = db.tenantMembers.get(tenantId)
   if (!members) {
@@ -165,4 +175,10 @@ export const removeTenantToken = (tenantId: string, tokenId: string): boolean =>
   }
   db.tenantTokens.set(tenantId, filtered)
   return true
+}
+
+export const getSessions = (): ReadonlyArray<Session> => db.sessions
+
+export const closeOtherSessions = (): void => {
+  db.sessions = db.sessions.filter(s => s.current === true)
 }

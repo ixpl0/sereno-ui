@@ -126,13 +126,17 @@ const focus = () => {
   inputRef.value?.focus()
 }
 
+const select = () => {
+  inputRef.value?.select()
+}
+
 onMounted(() => {
   if (props.autofocus) {
     focus()
   }
 })
 
-defineExpose({ focus })
+defineExpose({ focus, select })
 </script>
 
 <template>

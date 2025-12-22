@@ -1,9 +1,10 @@
 import { client } from '~/api/client.gen'
 import type {
-  UserEmailLoginHandlerRequestBody,
-  UserRequestEmailCodeHandlerRequestBody,
+  UserRequestEmail,
+  UserRequestEmailCode,
+  UserResponseAccessJwt,
 } from '~/api/types.gen'
-import type { ApiResponse, AuthTokenResponse, OAuthRedirectResponse, MessageResponse } from '~/types/api'
+import type { ApiResponse, OAuthRedirectResponse } from '~/types/api'
 import type { OAuthProvider } from '~/types/auth'
 import { useAuthStore } from '~/stores/auth'
 import { getApiData } from '~/utils/api'
@@ -14,28 +15,28 @@ export const useAuth = () => {
   const isAuthenticated = computed(() => store.isAuthenticated)
   const token = computed(() => store.token)
 
-  const requestEmailCode = async (email: string): Promise<ApiResponse<MessageResponse>> => {
-    const body: UserRequestEmailCodeHandlerRequestBody = { email }
+  const requestEmailCode = async (email: string): Promise<ApiResponse<void>> => {
+    const body: UserRequestEmail = { email }
     const response = await client.post({
       url: '/auth/login/email/code',
       body,
     })
-    return response as ApiResponse<MessageResponse>
+    return response as ApiResponse<void>
   }
 
-  const loginWithEmail = async (email: string, code: string): Promise<ApiResponse<AuthTokenResponse>> => {
-    const body: UserEmailLoginHandlerRequestBody = { email, code }
+  const loginWithEmail = async (email: string, code: string): Promise<ApiResponse<UserResponseAccessJwt>> => {
+    const body: UserRequestEmailCode = { email, code }
     const response = await client.post({
       url: '/auth/login/email',
       body,
     })
 
-    const data = getApiData(response as ApiResponse<AuthTokenResponse>)
-    if (data?.access_token) {
-      store.setToken(data.access_token)
+    const data = getApiData(response as ApiResponse<UserResponseAccessJwt>)
+    if (data?.token) {
+      store.setToken(data.token)
     }
 
-    return response as ApiResponse<AuthTokenResponse>
+    return response as ApiResponse<UserResponseAccessJwt>
   }
 
   const logout = async (): Promise<ApiResponse<void>> => {
@@ -48,17 +49,17 @@ export const useAuth = () => {
     return response as ApiResponse<void>
   }
 
-  const refresh = async (): Promise<ApiResponse<AuthTokenResponse>> => {
+  const refresh = async (): Promise<ApiResponse<UserResponseAccessJwt>> => {
     const response = await client.post({
       url: '/auth/refresh',
     })
 
-    const data = getApiData(response as ApiResponse<AuthTokenResponse>)
-    if (data?.access_token) {
-      store.setToken(data.access_token)
+    const data = getApiData(response as ApiResponse<UserResponseAccessJwt>)
+    if (data?.token) {
+      store.setToken(data.token)
     }
 
-    return response as ApiResponse<AuthTokenResponse>
+    return response as ApiResponse<UserResponseAccessJwt>
   }
 
   const getOAuthUrl = async (provider: OAuthProvider): Promise<ApiResponse<OAuthRedirectResponse>> => {
@@ -71,7 +72,7 @@ export const useAuth = () => {
   const handleOAuthCallback = async (
     provider: OAuthProvider,
     params?: Record<string, string>,
-  ): Promise<ApiResponse<AuthTokenResponse>> => {
+  ): Promise<ApiResponse<UserResponseAccessJwt>> => {
     const queryString = params
       ? `?${new URLSearchParams(params).toString()}`
       : ''
@@ -80,12 +81,12 @@ export const useAuth = () => {
       url: `/auth/login/${provider}/callback${queryString}`,
     })
 
-    const data = getApiData(response as ApiResponse<AuthTokenResponse>)
-    if (data?.access_token) {
-      store.setToken(data.access_token)
+    const data = getApiData(response as ApiResponse<UserResponseAccessJwt>)
+    if (data?.token) {
+      store.setToken(data.token)
     }
 
-    return response as ApiResponse<AuthTokenResponse>
+    return response as ApiResponse<UserResponseAccessJwt>
   }
 
   return {

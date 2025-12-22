@@ -4,48 +4,113 @@ export type ClientOptions = {
     baseUrl: 'http://localhost:8080/api/v1' | (string & {});
 };
 
-export type ServerErrorResponse = {
+export type ServerResponseError = {
     error?: string;
     request_id?: string;
 };
 
-export type TenantCreateHandlerRequestBody = {
+export type TenantRequestId = {
+    id: string;
+};
+
+export type TenantRequestIdRole = {
+    id: string;
+    role: 'admin' | 'member';
+};
+
+export type TenantRequestName = {
     name: string;
 };
 
-export type TenantCreateTokenHandlerRequestBody = {
-    name: string;
+export type TenantResponseMember = {
+    id?: string;
+    name?: string;
+    role?: string;
+    since?: number;
 };
 
-export type TenantDeleteMembersHandlerRequestBody = {
-    id: string;
+export type TenantResponseMembersList = {
+    members?: Array<TenantResponseMember>;
 };
 
-export type TenantDeleteTokenHandlerRequestBody = {
-    id: string;
+export type TenantResponseSingleMember = {
+    member?: TenantResponseMember;
 };
 
-export type TenantUpdateMembersHandlerRequestBody = {
-    id: string;
-    role: 'admin' | 'editor' | 'viewer';
+export type TenantResponseSingleTenant = {
+    tenant?: TenantResponseTenant;
 };
 
-export type UserAddContactHandlerRequestBody = {
-    kind: 'email' | 'telegram' | 'phone';
+export type TenantResponseTenant = {
+    id?: string;
+    name?: string;
+    role?: string;
+    since?: number;
+};
+
+export type TenantResponseTenantsList = {
+    tenants?: Array<TenantResponseTenant>;
+};
+
+export type UserRequestCode = {
+    code: string;
+};
+
+export type UserRequestContact = {
+    kind: 'email' | 'telegram';
     value: string;
 };
 
-export type UserEmailLoginHandlerRequestBody = {
+export type UserRequestEmail = {
+    email: string;
+};
+
+export type UserRequestEmailCode = {
     code: string;
     email: string;
 };
 
-export type UserRequestEmailCodeHandlerRequestBody = {
-    email: string;
+export type UserRequestParameter = {
+    kind: 'first_name' | 'last_name' | 'timezone';
+    value: string;
 };
 
-export type UserVerifyContactHandlerRequestBody = {
-    code: string;
+export type UserResponseAccessJwt = {
+    token?: string;
+    type?: string;
+};
+
+export type UserResponseContact = {
+    id?: string;
+    kind?: string;
+    value?: string;
+    verified?: boolean;
+};
+
+export type UserResponseContactsList = {
+    contacts?: Array<UserResponseContact>;
+};
+
+export type UserResponseSession = {
+    current?: boolean;
+    device?: string;
+    id?: string;
+    since?: number;
+};
+
+export type UserResponseSessions = {
+    sessions?: Array<UserResponseSession>;
+};
+
+export type UserResponseSingleContact = {
+    contact?: UserResponseContact;
+};
+
+export type UserResponseUser = {
+    first_name?: string;
+    id?: string;
+    last_name?: string;
+    timezone?: string;
 };
 
 export type GetAuthLoginByProviderData = {
@@ -76,7 +141,7 @@ export type PostAuthLoginEmailData = {
     /**
      * Request JSON
      */
-    body: UserEmailLoginHandlerRequestBody;
+    body: UserRequestEmailCode;
     path?: never;
     query?: never;
     url: '/auth/login/email';
@@ -86,11 +151,11 @@ export type PostAuthLoginEmailErrors = {
     /**
      * Bad Request
      */
-    400: ServerErrorResponse;
+    400: ServerResponseError;
     /**
      * Internal Server Error
      */
-    500: ServerErrorResponse;
+    500: ServerResponseError;
 };
 
 export type PostAuthLoginEmailError = PostAuthLoginEmailErrors[keyof PostAuthLoginEmailErrors];
@@ -99,9 +164,7 @@ export type PostAuthLoginEmailResponses = {
     /**
      * OK
      */
-    200: {
-        [key: string]: string;
-    };
+    200: UserResponseAccessJwt;
 };
 
 export type PostAuthLoginEmailResponse = PostAuthLoginEmailResponses[keyof PostAuthLoginEmailResponses];
@@ -110,7 +173,7 @@ export type PostAuthLoginEmailCodeData = {
     /**
      * Request JSON
      */
-    body: UserRequestEmailCodeHandlerRequestBody;
+    body: UserRequestEmail;
     path?: never;
     query?: never;
     url: '/auth/login/email/code';
@@ -120,25 +183,21 @@ export type PostAuthLoginEmailCodeErrors = {
     /**
      * Bad Request
      */
-    400: ServerErrorResponse;
+    400: ServerResponseError;
     /**
      * Internal Server Error
      */
-    500: ServerErrorResponse;
+    500: ServerResponseError;
 };
 
 export type PostAuthLoginEmailCodeError = PostAuthLoginEmailCodeErrors[keyof PostAuthLoginEmailCodeErrors];
 
 export type PostAuthLoginEmailCodeResponses = {
     /**
-     * Created
+     * No Content
      */
-    201: {
-        [key: string]: string;
-    };
+    204: unknown;
 };
-
-export type PostAuthLoginEmailCodeResponse = PostAuthLoginEmailCodeResponses[keyof PostAuthLoginEmailCodeResponses];
 
 export type PostAuthLogoutData = {
     body?: never;
@@ -151,11 +210,11 @@ export type PostAuthLogoutErrors = {
     /**
      * Unauthorized
      */
-    401: ServerErrorResponse;
+    401: ServerResponseError;
     /**
      * Internal Server Error
      */
-    500: ServerErrorResponse;
+    500: ServerResponseError;
 };
 
 export type PostAuthLogoutError = PostAuthLogoutErrors[keyof PostAuthLogoutErrors];
@@ -178,11 +237,11 @@ export type PostAuthRefreshErrors = {
     /**
      * Unauthorized
      */
-    401: ServerErrorResponse;
+    401: ServerResponseError;
     /**
      * Internal Server Error
      */
-    500: ServerErrorResponse;
+    500: ServerResponseError;
 };
 
 export type PostAuthRefreshError = PostAuthRefreshErrors[keyof PostAuthRefreshErrors];
@@ -191,9 +250,7 @@ export type PostAuthRefreshResponses = {
     /**
      * OK
      */
-    200: {
-        [key: string]: string;
-    };
+    200: UserResponseAccessJwt;
 };
 
 export type PostAuthRefreshResponse = PostAuthRefreshResponses[keyof PostAuthRefreshResponses];
@@ -209,11 +266,11 @@ export type GetTenantsErrors = {
     /**
      * Unauthorized
      */
-    401: ServerErrorResponse;
+    401: ServerResponseError;
     /**
      * Internal Server Error
      */
-    500: ServerErrorResponse;
+    500: ServerResponseError;
 };
 
 export type GetTenantsError = GetTenantsErrors[keyof GetTenantsErrors];
@@ -222,61 +279,10 @@ export type GetTenantsResponses = {
     /**
      * OK
      */
-    200: {
-        [key: string]: string;
-    };
+    200: TenantResponseTenantsList;
 };
 
 export type GetTenantsResponse = GetTenantsResponses[keyof GetTenantsResponses];
-
-export type GetTenantsByIdData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/tenants/{id}';
-};
-
-export type GetTenantsByIdErrors = {
-    /**
-     * Bad Request
-     */
-    400: ServerErrorResponse;
-    /**
-     * Unauthorized
-     */
-    401: ServerErrorResponse;
-    /**
-     * Internal Server Error
-     */
-    500: ServerErrorResponse;
-};
-
-export type GetTenantsByIdError = GetTenantsByIdErrors[keyof GetTenantsByIdErrors];
-
-export type GetTenantsByIdResponses = {
-    /**
-     * OK
-     */
-    200: {
-        [key: string]: string;
-    };
-};
-
-export type GetTenantsByIdResponse = GetTenantsByIdResponses[keyof GetTenantsByIdResponses];
-
-export type PostTenantsByIdDeleteData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/tenants/{id}/delete';
-};
-
-export type PostTenantsByIdDeleteErrors = {
-    /**
-     * Not Implemented
-     */
-    501: unknown;
-};
 
 export type GetTenantsByIdMembersData = {
     body?: never;
@@ -289,15 +295,15 @@ export type GetTenantsByIdMembersErrors = {
     /**
      * Bad Request
      */
-    400: ServerErrorResponse;
+    400: ServerResponseError;
     /**
      * Unauthorized
      */
-    401: ServerErrorResponse;
+    401: ServerResponseError;
     /**
      * Internal Server Error
      */
-    500: ServerErrorResponse;
+    500: ServerResponseError;
 };
 
 export type GetTenantsByIdMembersError = GetTenantsByIdMembersErrors[keyof GetTenantsByIdMembersErrors];
@@ -306,9 +312,7 @@ export type GetTenantsByIdMembersResponses = {
     /**
      * OK
      */
-    200: {
-        [key: string]: string;
-    };
+    200: TenantResponseMembersList;
 };
 
 export type GetTenantsByIdMembersResponse = GetTenantsByIdMembersResponses[keyof GetTenantsByIdMembersResponses];
@@ -317,7 +321,7 @@ export type PostTenantsByIdMembersDeleteData = {
     /**
      * Request JSON
      */
-    body: TenantDeleteMembersHandlerRequestBody;
+    body: TenantRequestId;
     path: {
         /**
          * Tenant ID
@@ -332,35 +336,31 @@ export type PostTenantsByIdMembersDeleteErrors = {
     /**
      * Bad Request
      */
-    400: ServerErrorResponse;
+    400: ServerResponseError;
     /**
      * Unauthorized
      */
-    401: ServerErrorResponse;
+    401: ServerResponseError;
     /**
      * Internal Server Error
      */
-    500: ServerErrorResponse;
+    500: ServerResponseError;
 };
 
 export type PostTenantsByIdMembersDeleteError = PostTenantsByIdMembersDeleteErrors[keyof PostTenantsByIdMembersDeleteErrors];
 
 export type PostTenantsByIdMembersDeleteResponses = {
     /**
-     * OK
+     * No Content
      */
-    200: {
-        [key: string]: string;
-    };
+    204: unknown;
 };
-
-export type PostTenantsByIdMembersDeleteResponse = PostTenantsByIdMembersDeleteResponses[keyof PostTenantsByIdMembersDeleteResponses];
 
 export type PostTenantsByIdMembersUpdateData = {
     /**
      * Request JSON
      */
-    body: TenantUpdateMembersHandlerRequestBody;
+    body: TenantRequestIdRole;
     path: {
         /**
          * Tenant ID
@@ -375,15 +375,15 @@ export type PostTenantsByIdMembersUpdateErrors = {
     /**
      * Bad Request
      */
-    400: ServerErrorResponse;
+    400: ServerResponseError;
     /**
      * Unauthorized
      */
-    401: ServerErrorResponse;
+    401: ServerResponseError;
     /**
      * Internal Server Error
      */
-    500: ServerErrorResponse;
+    500: ServerResponseError;
 };
 
 export type PostTenantsByIdMembersUpdateError = PostTenantsByIdMembersUpdateErrors[keyof PostTenantsByIdMembersUpdateErrors];
@@ -392,9 +392,7 @@ export type PostTenantsByIdMembersUpdateResponses = {
     /**
      * OK
      */
-    200: {
-        [key: string]: string;
-    };
+    200: TenantResponseSingleMember;
 };
 
 export type PostTenantsByIdMembersUpdateResponse = PostTenantsByIdMembersUpdateResponses[keyof PostTenantsByIdMembersUpdateResponses];
@@ -410,15 +408,15 @@ export type GetTenantsByIdTokensErrors = {
     /**
      * Bad Request
      */
-    400: ServerErrorResponse;
+    400: ServerResponseError;
     /**
      * Unauthorized
      */
-    401: ServerErrorResponse;
+    401: ServerResponseError;
     /**
      * Internal Server Error
      */
-    500: ServerErrorResponse;
+    500: ServerResponseError;
 };
 
 export type GetTenantsByIdTokensError = GetTenantsByIdTokensErrors[keyof GetTenantsByIdTokensErrors];
@@ -438,7 +436,7 @@ export type PostTenantsByIdTokensCreateData = {
     /**
      * Request JSON
      */
-    body: TenantCreateTokenHandlerRequestBody;
+    body: TenantRequestName;
     path: {
         /**
          * Tenant ID
@@ -453,15 +451,15 @@ export type PostTenantsByIdTokensCreateErrors = {
     /**
      * Bad Request
      */
-    400: ServerErrorResponse;
+    400: ServerResponseError;
     /**
      * Unauthorized
      */
-    401: ServerErrorResponse;
+    401: ServerResponseError;
     /**
      * Internal Server Error
      */
-    500: ServerErrorResponse;
+    500: ServerResponseError;
 };
 
 export type PostTenantsByIdTokensCreateError = PostTenantsByIdTokensCreateErrors[keyof PostTenantsByIdTokensCreateErrors];
@@ -481,7 +479,7 @@ export type PostTenantsByIdTokensDeleteData = {
     /**
      * Request JSON
      */
-    body: TenantDeleteTokenHandlerRequestBody;
+    body: TenantRequestId;
     path: {
         /**
          * Tenant ID
@@ -496,11 +494,11 @@ export type PostTenantsByIdTokensDeleteErrors = {
     /**
      * Bad Request
      */
-    400: ServerErrorResponse;
+    400: ServerResponseError;
     /**
      * Unauthorized
      */
-    401: ServerErrorResponse;
+    401: ServerResponseError;
 };
 
 export type PostTenantsByIdTokensDeleteError = PostTenantsByIdTokensDeleteErrors[keyof PostTenantsByIdTokensDeleteErrors];
@@ -517,7 +515,10 @@ export type PostTenantsByIdTokensDeleteResponses = {
 export type PostTenantsByIdTokensDeleteResponse = PostTenantsByIdTokensDeleteResponses[keyof PostTenantsByIdTokensDeleteResponses];
 
 export type PostTenantsByIdUpdateData = {
-    body?: never;
+    /**
+     * Request JSON
+     */
+    body: TenantRequestName;
     path?: never;
     query?: never;
     url: '/tenants/{id}/update';
@@ -525,16 +526,35 @@ export type PostTenantsByIdUpdateData = {
 
 export type PostTenantsByIdUpdateErrors = {
     /**
-     * Not Implemented
+     * Bad Request
      */
-    501: unknown;
+    400: ServerResponseError;
+    /**
+     * Unauthorized
+     */
+    401: ServerResponseError;
+    /**
+     * Internal Server Error
+     */
+    500: ServerResponseError;
 };
+
+export type PostTenantsByIdUpdateError = PostTenantsByIdUpdateErrors[keyof PostTenantsByIdUpdateErrors];
+
+export type PostTenantsByIdUpdateResponses = {
+    /**
+     * Created
+     */
+    201: TenantResponseSingleTenant;
+};
+
+export type PostTenantsByIdUpdateResponse = PostTenantsByIdUpdateResponses[keyof PostTenantsByIdUpdateResponses];
 
 export type PostTenantsCreateData = {
     /**
      * Request JSON
      */
-    body: TenantCreateHandlerRequestBody;
+    body: TenantRequestName;
     path?: never;
     query?: never;
     url: '/tenants/create';
@@ -544,15 +564,15 @@ export type PostTenantsCreateErrors = {
     /**
      * Bad Request
      */
-    400: ServerErrorResponse;
+    400: ServerResponseError;
     /**
      * Unauthorized
      */
-    401: ServerErrorResponse;
+    401: ServerResponseError;
     /**
      * Internal Server Error
      */
-    500: ServerErrorResponse;
+    500: ServerResponseError;
 };
 
 export type PostTenantsCreateError = PostTenantsCreateErrors[keyof PostTenantsCreateErrors];
@@ -561,9 +581,7 @@ export type PostTenantsCreateResponses = {
     /**
      * Created
      */
-    201: {
-        [key: string]: string;
-    };
+    201: TenantResponseSingleTenant;
 };
 
 export type PostTenantsCreateResponse = PostTenantsCreateResponses[keyof PostTenantsCreateResponses];
@@ -579,15 +597,15 @@ export type GetUserErrors = {
     /**
      * Bad Request
      */
-    400: ServerErrorResponse;
+    400: ServerResponseError;
     /**
      * Unauthorized
      */
-    401: ServerErrorResponse;
+    401: ServerResponseError;
     /**
      * Internal Server Error
      */
-    500: ServerErrorResponse;
+    500: ServerResponseError;
 };
 
 export type GetUserError = GetUserErrors[keyof GetUserErrors];
@@ -596,9 +614,7 @@ export type GetUserResponses = {
     /**
      * OK
      */
-    200: {
-        [key: string]: string;
-    };
+    200: UserResponseUser;
 };
 
 export type GetUserResponse = GetUserResponses[keyof GetUserResponses];
@@ -614,11 +630,11 @@ export type GetUserContactsErrors = {
     /**
      * Unauthorized
      */
-    401: ServerErrorResponse;
+    401: ServerResponseError;
     /**
      * Internal Server Error
      */
-    500: ServerErrorResponse;
+    500: ServerResponseError;
 };
 
 export type GetUserContactsError = GetUserContactsErrors[keyof GetUserContactsErrors];
@@ -627,9 +643,7 @@ export type GetUserContactsResponses = {
     /**
      * OK
      */
-    200: {
-        [key: string]: string;
-    };
+    200: UserResponseContactsList;
 };
 
 export type GetUserContactsResponse = GetUserContactsResponses[keyof GetUserContactsResponses];
@@ -650,15 +664,15 @@ export type PostUserContactsByIdDeleteErrors = {
     /**
      * Bad Request
      */
-    400: ServerErrorResponse;
+    400: ServerResponseError;
     /**
      * Unauthorized
      */
-    401: ServerErrorResponse;
+    401: ServerResponseError;
     /**
      * Internal Server Error
      */
-    500: ServerErrorResponse;
+    500: ServerResponseError;
 };
 
 export type PostUserContactsByIdDeleteError = PostUserContactsByIdDeleteErrors[keyof PostUserContactsByIdDeleteErrors];
@@ -674,7 +688,7 @@ export type PostUserContactsByIdVerifyData = {
     /**
      * Request JSON
      */
-    body: UserVerifyContactHandlerRequestBody;
+    body: UserRequestCode;
     path: {
         /**
          * Contact ID
@@ -689,15 +703,15 @@ export type PostUserContactsByIdVerifyErrors = {
     /**
      * Bad Request
      */
-    400: ServerErrorResponse;
+    400: ServerResponseError;
     /**
      * Unauthorized
      */
-    401: ServerErrorResponse;
+    401: ServerResponseError;
     /**
      * Internal Server Error
      */
-    500: ServerErrorResponse;
+    500: ServerResponseError;
 };
 
 export type PostUserContactsByIdVerifyError = PostUserContactsByIdVerifyErrors[keyof PostUserContactsByIdVerifyErrors];
@@ -706,9 +720,7 @@ export type PostUserContactsByIdVerifyResponses = {
     /**
      * OK
      */
-    200: {
-        [key: string]: string;
-    };
+    200: UserResponseSingleContact;
 };
 
 export type PostUserContactsByIdVerifyResponse = PostUserContactsByIdVerifyResponses[keyof PostUserContactsByIdVerifyResponses];
@@ -717,7 +729,7 @@ export type PostUserContactsAddData = {
     /**
      * Request JSON
      */
-    body: UserAddContactHandlerRequestBody;
+    body: UserRequestContact;
     path?: never;
     query?: never;
     url: '/user/contacts/add';
@@ -727,32 +739,89 @@ export type PostUserContactsAddErrors = {
     /**
      * Bad Request
      */
-    400: ServerErrorResponse;
+    400: ServerResponseError;
     /**
      * Unauthorized
      */
-    401: ServerErrorResponse;
+    401: ServerResponseError;
     /**
      * Internal Server Error
      */
-    500: ServerErrorResponse;
+    500: ServerResponseError;
 };
 
 export type PostUserContactsAddError = PostUserContactsAddErrors[keyof PostUserContactsAddErrors];
 
 export type PostUserContactsAddResponses = {
     /**
-     * OK
+     * Created
      */
-    200: {
-        [key: string]: string;
-    };
+    201: UserResponseSingleContact;
 };
 
 export type PostUserContactsAddResponse = PostUserContactsAddResponses[keyof PostUserContactsAddResponses];
 
-export type PostUserUpdateData = {
+export type GetUserSessionsData = {
     body?: never;
+    path?: never;
+    query?: never;
+    url: '/user/sessions';
+};
+
+export type GetUserSessionsErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ServerResponseError;
+    /**
+     * Internal Server Error
+     */
+    500: ServerResponseError;
+};
+
+export type GetUserSessionsError = GetUserSessionsErrors[keyof GetUserSessionsErrors];
+
+export type GetUserSessionsResponses = {
+    /**
+     * OK
+     */
+    200: UserResponseSessions;
+};
+
+export type GetUserSessionsResponse = GetUserSessionsResponses[keyof GetUserSessionsResponses];
+
+export type PostUserSessionsCloseData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/user/sessions/close';
+};
+
+export type PostUserSessionsCloseErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ServerResponseError;
+    /**
+     * Internal Server Error
+     */
+    500: ServerResponseError;
+};
+
+export type PostUserSessionsCloseError = PostUserSessionsCloseErrors[keyof PostUserSessionsCloseErrors];
+
+export type PostUserSessionsCloseResponses = {
+    /**
+     * No Content
+     */
+    204: unknown;
+};
+
+export type PostUserUpdateData = {
+    /**
+     * Request JSON
+     */
+    body: UserRequestParameter;
     path?: never;
     query?: never;
     url: '/user/update';
@@ -762,15 +831,15 @@ export type PostUserUpdateErrors = {
     /**
      * Bad Request
      */
-    400: ServerErrorResponse;
+    400: ServerResponseError;
     /**
      * Unauthorized
      */
-    401: ServerErrorResponse;
+    401: ServerResponseError;
     /**
      * Internal Server Error
      */
-    500: ServerErrorResponse;
+    500: ServerResponseError;
 };
 
 export type PostUserUpdateError = PostUserUpdateErrors[keyof PostUserUpdateErrors];
@@ -779,9 +848,7 @@ export type PostUserUpdateResponses = {
     /**
      * OK
      */
-    200: {
-        [key: string]: string;
-    };
+    200: UserResponseUser;
 };
 
 export type PostUserUpdateResponse = PostUserUpdateResponses[keyof PostUserUpdateResponses];

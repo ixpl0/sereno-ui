@@ -1,8 +1,8 @@
 import { http, HttpResponse } from 'msw'
 import type {
-  TenantCreateHandlerRequestBody,
-  TenantUpdateMembersHandlerRequestBody,
-  TenantDeleteMembersHandlerRequestBody,
+  TenantRequestName,
+  TenantRequestIdRole,
+  TenantRequestId,
 } from '~/api/types.gen'
 import { withDelay } from '~/mocks/utils/delay'
 import { createErrorResponse } from '~/mocks/utils/error'
@@ -50,7 +50,7 @@ export const tenantsHandlers = [
     },
   ),
 
-  http.post<never, TenantCreateHandlerRequestBody>(
+  http.post<never, TenantRequestName>(
     `${BASE_URL}/tenants/create`,
     async ({ request }) => {
       await withDelay('realistic')
@@ -114,7 +114,7 @@ export const tenantsHandlers = [
     },
   ),
 
-  http.post<{ id: string }, TenantUpdateMembersHandlerRequestBody>(
+  http.post<{ id: string }, TenantRequestIdRole>(
     `${BASE_URL}/tenants/:id/members/update`,
     async ({ params, request }) => {
       await withDelay('realistic')
@@ -145,7 +145,7 @@ export const tenantsHandlers = [
     },
   ),
 
-  http.post<{ id: string }, TenantDeleteMembersHandlerRequestBody>(
+  http.post<{ id: string }, TenantRequestId>(
     `${BASE_URL}/tenants/:id/members/delete`,
     async ({ params, request }) => {
       await withDelay('realistic')

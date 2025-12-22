@@ -2,12 +2,15 @@ export interface User {
   id: string
   email: string
   name: string
+  firstName?: string
+  lastName?: string
+  timezone?: string
   createdAt: string
 }
 
 export interface Contact {
   id: string
-  kind: 'email' | 'telegram' | 'phone'
+  kind: 'email' | 'telegram'
   value: string
   verified: boolean
   createdAt: string
@@ -16,7 +19,7 @@ export interface Contact {
 export interface Tenant {
   id: string
   name: string
-  role: 'admin' | 'editor' | 'viewer'
+  role: 'admin' | 'member'
   createdAt: string
 }
 
@@ -25,7 +28,7 @@ export interface TenantMember {
   userId: string
   email: string
   name: string
-  role: 'admin' | 'editor' | 'viewer'
+  role: 'admin' | 'member'
 }
 
 export interface TenantToken {
@@ -33,4 +36,11 @@ export interface TenantToken {
   name: string
   token: string
   createdAt: string
+}
+
+export interface Session {
+  id: string
+  device: string
+  since: number
+  current: boolean
 }
