@@ -26,7 +26,7 @@ const maskedToken = computed(() => {
 
 <template>
   <main class="min-h-screen p-8">
-    <div class="max-w-4xl mx-auto">
+    <div class="max-w-3xl mx-auto">
       <header class="flex justify-between items-center mb-8 animate-fade-in">
         <h1 class="text-3xl font-bold">
           Dashboard

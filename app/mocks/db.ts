@@ -120,7 +120,7 @@ export const getTenantMembers = (tenantId: string): ReadonlyArray<TenantMember> 
 export const updateTenantMember = (
   tenantId: string,
   memberId: string,
-  role: 'admin' | 'member',
+  admin: boolean,
 ): TenantMember | undefined => {
   const members = db.tenantMembers.get(tenantId)
   if (!members) {
@@ -134,7 +134,7 @@ export const updateTenantMember = (
   if (!existingMember) {
     return undefined
   }
-  const updated: TenantMember = { ...existingMember, role }
+  const updated: TenantMember = { ...existingMember, admin }
   db.tenantMembers.set(tenantId, [
     ...members.slice(0, index),
     updated,

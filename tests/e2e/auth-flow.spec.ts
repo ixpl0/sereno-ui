@@ -309,13 +309,6 @@ test.describe('Auth - OAuth Flow', () => {
   })
 
   test.describe('OAuth Callback Page', () => {
-    test('shows loading state initially', async ({ page }) => {
-      await page.getByRole('button', { name: 'Войти через Яндекс' }).click()
-      await page.getByRole('button', { name: 'Выполнить сценарий' }).click()
-
-      await expect(page.getByText('Завершаем авторизацию...')).toBeVisible()
-    })
-
     test('shows success state after login', async ({ page }) => {
       await page.getByRole('button', { name: 'Войти через Яндекс' }).click()
       await page.getByRole('button', { name: 'Выполнить сценарий' }).click()

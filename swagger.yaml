@@ -1,6 +1,4 @@
 basePath: /api/v1
-schemes:
-  - http
 definitions:
   server.ResponseError:
     properties:
@@ -18,20 +16,17 @@ definitions:
     required:
     - id
     type: object
-  tenant.RequestIDRole:
+  tenant.RequestMember:
     properties:
+      admin:
+        description: TODO Как валидировать ?
+        example: true
+        type: boolean
       id:
         example: 00112233-4455-6677-8899-aabbccddeeff
         type: string
-      role:
-        enum:
-        - admin
-        - member
-        example: admin
-        type: string
     required:
     - id
-    - role
     type: object
   tenant.RequestName:
     properties:
@@ -45,14 +40,14 @@ definitions:
     type: object
   tenant.ResponseMember:
     properties:
+      admin:
+        example: true
+        type: boolean
       id:
         example: 00112233-4455-6677-8899-aabbccddeeff
         type: string
       name:
         example: Ivan Ivanov
-        type: string
-      role:
-        example: admin
         type: string
       since:
         example: 1766412596
@@ -77,14 +72,14 @@ definitions:
     type: object
   tenant.ResponseTenant:
     properties:
+      admin:
+        example: true
+        type: boolean
       id:
         example: 00112233-4455-6677-8899-aabbccddeeff
         type: string
       name:
         example: My first tenant
-        type: string
-      role:
-        example: admin
         type: string
       since:
         example: 1766412596
@@ -147,6 +142,7 @@ definitions:
         - first_name
         - last_name
         - timezone
+        - language
         example: first_name
         type: string
       value:
@@ -480,7 +476,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/tenant.RequestIDRole'
+          $ref: '#/definitions/tenant.RequestMember'
       produces:
       - application/json
       responses:

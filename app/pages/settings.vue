@@ -24,13 +24,13 @@ const otherSessions = computed(() =>
   sessionsData.value?.sessions?.filter(s => s.current !== true) ?? [],
 )
 
-const { updateFirstName, updateLastName, updateTimezone } = useUser()
+const { updateFirstName, updateLastName, updateTimezone, updateLanguage } = useUser()
 const { closeAllSessions } = useSessions()
 const { logout } = useAuth()
 const router = useRouter()
 const toast = useToast()
 
-const isEditing = ref<'first_name' | 'last_name' | 'timezone' | null>(null)
+const isEditing = ref<'first_name' | 'last_name' | 'timezone' | 'language' | null>(null)
 const editValue = ref('')
 const editInputRef = ref<{ focus: () => void, select: () => void } | null>(null)
 const editSelectRef = ref<HTMLSelectElement | null>(null)
@@ -45,7 +45,12 @@ const timezones = [
   'Asia/Shanghai',
 ]
 
-const startEdit = (field: 'first_name' | 'last_name' | 'timezone') => {
+const languages = [
+  { code: 'ru', label: 'Русский' },
+  { code: 'en', label: 'English' },
+]
+
+const startEdit = (field: 'first_name' | 'last_name' | 'timezone' | 'language') => {
   isEditing.value = field
   if (field === 'first_name') {
     editValue.value = user.value?.first_name ?? ''
@@ -53,12 +58,15 @@ const startEdit = (field: 'first_name' | 'last_name' | 'timezone') => {
   else if (field === 'last_name') {
     editValue.value = user.value?.last_name ?? ''
   }
-  else {
+  else if (field === 'timezone') {
     editValue.value = user.value?.timezone ?? 'Europe/Moscow'
+  }
+  else {
+    editValue.value = (user.value as { language?: string } | null)?.language ?? 'ru'
   }
 
   nextTick(() => {
-    if (field === 'timezone') {
+    if (field === 'timezone' || field === 'language') {
       editSelectRef.value?.focus()
     }
     else if (editInputRef.value) {
@@ -84,8 +92,11 @@ const saveEdit = async () => {
   else if (isEditing.value === 'last_name') {
     await updateLastName(editValue.value)
   }
-  else {
+  else if (isEditing.value === 'timezone') {
     await updateTimezone(editValue.value)
+  }
+  else {
+    await updateLanguage(editValue.value)
   }
 
   await refreshUser()
@@ -137,6 +148,11 @@ const formatDate = (timestamp: number | undefined): string => {
     year: 'numeric',
   })
 }
+
+const currentLanguageLabel = computed(() => {
+  const code = (user.value as { language?: string } | null)?.language ?? 'ru'
+  return languages.find(l => l.code === code)?.label ?? 'Русский'
+})
 </script>
 
 <template>
@@ -311,6 +327,64 @@ const formatDate = (timestamp: number | undefined): string => {
                 variant="ghost"
                 size="sm"
                 @click="startEdit('timezone')"
+              >
+                Изменить
+              </UiButton>
+            </div>
+            <div
+              v-else
+              class="flex gap-2"
+            >
+              <UiButton
+                variant="primary"
+                size="sm"
+                @click="saveEdit"
+              >
+                Сохранить
+              </UiButton>
+              <UiButton
+                variant="ghost"
+                size="sm"
+                @click="cancelEdit"
+              >
+                Отмена
+              </UiButton>
+            </div>
+          </div>
+
+          <div class="divider my-2" />
+
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-sm text-base-content/60">
+                Язык
+              </div>
+              <div
+                v-if="isEditing !== 'language'"
+                class="font-medium"
+              >
+                {{ currentLanguageLabel }}
+              </div>
+              <select
+                v-else
+                ref="editSelectRef"
+                v-model="editValue"
+                class="select select-bordered mt-1"
+              >
+                <option
+                  v-for="lang in languages"
+                  :key="lang.code"
+                  :value="lang.code"
+                >
+                  {{ lang.label }}
+                </option>
+              </select>
+            </div>
+            <div v-if="isEditing !== 'language'">
+              <UiButton
+                variant="ghost"
+                size="sm"
+                @click="startEdit('language')"
               >
                 Изменить
               </UiButton>

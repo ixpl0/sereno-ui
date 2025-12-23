@@ -59,7 +59,7 @@ describe('UiPinInput', () => {
         props: { length: 8 },
         global: globalConfig,
       })
-      const separators = wrapper.findAll('.w-3.h-0\\.5')
+      const separators = wrapper.findAll('.bg-base-content\\/30')
       expect(separators.length).toBe(1)
     })
 
@@ -68,7 +68,7 @@ describe('UiPinInput', () => {
         props: { length: 6, groupSize: 3 },
         global: globalConfig,
       })
-      const separators = wrapper.findAll('.w-3.h-0\\.5')
+      const separators = wrapper.findAll('.bg-base-content\\/30')
       expect(separators.length).toBe(1)
     })
 
@@ -77,7 +77,7 @@ describe('UiPinInput', () => {
         props: { length: 9, groupSize: 3 },
         global: globalConfig,
       })
-      const separators = wrapper.findAll('.w-3.h-0\\.5')
+      const separators = wrapper.findAll('.bg-base-content\\/30')
       expect(separators.length).toBe(2)
     })
   })

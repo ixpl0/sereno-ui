@@ -15,7 +15,7 @@ export const createTenant = (overrides: TenantOverrides = {}): Tenant => {
   return {
     id,
     name: `Tenant ${tenantIdCounter}`,
-    role: 'admin',
+    admin: true,
     createdAt: new Date().toISOString(),
     ...overrides,
   }
@@ -30,7 +30,7 @@ export const createTenantMember = (overrides: MemberOverrides = {}): TenantMembe
     userId: `user-${memberIdCounter}`,
     email: `member${memberIdCounter}@example.com`,
     name: `Member ${memberIdCounter}`,
-    role: 'member',
+    admin: false,
     ...overrides,
   }
 }

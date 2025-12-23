@@ -75,6 +75,7 @@ tests/
 - API client generated from `swagger.yaml` to `app/api/`
 - Run `pnpm generate:api` after updating swagger
 - Generated directory excluded from ESLint
+- **IMPORTANT**: `swagger.yaml` is read-only and provided by backend team. Do not edit it manually.
 
 ## UI Components
 

@@ -1,7 +1,7 @@
 import { http, HttpResponse } from 'msw'
 import type {
   TenantRequestName,
-  TenantRequestIdRole,
+  TenantRequestMember,
   TenantRequestId,
 } from '~/api/types.gen'
 import { withDelay } from '~/mocks/utils/delay'
@@ -65,7 +65,7 @@ export const tenantsHandlers = [
         return createErrorResponse('badRequest', 'Name must be 1-64 characters')
       }
 
-      const newTenant = createTenant({ name: body.name, role: 'admin' })
+      const newTenant = createTenant({ name: body.name, admin: true })
       addTenant(newTenant)
 
       return HttpResponse.json({ tenant: newTenant }, { status: 201 })
@@ -114,7 +114,7 @@ export const tenantsHandlers = [
     },
   ),
 
-  http.post<{ id: string }, TenantRequestIdRole>(
+  http.post<{ id: string }, TenantRequestMember>(
     `${BASE_URL}/tenants/:id/members/update`,
     async ({ params, request }) => {
       await withDelay('realistic')
@@ -131,11 +131,11 @@ export const tenantsHandlers = [
 
       const body = await request.json()
 
-      if (!body.id || !body.role) {
-        return createErrorResponse('badRequest', 'Member ID and role are required')
+      if (!body.id || body.admin === undefined) {
+        return createErrorResponse('badRequest', 'Member ID and admin flag are required')
       }
 
-      const updated = updateTenantMember(params.id, body.id, body.role)
+      const updated = updateTenantMember(params.id, body.id, body.admin)
 
       if (!updated) {
         return createErrorResponse('notFound', 'Member not found')

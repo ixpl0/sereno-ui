@@ -11,12 +11,16 @@ export const extractApiError = (response: ApiErrorResponse, fallback: string): s
     return error
   }
 
-  if (error.message) {
-    return error.message
+  if (!error) {
+    return fallback
   }
 
   if (error.error) {
-    return error.error
+    return String(error.error)
+  }
+
+  if (error.message) {
+    return error.message
   }
 
   return fallback

@@ -61,6 +61,7 @@ export const useUser = () => {
   const updateFirstName = (value: string) => updateUserParameter('first_name', value)
   const updateLastName = (value: string) => updateUserParameter('last_name', value)
   const updateTimezone = (value: string) => updateUserParameter('timezone', value)
+  const updateLanguage = (value: string) => updateUserParameter('language', value)
 
   return {
     user: readonly(user),
@@ -70,5 +71,6 @@ export const useUser = () => {
     updateFirstName,
     updateLastName,
     updateTimezone,
+    updateLanguage,
   }
 }

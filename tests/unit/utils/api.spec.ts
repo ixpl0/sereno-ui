@@ -55,8 +55,8 @@ describe('extractApiError', () => {
     expect(extractApiError(response, 'fallback')).toBe('404')
   })
 
-  it('returns fallback when error object has no error field', () => {
-    const response = { error: { message: 'Some message' } } as unknown as ApiErrorResponse
+  it('returns fallback when error object has no error or message field', () => {
+    const response = { error: { code: 500 } } as unknown as ApiErrorResponse
     expect(extractApiError(response, 'fallback')).toBe('fallback')
   })
 

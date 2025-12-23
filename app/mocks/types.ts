@@ -19,7 +19,7 @@ export interface Contact {
 export interface Tenant {
   id: string
   name: string
-  role: 'admin' | 'member'
+  admin: boolean
   createdAt: string
 }
 
@@ -28,7 +28,7 @@ export interface TenantMember {
   userId: string
   email: string
   name: string
-  role: 'admin' | 'member'
+  admin: boolean
 }
 
 export interface TenantToken {
