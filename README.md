@@ -7,7 +7,7 @@ Frontend for Sereno platform built with Nuxt 4.
 ## Features
 
 - **SSR** — full server-side rendering, cookie-based auth
-- **Mock API** — run UI on mocks without real backend (MSW)
+- **Mock API** — run UI on mocks without real backend (Nuxt server routes)
 - **API Generation** — typed API client from swagger.yaml (@hey-api/openapi-ts)
 - **E2E Tests** — Playwright tests for auth flows
 - **UI Components** — reusable components with animations

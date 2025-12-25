@@ -1,6 +1,6 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to AI agents when working with code in this repository.
 
 ## Commands
 
@@ -31,7 +31,7 @@ pnpm test:unit:coverage # Run Vitest with coverage
 - **State**: Pinia (SSR-compatible)
 - **Styling**: Tailwind CSS 4 (@tailwindcss/vite) + DaisyUI 5
 - **API Client**: @hey-api/openapi-ts (generated from swagger.yaml)
-- **Mocking**: MSW (Mock Service Worker)
+- **Mocking**: Nuxt server routes (server/api/)
 - **Icons**: @nuxt/icon
 - **Testing**: Vitest (unit) + Playwright (e2e)
 - **Deployment**: Vercel (auto-deploy)
@@ -47,12 +47,14 @@ app/
 ├── composables/      # Vue composables (useAuth, etc.)
 ├── layouts/          # Nuxt layouts (default, auth)
 ├── middleware/       # Route middleware (auth, guest)
-├── mocks/            # MSW mock handlers and data
 ├── pages/            # Nuxt pages (file-based routing)
 ├── stores/           # Pinia stores
 ├── types/            # TypeScript types
 ├── utils/            # Utility functions
 └── app.vue           # Root component
+server/
+├── api/v1/           # Mock API routes (used when mockApi=true)
+└── utils/            # Mock data and helpers
 stories/              # Storybook stories
 tests/
 ├── unit/             # Vitest unit tests
@@ -67,7 +69,9 @@ tests/
 - Route middleware runs on server
 
 ### Mock API
-- Run `pnpm dev:mock` to use MSW mocks instead of real API
+- Run `pnpm dev:mock` to use mock API instead of real backend
+- Mocks implemented as Nuxt server routes in `server/api/v1/`
+- Mock data stored in memory (`server/utils/mockData.ts`)
 - OAuth mock with multiple providers (Yandex, VK, Keycloak)
 - Supports scenarios: success, cancel, error, timeout
 
@@ -83,6 +87,7 @@ All reusable UI elements in `app/components/ui/` with `Ui` prefix:
 
 - **UiButton** - Buttons with variants (primary, secondary, ghost, etc.)
 - **UiInput** - Text inputs with labels, validation states, autofocus
+- **UiSelect** - Select dropdowns with consistent styling and focus effects
 - **UiPinInput** - PIN/OTP code input with grouping and auto-focus
 - **UiCard** - Cards with header/footer slots
 - **UiTransition** - Transition wrapper with presets (fade, scale, slide)
