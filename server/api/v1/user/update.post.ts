@@ -1,7 +1,7 @@
 import { updateMockUser, isValidToken } from '../../../utils/mockData'
 
 interface UpdateBody {
-  kind: 'first_name' | 'last_name' | 'timezone'
+  kind: 'first_name' | 'last_name' | 'timezone' | 'language'
   value: string
 }
 
@@ -37,6 +37,9 @@ export default defineEventHandler(async (event) => {
   else if (body.kind === 'timezone') {
     updates.timezone = body.value
   }
+  else if (body.kind === 'language') {
+    updates.language = body.value
+  }
   else {
     throw createError({
       statusCode: 400,
@@ -52,5 +55,6 @@ export default defineEventHandler(async (event) => {
     first_name: user.firstName,
     last_name: user.lastName,
     timezone: user.timezone,
+    language: user.language,
   }
 })

@@ -3,6 +3,7 @@ export interface User {
   firstName: string
   lastName: string
   timezone: string
+  language: string
 }
 
 export interface Session {
@@ -20,9 +21,10 @@ interface MockState {
 const defaultState: MockState = {
   user: {
     id: 'user-1',
-    firstName: 'Иван',
-    lastName: 'Петров',
+    firstName: 'Василий',
+    lastName: 'Пупкин',
     timezone: 'Europe/Moscow',
+    language: 'ru',
   },
   sessions: [
     {

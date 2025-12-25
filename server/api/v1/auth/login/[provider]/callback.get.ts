@@ -37,13 +37,15 @@ export default defineEventHandler((event) => {
 
   const token = generateMockToken()
 
-  const oauthUser = MOCK_OAUTH_USERS[provider]
-  const nameParts = oauthUser.name.split(' ')
-  updateMockUser({
-    id: oauthUser.id,
-    firstName: nameParts[0] ?? '',
-    lastName: nameParts[1] ?? '',
-  })
+  const oauthUser = MOCK_OAUTH_USERS[provider][0]
+  if (oauthUser) {
+    const nameParts = oauthUser.name.split(' ')
+    updateMockUser({
+      id: oauthUser.id,
+      firstName: nameParts[0] ?? '',
+      lastName: nameParts[1] ?? '',
+    })
+  }
 
   setCookie(event, 'auth_token', token, {
     httpOnly: false,

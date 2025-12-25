@@ -35,15 +35,10 @@ const editValue = ref('')
 const editInputRef = ref<{ focus: () => void, select: () => void } | null>(null)
 const editSelectRef = ref<{ focus: () => void } | null>(null)
 
-const timezoneOptions = [
-  { value: 'Europe/Moscow', label: 'Europe/Moscow' },
-  { value: 'Europe/London', label: 'Europe/London' },
-  { value: 'Europe/Paris', label: 'Europe/Paris' },
-  { value: 'America/New_York', label: 'America/New_York' },
-  { value: 'America/Los_Angeles', label: 'America/Los_Angeles' },
-  { value: 'Asia/Tokyo', label: 'Asia/Tokyo' },
-  { value: 'Asia/Shanghai', label: 'Asia/Shanghai' },
-]
+const timezoneOptions = Intl.supportedValuesOf('timeZone').map(tz => ({
+  value: tz,
+  label: tz,
+}))
 
 const languageOptions = [
   { value: 'ru', label: 'Русский' },
@@ -62,6 +57,7 @@ const startEdit = (field: 'first_name' | 'last_name' | 'timezone' | 'language') 
     editValue.value = user.value?.timezone ?? 'Europe/Moscow'
   }
   else {
+    // TODO: remove type assertion when language field is added to API types
     editValue.value = (user.value as { language?: string } | null)?.language ?? 'ru'
   }
 
@@ -86,23 +82,28 @@ const saveEdit = async () => {
     return
   }
 
-  if (isEditing.value === 'first_name') {
-    await updateFirstName(editValue.value)
-  }
-  else if (isEditing.value === 'last_name') {
-    await updateLastName(editValue.value)
-  }
-  else if (isEditing.value === 'timezone') {
-    await updateTimezone(editValue.value)
-  }
-  else {
-    await updateLanguage(editValue.value)
-  }
+  try {
+    if (isEditing.value === 'first_name') {
+      await updateFirstName(editValue.value)
+    }
+    else if (isEditing.value === 'last_name') {
+      await updateLastName(editValue.value)
+    }
+    else if (isEditing.value === 'timezone') {
+      await updateTimezone(editValue.value)
+    }
+    else {
+      await updateLanguage(editValue.value)
+    }
 
-  await refreshUser()
-  toast.success('Сохранено')
-  isEditing.value = null
-  editValue.value = ''
+    await refreshUser()
+    toast.success('Сохранено')
+    isEditing.value = null
+    editValue.value = ''
+  }
+  catch {
+    toast.error('Не удалось сохранить')
+  }
 }
 
 const handleCloseAllSessions = async () => {

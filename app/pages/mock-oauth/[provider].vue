@@ -5,7 +5,7 @@ import {
   MOCK_OAUTH_USERS,
   MOCK_OAUTH_PROVIDER_CONFIG,
   type MockOAuthScenario,
-} from '~/mocks/utils/constants'
+} from '~~/server/utils/mockAuth'
 
 definePageMeta({
   layout: 'auth',

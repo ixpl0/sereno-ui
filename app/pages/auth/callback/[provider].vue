@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { OAuthProvider } from '~/types/auth'
 import { isApiError, extractApiError } from '~/utils/api'
-import { MOCK_OAUTH_PROVIDERS, MOCK_OAUTH_PROVIDER_CONFIG } from '~/mocks/utils/constants'
+import { MOCK_OAUTH_PROVIDERS, MOCK_OAUTH_PROVIDER_CONFIG } from '~~/server/utils/mockAuth'
 
 definePageMeta({
   layout: 'auth',

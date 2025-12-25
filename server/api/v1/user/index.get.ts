@@ -18,5 +18,6 @@ export default defineEventHandler((event) => {
     first_name: user.firstName,
     last_name: user.lastName,
     timezone: user.timezone,
+    language: user.language,
   }
 })
