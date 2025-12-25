@@ -79,9 +79,6 @@ const hintColorClasses: Record<InputState, string> = {
 const inputClasses = computed(() => [
   'input',
   'w-full',
-  'transition-all',
-  'duration-200',
-  'ease-out',
   variantClasses[props.variant],
   sizeClasses[props.size],
   stateClasses[props.state],
@@ -161,7 +158,6 @@ defineExpose({ focus, select })
       :aria-describedby="ariaDescribedbyComputed"
       :aria-invalid="state === 'error'"
       :class="inputClasses"
-      class="focus:scale-[1.01] focus:shadow-lg"
       @input="handleInput"
     >
     <p

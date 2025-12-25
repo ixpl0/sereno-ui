@@ -33,21 +33,21 @@ const toast = useToast()
 const isEditing = ref<'first_name' | 'last_name' | 'timezone' | 'language' | null>(null)
 const editValue = ref('')
 const editInputRef = ref<{ focus: () => void, select: () => void } | null>(null)
-const editSelectRef = ref<HTMLSelectElement | null>(null)
+const editSelectRef = ref<{ focus: () => void } | null>(null)
 
-const timezones = [
-  'Europe/Moscow',
-  'Europe/London',
-  'Europe/Paris',
-  'America/New_York',
-  'America/Los_Angeles',
-  'Asia/Tokyo',
-  'Asia/Shanghai',
+const timezoneOptions = [
+  { value: 'Europe/Moscow', label: 'Europe/Moscow' },
+  { value: 'Europe/London', label: 'Europe/London' },
+  { value: 'Europe/Paris', label: 'Europe/Paris' },
+  { value: 'America/New_York', label: 'America/New_York' },
+  { value: 'America/Los_Angeles', label: 'America/Los_Angeles' },
+  { value: 'Asia/Tokyo', label: 'Asia/Tokyo' },
+  { value: 'Asia/Shanghai', label: 'Asia/Shanghai' },
 ]
 
-const languages = [
-  { code: 'ru', label: 'Русский' },
-  { code: 'en', label: 'English' },
+const languageOptions = [
+  { value: 'ru', label: 'Русский' },
+  { value: 'en', label: 'English' },
 ]
 
 const startEdit = (field: 'first_name' | 'last_name' | 'timezone' | 'language') => {
@@ -151,7 +151,7 @@ const formatDate = (timestamp: number | undefined): string => {
 
 const currentLanguageLabel = computed(() => {
   const code = (user.value as { language?: string } | null)?.language ?? 'ru'
-  return languages.find(l => l.code === code)?.label ?? 'Русский'
+  return languageOptions.find(l => l.value === code)?.label ?? 'Русский'
 })
 </script>
 
@@ -307,20 +307,13 @@ const currentLanguageLabel = computed(() => {
               >
                 {{ user?.timezone || 'Europe/Moscow' }}
               </div>
-              <select
+              <UiSelect
                 v-else
                 ref="editSelectRef"
                 v-model="editValue"
-                class="select select-bordered mt-1"
-              >
-                <option
-                  v-for="tz in timezones"
-                  :key="tz"
-                  :value="tz"
-                >
-                  {{ tz }}
-                </option>
-              </select>
+                :options="timezoneOptions"
+                class="mt-1"
+              />
             </div>
             <div v-if="isEditing !== 'timezone'">
               <UiButton
@@ -365,20 +358,13 @@ const currentLanguageLabel = computed(() => {
               >
                 {{ currentLanguageLabel }}
               </div>
-              <select
+              <UiSelect
                 v-else
                 ref="editSelectRef"
                 v-model="editValue"
-                class="select select-bordered mt-1"
-              >
-                <option
-                  v-for="lang in languages"
-                  :key="lang.code"
-                  :value="lang.code"
-                >
-                  {{ lang.label }}
-                </option>
-              </select>
+                :options="languageOptions"
+                class="mt-1"
+              />
             </div>
             <div v-if="isEditing !== 'language'">
               <UiButton
