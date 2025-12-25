@@ -33,7 +33,6 @@ const toast = useToast()
 const isEditing = ref<'first_name' | 'last_name' | 'timezone' | 'language' | null>(null)
 const editValue = ref('')
 const editInputRef = ref<{ focus: () => void, select: () => void } | null>(null)
-const editSelectRef = ref<{ focus: () => void } | null>(null)
 
 const timezoneOptions = Intl.supportedValuesOf('timeZone').map(tz => ({
   value: tz,
@@ -62,12 +61,9 @@ const startEdit = (field: 'first_name' | 'last_name' | 'timezone' | 'language') 
   }
 
   nextTick(() => {
-    if (field === 'timezone' || field === 'language') {
-      editSelectRef.value?.focus()
-    }
-    else if (editInputRef.value) {
-      editInputRef.value.focus()
-      editInputRef.value.select()
+    if (field === 'first_name' || field === 'last_name') {
+      editInputRef.value?.focus()
+      editInputRef.value?.select()
     }
   })
 }
@@ -310,7 +306,6 @@ const currentLanguageLabel = computed(() => {
               </div>
               <UiSelect
                 v-else
-                ref="editSelectRef"
                 v-model="editValue"
                 :options="timezoneOptions"
                 class="mt-1"
@@ -361,7 +356,6 @@ const currentLanguageLabel = computed(() => {
               </div>
               <UiSelect
                 v-else
-                ref="editSelectRef"
                 v-model="editValue"
                 :options="languageOptions"
                 class="mt-1"
