@@ -1,0 +1,21 @@
+@plugin "daisyui";
+
+@plugin "daisyui/theme" {
+  name: "dark";
+  --color-primary: oklch(0.66 0.15 250);
+  --color-primary-content: oklch(0.98 0.01 250);
+  --color-success: oklch(0.72 0.16 142);
+  --color-success-content: oklch(0.25 0.04 142);
+  --color-error: oklch(0.72 0.15 25.42);
+  --color-error-content: oklch(0.98 0.01 25);
+}
+
+@plugin "daisyui/theme" {
+  name: "light";
+  --color-primary: oklch(0.66 0.15 250);
+  --color-primary-content: oklch(0.98 0.01 250);
+  --color-success: oklch(0.65 0.17 142);
+  --color-success-content: oklch(0.98 0.01 142);
+  --color-error: oklch(0.72 0.15 25.42);
+  --color-error-content: oklch(0.98 0.01 25);
+}

@@ -1,0 +1,44 @@
+.auth-gradient {
+  background: linear-gradient(
+    to bottom right in oklch,
+    oklch(0.25 0.02 260) 0%,
+    oklch(0.28 0.015 240) 50%,
+    oklch(0.25 0.02 260) 100%
+  );
+}
+
+[data-theme="light"] .auth-gradient {
+  background: linear-gradient(
+    to bottom right in oklch,
+    oklch(0.92 0.02 250) 0%,
+    oklch(0.96 0.01 240) 50%,
+    oklch(0.92 0.02 250) 100%
+  );
+}
+
+.noise-overlay {
+  background-image: radial-gradient(circle at center, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 3px 3px;
+}
+
+[data-theme="light"] .noise-overlay {
+  background-image: radial-gradient(circle at center, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+}
+
+.card-glass {
+  background: oklch(0.3 0.02 260 / 0.6);
+}
+
+[data-theme="light"] .card-glass {
+  --tw-ring-color: rgb(0 0 0 / 0.05);
+  --tw-shadow-color: color-mix(in oklch, var(--color-base-content) 30%, transparent);
+  background: oklch(0.98 0.01 260 / 0.7);
+}
+
+[data-theme="light"] .btn-ghost:hover {
+  --btn-bg: color-mix(in oklch, var(--color-base-content) 4%, transparent);
+}
+
+[data-theme="light"] .btn {
+  --tw-shadow-color: color-mix(in oklch, var(--color-base-content) 15%, transparent);
+}
