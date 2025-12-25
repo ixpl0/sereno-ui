@@ -88,6 +88,8 @@
   --tw-shadow-color: color-mix(in oklch, var(--color-base-content) 15%, transparent);
 }
 
-.input {
+.input,
+.select {
   outline: none;
+  border-width: 1px;
 }
