@@ -13,8 +13,8 @@ useSeoMeta({
 const { data: user, status: userStatus, refresh: refreshUser } = await useFetch<UserResponseUser>('/api/v1/user')
 const { data: sessionsData, status: sessionsStatus, refresh: refreshSessions } = await useFetch<UserResponseSessions>('/api/v1/user/sessions')
 
-const userLoading = computed(() => userStatus.value === 'pending')
-const sessionsLoading = computed(() => sessionsStatus.value === 'pending')
+const userLoading = computed(() => userStatus.value === 'pending' && !user.value)
+const sessionsLoading = computed(() => sessionsStatus.value === 'pending' && !sessionsData.value)
 
 const currentSession = computed(() =>
   sessionsData.value?.sessions?.find(s => s.current === true),
