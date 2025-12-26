@@ -13,10 +13,23 @@ export interface Session {
   current: boolean
 }
 
+export interface Contact {
+  id: string
+  kind: 'email' | 'telegram'
+  value: string
+  verified: boolean
+  verificationCode: string
+}
+
 interface MockState {
   user: User
   sessions: Session[]
+  contacts: Contact[]
 }
+
+const generateId = (): string => `contact-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
+
+const generateVerificationCode = (): string => '12345678'
 
 const defaultState: MockState = {
   user: {
@@ -46,9 +59,29 @@ const defaultState: MockState = {
       current: false,
     },
   ],
+  contacts: [
+    {
+      id: 'contact-1',
+      kind: 'email',
+      value: 'user@example.com',
+      verified: true,
+      verificationCode: '12345678',
+    },
+    {
+      id: 'contact-2',
+      kind: 'telegram',
+      value: '@vasya_pupkin',
+      verified: false,
+      verificationCode: '12345678',
+    },
+  ],
 }
 
-const state: MockState = { ...defaultState, sessions: [...defaultState.sessions] }
+const state: MockState = {
+  ...defaultState,
+  sessions: [...defaultState.sessions],
+  contacts: [...defaultState.contacts],
+}
 
 export const getMockUser = (): User => state.user
 
@@ -61,6 +94,39 @@ export const getMockSessions = (): ReadonlyArray<Session> => state.sessions
 
 export const closeOtherMockSessions = (): void => {
   state.sessions = state.sessions.filter(s => s.current)
+}
+
+export const getMockContacts = (): ReadonlyArray<Contact> => state.contacts
+
+export const addMockContact = (kind: 'email' | 'telegram', value: string): Contact => {
+  const contact: Contact = {
+    id: generateId(),
+    kind,
+    value,
+    verified: false,
+    verificationCode: generateVerificationCode(),
+  }
+  state.contacts = [...state.contacts, contact]
+  return contact
+}
+
+export const deleteMockContact = (id: string): boolean => {
+  const initialLength = state.contacts.length
+  state.contacts = state.contacts.filter(c => c.id !== id)
+  return state.contacts.length < initialLength
+}
+
+export const verifyMockContact = (id: string, code: string): Contact | null => {
+  const contact = state.contacts.find(c => c.id === id)
+  if (!contact) {
+    return null
+  }
+  if (contact.verificationCode !== code) {
+    return null
+  }
+  const verifiedContact: Contact = { ...contact, verified: true }
+  state.contacts = state.contacts.map(c => c.id === id ? verifiedContact : c)
+  return verifiedContact
 }
 
 export const isValidToken = (token: string | undefined): boolean => {

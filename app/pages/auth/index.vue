@@ -36,6 +36,11 @@ const handleRequestCode = async () => {
     return
   }
 
+  if (!isValidEmail(email.value)) {
+    toast.error('Некорректный email')
+    return
+  }
+
   isLoading.value = true
 
   const response = await auth.requestEmailCode(email.value)

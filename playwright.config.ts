@@ -18,7 +18,7 @@ export default defineConfig({
     navigationTimeout: 30000,
   },
   webServer: {
-    command: 'pnpm dev:e2e',
+    command: 'pnpm dev:mock',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
   },

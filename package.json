@@ -8,7 +8,7 @@
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
-    "dev:e2e": "cross-env NUXT_PUBLIC_MOCK_API=true NUXT_TYPE_CHECK=false nuxt dev",
+    "dev:mock": "cross-env NUXT_PUBLIC_MOCK_API=true NUXT_TYPE_CHECK=false nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
