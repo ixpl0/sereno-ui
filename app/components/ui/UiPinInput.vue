@@ -38,11 +38,11 @@ const groups = computed(() => {
 })
 
 const stateClasses = computed(() => {
-  const baseClasses = 'w-8 h-10 sm:w-10 sm:h-12 text-center text-base sm:text-lg font-medium rounded-lg border transition-all duration-200'
+  const baseClasses = 'input input-bordered w-8 h-10 sm:w-10 sm:h-12 text-center text-base sm:text-lg font-medium px-0'
   const stateMap = {
-    default: 'border-base-content/20 focus:border-primary focus:ring-2 focus:ring-primary/20',
-    error: 'border-error focus:border-error focus:ring-2 focus:ring-error/20',
-    success: 'border-success focus:border-success focus:ring-2 focus:ring-success/20',
+    default: '',
+    error: 'input-error',
+    success: 'input-success',
   }
   return `${baseClasses} ${stateMap[props.state]}`
 })
@@ -158,7 +158,6 @@ defineExpose({ focus })
             :disabled="disabled"
             :class="stateClasses"
             :aria-label="`Цифра ${index + 1} из ${length}`"
-            class="bg-base-100"
             @input="handleInput(index, $event)"
             @keydown="handleKeydown(index, $event)"
           >
