@@ -1,6 +1,6 @@
 <script setup lang="ts">
 useSeoMeta({
-  titleTemplate: '%s | Sereno UI',
+  titleTemplate: '%s | Настройки | Sereno UI',
   ogSiteName: 'Sereno UI',
   ogType: 'website',
 })
@@ -55,8 +55,10 @@ const toggleMobileSidebar = () => {
           @toggle-mobile-sidebar="toggleMobileSidebar"
         />
 
-        <main class="flex-1">
-          <slot />
+        <main class="flex-1 p-4 lg:p-6">
+          <div class="max-w-3xl mx-auto">
+            <slot />
+          </div>
         </main>
       </div>
     </div>

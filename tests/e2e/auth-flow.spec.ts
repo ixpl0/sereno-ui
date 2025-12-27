@@ -31,7 +31,7 @@ const completeLogin = async (page: Page, email = VALID_EMAIL, code = VALID_CODE)
   await fillEmailAndSubmit(page, email)
   await expect(page.getByRole('heading', { name: 'Введите код' })).toBeVisible()
   await fillCodeAndSubmit(page, code)
-  await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
+  await expect(page.getByText('Добро пожаловать!')).toBeVisible()
 }
 
 test.describe('Auth - Email Step', () => {
@@ -118,7 +118,7 @@ test.describe('Auth - Code Step', () => {
     await firstDigitInput.click()
     await page.keyboard.type(VALID_CODE)
 
-    await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
+    await expect(page.getByText('Добро пожаловать!')).toBeVisible()
   })
 
   test('navigates back to email step', async ({ page }) => {
@@ -148,7 +148,7 @@ test.describe('Auth - Code Step', () => {
   test('successful login with valid code', async ({ page }) => {
     await fillCodeAndSubmit(page, VALID_CODE)
 
-    await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
+    await expect(page.getByText('Добро пожаловать!')).toBeVisible()
     await expect(page.getByText('Добро пожаловать!')).toBeVisible()
   })
 })
@@ -159,10 +159,8 @@ test.describe('Auth - Dashboard', () => {
   })
 
   test('displays dashboard correctly after login', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
     await expect(page.getByText('Добро пожаловать!')).toBeVisible()
     await expect(page.getByText('Вы авторизованы')).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Выйти из аккаунта' })).toBeVisible()
   })
 
   test('shows token info', async ({ page }) => {
@@ -170,7 +168,8 @@ test.describe('Auth - Dashboard', () => {
   })
 
   test('logs out and returns to auth', async ({ page }) => {
-    await page.getByRole('button', { name: 'Выйти из аккаунта' }).click()
+    await page.locator('.user-dropdown button').first().click()
+    await page.getByRole('button', { name: 'Выйти' }).click()
 
     await expect(page.getByRole('heading', { name: 'Вход в систему' })).toBeVisible()
     await expect(page.getByPlaceholder('admin@example.ru')).toBeVisible()
@@ -411,9 +410,7 @@ test.describe('Auth - Complete Flow', () => {
     await firstDigitInput.click()
     await page.keyboard.type(VALID_CODE)
 
-    await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
     await expect(page.getByText('Добро пожаловать!')).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Выйти из аккаунта' })).toBeVisible()
   })
 
   test('flow with retry after invalid code', async ({ page }) => {
@@ -427,16 +424,17 @@ test.describe('Auth - Complete Flow', () => {
     await fillEmailAndSubmit(page, VALID_EMAIL)
     await fillCodeAndSubmit(page, VALID_CODE)
 
-    await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
+    await expect(page.getByText('Добро пожаловать!')).toBeVisible()
   })
 
   test('full logout and re-login flow', async ({ page }) => {
     await completeLogin(page)
 
+    await page.locator('.user-dropdown button').first().click()
     await page.getByRole('button', { name: 'Выйти' }).click()
     await expect(page.getByRole('heading', { name: 'Вход в систему' })).toBeVisible()
 
     await completeLogin(page, 'another@example.com', VALID_CODE)
-    await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
+    await expect(page.getByText('Добро пожаловать!')).toBeVisible()
   })
 })

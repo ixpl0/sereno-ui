@@ -21,12 +21,12 @@ const login = async (page: Page) => {
   await firstDigitInput.click()
   await page.keyboard.type(VALID_CODE)
 
-  await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
+  await expect(page.getByText('Добро пожаловать!')).toBeVisible()
 }
 
-const navigateToSettings = async (page: Page) => {
-  await page.goto('/settings')
-  await expect(page.getByRole('heading', { name: 'Настройки' })).toBeVisible()
+const navigateToContacts = async (page: Page) => {
+  await page.goto('/settings/contacts')
+  await expect(page.getByRole('button', { name: '+ Добавить контакт' })).toBeVisible()
   await page.waitForLoadState('networkidle')
 }
 
@@ -47,7 +47,7 @@ const addContact = async (page: Page, kind: 'email' | 'telegram', value: string)
 test.describe('Contacts - Display', () => {
   test.beforeEach(async ({ page }) => {
     await login(page)
-    await navigateToSettings(page)
+    await navigateToContacts(page)
   })
 
   test('displays contacts section', async ({ page }) => {
@@ -65,7 +65,7 @@ test.describe('Contacts - Display', () => {
 test.describe('Contacts - Add', () => {
   test.beforeEach(async ({ page }) => {
     await login(page)
-    await navigateToSettings(page)
+    await navigateToContacts(page)
   })
 
   test('opens add contact form', async ({ page }) => {
@@ -153,7 +153,7 @@ test.describe('Contacts - Add', () => {
 test.describe('Contacts - Verify', () => {
   test.beforeEach(async ({ page }) => {
     await login(page)
-    await navigateToSettings(page)
+    await navigateToContacts(page)
   })
 
   test('does not show verify button for verified contact', async ({ page }) => {
@@ -223,7 +223,7 @@ test.describe('Contacts - Verify', () => {
 test.describe('Contacts - Delete', () => {
   test.beforeEach(async ({ page }) => {
     await login(page)
-    await navigateToSettings(page)
+    await navigateToContacts(page)
   })
 
   test('shows delete button for verified contact', async ({ page }) => {

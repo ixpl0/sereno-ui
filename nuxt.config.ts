@@ -24,6 +24,9 @@ export default defineNuxtConfig({
 
   vite: {
     plugins: [tailwindcss()],
+    optimizeDeps: {
+      exclude: ['@iconify/vue'],
+    },
   },
 
   typescript: {
