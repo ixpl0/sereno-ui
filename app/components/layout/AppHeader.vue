@@ -89,16 +89,8 @@ const breadcrumbs = computed(() => {
       </div>
     </div>
 
-    <div class="flex items-center gap-2">
-      <NuxtLink
-        to="/settings"
-        class="p-2 rounded-lg hover:bg-base-content/5 text-base-content/60 hover:text-base-content transition-colors"
-      >
-        <Icon
-          name="lucide:settings"
-          class="w-5 h-5"
-        />
-      </NuxtLink>
+    <div class="flex items-center gap-3 self-center">
+      <LayoutThemeSwitcher />
 
       <LayoutUserDropdown :user="userOrNull" />
     </div>
