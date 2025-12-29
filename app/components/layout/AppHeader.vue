@@ -90,9 +90,9 @@ const breadcrumbs = computed(() => {
     </div>
 
     <div class="flex items-center gap-3 self-center">
-      <LayoutThemeSwitcher />
-
       <LayoutUserDropdown :user="userOrNull" />
+
+      <LayoutThemeSwitcher />
     </div>
   </header>
 </template>
