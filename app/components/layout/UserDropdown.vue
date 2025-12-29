@@ -118,7 +118,7 @@ onUnmounted(() => {
 
         <div class="border-t border-base-content/5 py-1">
           <button
-            class="flex items-center gap-3 w-full px-4 py-2 text-sm text-error hover:bg-error/10 transition-colors"
+            class="flex items-center gap-3 w-full px-4 py-2 text-sm text-error hover:bg-error/10 transition-colors cursor-pointer"
             @click="handleLogout"
           >
             <Icon
