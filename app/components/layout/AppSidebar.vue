@@ -52,14 +52,17 @@ const isActive = (path: string) => route.path === path
       mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
     ]"
   >
-    <div class="flex items-center h-16 px-4 border-b border-base-content/5">
+    <div
+      class="flex items-center h-16 border-b border-base-content/5 transition-all duration-300"
+      :class="collapsed ? 'px-2 justify-center' : 'px-4'"
+    >
       <NuxtLink
         v-if="!isSettingsPage"
         to="/dashboard"
         class="flex items-center gap-3 overflow-hidden"
         @click="closeMobileMenu"
       >
-        <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
+        <div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center shrink-0">
           <span class="text-primary-content font-bold text-sm">S</span>
         </div>
         <span
@@ -76,7 +79,7 @@ const isActive = (path: string) => route.path === path
         class="flex items-center gap-3 overflow-hidden group"
         @click="closeMobileMenu"
       >
-        <div class="w-8 h-8 rounded-lg bg-base-content/10 group-hover:bg-base-content/20 flex items-center justify-center shrink-0 transition-colors">
+        <div class="w-10 h-10 rounded-lg bg-base-content/10 group-hover:bg-base-content/20 flex items-center justify-center shrink-0 transition-colors">
           <Icon
             name="lucide:arrow-left"
             class="w-5 h-5 text-base-content/70"
@@ -99,8 +102,9 @@ const isActive = (path: string) => route.path === path
         >
           <NuxtLink
             :to="item.to"
-            class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors"
+            class="flex items-center h-10 rounded-lg transition-colors"
             :class="[
+              collapsed ? 'justify-center w-10 mx-auto' : 'gap-3 px-3',
               isActive(item.to)
                 ? 'bg-primary/10 text-primary'
                 : 'hover:bg-base-content/5 text-base-content/70 hover:text-base-content',
@@ -124,7 +128,8 @@ const isActive = (path: string) => route.path === path
 
     <div class="p-2 border-t border-base-content/5">
       <button
-        class="hidden lg:flex w-full items-center justify-center gap-2 px-3 py-2 rounded-lg hover:bg-base-content/5 text-base-content/60 transition-colors"
+        class="hidden lg:flex items-center h-10 rounded-lg hover:bg-base-content/5 text-base-content/60 transition-colors"
+        :class="collapsed ? 'justify-center w-10 mx-auto' : 'w-full justify-center gap-2 px-3'"
         @click="toggleCollapse"
       >
         <Icon
