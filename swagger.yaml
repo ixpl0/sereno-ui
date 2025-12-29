@@ -52,6 +52,10 @@ definitions:
       since:
         example: 1766412596
         type: integer
+    required:
+    - admin
+    - id
+    - since
     type: object
   tenant.ResponseMembersList:
     properties:
@@ -59,16 +63,29 @@ definitions:
         items:
           $ref: '#/definitions/tenant.ResponseMember'
         type: array
+    required:
+    - members
     type: object
   tenant.ResponseSingleMember:
     properties:
       member:
         $ref: '#/definitions/tenant.ResponseMember'
+    required:
+    - member
     type: object
   tenant.ResponseSingleTenant:
     properties:
       tenant:
         $ref: '#/definitions/tenant.ResponseTenant'
+    required:
+    - tenant
+    type: object
+  tenant.ResponseSingleToken:
+    properties:
+      token:
+        $ref: '#/definitions/tenant.ResponseToken'
+    required:
+    - token
     type: object
   tenant.ResponseTenant:
     properties:
@@ -84,6 +101,11 @@ definitions:
       since:
         example: 1766412596
         type: integer
+    required:
+    - admin
+    - id
+    - name
+    - since
     type: object
   tenant.ResponseTenantsList:
     properties:
@@ -91,6 +113,36 @@ definitions:
         items:
           $ref: '#/definitions/tenant.ResponseTenant'
         type: array
+    required:
+    - tenants
+    type: object
+  tenant.ResponseToken:
+    properties:
+      id:
+        example: 00112233-4455-6677-8899-aabbccddeeff
+        type: string
+      name:
+        example: My first token
+        type: string
+      since:
+        example: 1766412596
+        type: integer
+      value:
+        example: sat_1234567890abcdefghijkABCDEFGHIJK
+        type: string
+    required:
+    - id
+    - name
+    - since
+    type: object
+  tenant.ResponseTokensList:
+    properties:
+      tokens:
+        items:
+          $ref: '#/definitions/tenant.ResponseToken'
+        type: array
+    required:
+    - tokens
     type: object
   user.RequestCode:
     properties:
@@ -160,6 +212,9 @@ definitions:
       type:
         example: bearer
         type: string
+    required:
+    - token
+    - type
     type: object
   user.ResponseContact:
     properties:
@@ -167,6 +222,9 @@ definitions:
         example: 00112233-4455-6677-8899-aabbccddeeff
         type: string
       kind:
+        enum:
+        - email
+        - telegram
         example: email
         type: string
       value:
@@ -175,6 +233,11 @@ definitions:
       verified:
         example: true
         type: boolean
+    required:
+    - id
+    - kind
+    - value
+    - verified
     type: object
   user.ResponseContactsList:
     properties:
@@ -182,6 +245,8 @@ definitions:
         items:
           $ref: '#/definitions/user.ResponseContact'
         type: array
+    required:
+    - contacts
     type: object
   user.ResponseSession:
     properties:
@@ -197,6 +262,11 @@ definitions:
       since:
         example: 1766412596
         type: integer
+    required:
+    - current
+    - device
+    - id
+    - since
     type: object
   user.ResponseSessions:
     properties:
@@ -204,11 +274,15 @@ definitions:
         items:
           $ref: '#/definitions/user.ResponseSession'
         type: array
+    required:
+    - sessions
     type: object
   user.ResponseSingleContact:
     properties:
       contact:
         $ref: '#/definitions/user.ResponseContact'
+    required:
+    - contact
     type: object
   user.ResponseUser:
     properties:
@@ -224,6 +298,8 @@ definitions:
       timezone:
         example: Europe/Moscow
         type: string
+    required:
+    - id
     type: object
 host: localhost:8080
 info:
@@ -511,9 +587,7 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/tenant.ResponseTokensList'
         "400":
           description: Bad Request
           schema:
@@ -554,9 +628,7 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/tenant.ResponseSingleToken'
         "400":
           description: Bad Request
           schema:
@@ -592,12 +664,8 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties:
-              type: string
-            type: object
+        "204":
+          description: No Content
         "400":
           description: Bad Request
           schema:
@@ -930,6 +998,6 @@ securityDefinitions:
     type: apiKey
   StaticAccessToken:
     in: header
-    name: X-Static-Access-Token
+    name: Authorization
     type: apiKey
 swagger: "2.0"

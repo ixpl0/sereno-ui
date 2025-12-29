@@ -17,21 +17,16 @@ const emit = defineEmits<{
 
 const route = useRoute()
 
-const isSettingsPage = computed(() => route.path.startsWith('/settings'))
-
-const mainNavigationItems: NavigationItem[] = [
+const topNavigationItems: ReadonlyArray<NavigationItem> = [
   { label: 'Главная', to: '/dashboard', icon: 'lucide:home' },
+  { label: 'Алерты', to: '/alerts', icon: 'lucide:bell' },
+  { label: 'Инциденты', to: '/incidents', icon: 'lucide:alert-triangle' },
 ]
 
-const settingsNavigationItems: NavigationItem[] = [
-  { label: 'Профиль', to: '/settings', icon: 'lucide:user' },
-  { label: 'Сессии', to: '/settings/sessions', icon: 'lucide:monitor-smartphone' },
-  { label: 'Контакты', to: '/settings/contacts', icon: 'lucide:mail' },
+const bottomNavigationItems: ReadonlyArray<NavigationItem> = [
+  { label: 'Тенанты', to: '/tenants', icon: 'lucide:building-2' },
+  { label: 'Профиль', to: '/profile', icon: 'lucide:user' },
 ]
-
-const navigationItems = computed(() =>
-  isSettingsPage.value ? settingsNavigationItems : mainNavigationItems,
-)
 
 const toggleCollapse = () => {
   emit('update:collapsed', !props.collapsed)
@@ -41,7 +36,7 @@ const closeMobileMenu = () => {
   emit('update:mobileOpen', false)
 }
 
-const isActive = (path: string) => route.path === path
+const isActive = (path: string) => route.path === path || route.path.startsWith(`${path}/`)
 </script>
 
 <template>
@@ -57,7 +52,6 @@ const isActive = (path: string) => route.path === path
       :class="collapsed ? 'px-2 justify-center' : 'px-4'"
     >
       <NuxtLink
-        v-if="!isSettingsPage"
         to="/dashboard"
         class="flex items-center gap-3 overflow-hidden"
         @click="closeMobileMenu"
@@ -72,32 +66,44 @@ const isActive = (path: string) => route.path === path
           Sereno
         </span>
       </NuxtLink>
-
-      <NuxtLink
-        v-else
-        to="/dashboard"
-        class="flex items-center gap-3 overflow-hidden group"
-        @click="closeMobileMenu"
-      >
-        <div class="w-10 h-10 rounded-lg bg-base-content/10 group-hover:bg-base-content/20 flex items-center justify-center shrink-0 transition-colors">
-          <Icon
-            name="lucide:arrow-left"
-            class="w-5 h-5 text-base-content/70"
-          />
-        </div>
-        <span
-          v-if="!collapsed"
-          class="font-semibold whitespace-nowrap"
-        >
-          Настройки
-        </span>
-      </NuxtLink>
     </div>
 
-    <nav class="flex-1 overflow-hidden py-4 px-2">
+    <nav class="flex-1 flex flex-col overflow-hidden py-4 px-2">
       <ul class="space-y-1">
         <li
-          v-for="item in navigationItems"
+          v-for="item in topNavigationItems"
+          :key="item.to"
+        >
+          <NuxtLink
+            :to="item.to"
+            class="flex items-center h-10 rounded-lg transition-colors"
+            :class="[
+              collapsed ? 'justify-center w-10 mx-auto' : 'gap-3 px-3',
+              isActive(item.to)
+                ? 'bg-primary/10 text-primary'
+                : 'hover:bg-base-content/5 text-base-content/70 hover:text-base-content',
+            ]"
+            @click="closeMobileMenu"
+          >
+            <Icon
+              :name="item.icon"
+              class="w-5 h-5 shrink-0"
+            />
+            <span
+              v-if="!collapsed"
+              class="whitespace-nowrap"
+            >
+              {{ item.label }}
+            </span>
+          </NuxtLink>
+        </li>
+      </ul>
+
+      <div class="flex-1" />
+
+      <ul class="space-y-1">
+        <li
+          v-for="item in bottomNavigationItems"
           :key="item.to"
         >
           <NuxtLink
