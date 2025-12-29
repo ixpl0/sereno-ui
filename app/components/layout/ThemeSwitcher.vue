@@ -24,18 +24,15 @@ const options: Array<{ value: ThemeOption, icon: string, label: string }> = [
       :aria-checked="preference === option.value"
       :aria-label="option.label"
       :title="option.label"
-      class="relative w-6 h-6 flex items-center justify-center rounded transition-all duration-200"
+      class="relative w-5 h-5 flex items-center justify-center rounded transition-all duration-200"
       :class="[
         preference === option.value
-          ? 'bg-base-content/10 text-base-content shadow-sm'
+          ? 'bg-base-content/10 text-base-content'
           : 'text-base-content/50 hover:text-base-content/80 hover:bg-base-content/5',
       ]"
       @click="setPreference(option.value)"
     >
-      <Icon
-        :name="option.icon"
-        class="w-3.5 h-3.5"
-      />
+      <Icon :name="option.icon" />
     </button>
   </div>
 </template>
