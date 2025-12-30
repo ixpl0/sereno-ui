@@ -26,33 +26,48 @@ export type TenantRequestName = {
 };
 
 export type TenantResponseMember = {
-    admin?: boolean;
-    id?: string;
+    admin: boolean;
+    id: string;
     name?: string;
-    since?: number;
+    since: number;
 };
 
 export type TenantResponseMembersList = {
-    members?: Array<TenantResponseMember>;
+    members: Array<TenantResponseMember>;
 };
 
 export type TenantResponseSingleMember = {
-    member?: TenantResponseMember;
+    member: TenantResponseMember;
 };
 
 export type TenantResponseSingleTenant = {
-    tenant?: TenantResponseTenant;
+    tenant: TenantResponseTenant;
+};
+
+export type TenantResponseSingleToken = {
+    token: TenantResponseToken;
 };
 
 export type TenantResponseTenant = {
-    admin?: boolean;
-    id?: string;
-    name?: string;
-    since?: number;
+    admin: boolean;
+    id: string;
+    name: string;
+    since: number;
 };
 
 export type TenantResponseTenantsList = {
-    tenants?: Array<TenantResponseTenant>;
+    tenants: Array<TenantResponseTenant>;
+};
+
+export type TenantResponseToken = {
+    id: string;
+    name: string;
+    since: number;
+    value?: string;
+};
+
+export type TenantResponseTokensList = {
+    tokens: Array<TenantResponseToken>;
 };
 
 export type UserRequestCode = {
@@ -79,39 +94,39 @@ export type UserRequestParameter = {
 };
 
 export type UserResponseAccessJwt = {
-    token?: string;
-    type?: string;
+    token: string;
+    type: string;
 };
 
 export type UserResponseContact = {
-    id?: string;
-    kind?: string;
-    value?: string;
-    verified?: boolean;
+    id: string;
+    kind: 'email' | 'telegram';
+    value: string;
+    verified: boolean;
 };
 
 export type UserResponseContactsList = {
-    contacts?: Array<UserResponseContact>;
+    contacts: Array<UserResponseContact>;
 };
 
 export type UserResponseSession = {
-    current?: boolean;
-    device?: string;
-    id?: string;
-    since?: number;
+    current: boolean;
+    device: string;
+    id: string;
+    since: number;
 };
 
 export type UserResponseSessions = {
-    sessions?: Array<UserResponseSession>;
+    sessions: Array<UserResponseSession>;
 };
 
 export type UserResponseSingleContact = {
-    contact?: UserResponseContact;
+    contact: UserResponseContact;
 };
 
 export type UserResponseUser = {
     first_name?: string;
-    id?: string;
+    id: string;
     last_name?: string;
     timezone?: string;
 };
@@ -428,9 +443,7 @@ export type GetTenantsByIdTokensResponses = {
     /**
      * OK
      */
-    200: {
-        [key: string]: string;
-    };
+    200: TenantResponseTokensList;
 };
 
 export type GetTenantsByIdTokensResponse = GetTenantsByIdTokensResponses[keyof GetTenantsByIdTokensResponses];
@@ -471,9 +484,7 @@ export type PostTenantsByIdTokensCreateResponses = {
     /**
      * OK
      */
-    200: {
-        [key: string]: string;
-    };
+    200: TenantResponseSingleToken;
 };
 
 export type PostTenantsByIdTokensCreateResponse = PostTenantsByIdTokensCreateResponses[keyof PostTenantsByIdTokensCreateResponses];
@@ -508,14 +519,10 @@ export type PostTenantsByIdTokensDeleteError = PostTenantsByIdTokensDeleteErrors
 
 export type PostTenantsByIdTokensDeleteResponses = {
     /**
-     * OK
+     * No Content
      */
-    200: {
-        [key: string]: string;
-    };
+    204: unknown;
 };
-
-export type PostTenantsByIdTokensDeleteResponse = PostTenantsByIdTokensDeleteResponses[keyof PostTenantsByIdTokensDeleteResponses];
 
 export type PostTenantsByIdUpdateData = {
     /**
