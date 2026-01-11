@@ -41,15 +41,15 @@ const isActive = (path: string) => route.path === path || route.path.startsWith(
 
 <template>
   <aside
-    class="fixed inset-y-0 left-0 z-40 flex flex-col bg-base-200/35 backdrop-blur-xl border-r border-base-content/5 transition-all duration-300"
+    class="fixed inset-y-0 left-0 z-40 flex flex-col bg-base-200 lg:bg-base-200/35 lg:backdrop-blur-xl border-r border-base-content/5 transition-all duration-300"
     :class="[
-      collapsed ? 'w-16' : 'w-64',
+      collapsed ? 'w-64 lg:w-16' : 'w-64',
       mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
     ]"
   >
     <div
       class="flex items-center h-16 border-b border-base-content/5 transition-all duration-300"
-      :class="collapsed ? 'px-2 justify-center' : 'px-4'"
+      :class="collapsed ? 'px-4 lg:px-2 lg:justify-center' : 'px-4'"
     >
       <NuxtLink
         to="/dashboard"
@@ -60,10 +60,10 @@ const isActive = (path: string) => route.path === path || route.path.startsWith(
           <span class="text-primary-content font-bold text-sm">S</span>
         </div>
         <span
-          v-if="!collapsed"
           class="font-bold text-lg whitespace-nowrap"
+          :class="{ 'lg:hidden': collapsed }"
         >
-          Sereno
+          Sereno Systems
         </span>
       </NuxtLink>
     </div>
@@ -76,9 +76,9 @@ const isActive = (path: string) => route.path === path || route.path.startsWith(
         >
           <NuxtLink
             :to="item.to"
-            class="flex items-center h-10 rounded-lg transition-colors"
+            class="flex items-center h-10 rounded-lg transition-colors gap-3 px-3"
             :class="[
-              collapsed ? 'justify-center w-10 mx-auto' : 'gap-3 px-3',
+              collapsed ? 'lg:justify-center lg:w-10 lg:mx-auto lg:gap-0 lg:px-0' : '',
               isActive(item.to)
                 ? 'bg-primary/10 text-primary'
                 : 'hover:bg-base-content/5 text-base-content/70 hover:text-base-content',
@@ -90,8 +90,8 @@ const isActive = (path: string) => route.path === path || route.path.startsWith(
               class="w-5 h-5 shrink-0"
             />
             <span
-              v-if="!collapsed"
               class="whitespace-nowrap"
+              :class="{ 'lg:hidden': collapsed }"
             >
               {{ item.label }}
             </span>
@@ -108,9 +108,9 @@ const isActive = (path: string) => route.path === path || route.path.startsWith(
         >
           <NuxtLink
             :to="item.to"
-            class="flex items-center h-10 rounded-lg transition-colors"
+            class="flex items-center h-10 rounded-lg transition-colors gap-3 px-3"
             :class="[
-              collapsed ? 'justify-center w-10 mx-auto' : 'gap-3 px-3',
+              collapsed ? 'lg:justify-center lg:w-10 lg:mx-auto lg:gap-0 lg:px-0' : '',
               isActive(item.to)
                 ? 'bg-primary/10 text-primary'
                 : 'hover:bg-base-content/5 text-base-content/70 hover:text-base-content',
@@ -122,8 +122,8 @@ const isActive = (path: string) => route.path === path || route.path.startsWith(
               class="w-5 h-5 shrink-0"
             />
             <span
-              v-if="!collapsed"
               class="whitespace-nowrap"
+              :class="{ 'lg:hidden': collapsed }"
             >
               {{ item.label }}
             </span>
