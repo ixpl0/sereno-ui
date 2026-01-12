@@ -18,7 +18,7 @@ const emit = defineEmits<{
 const route = useRoute()
 
 const topNavigationItems: ReadonlyArray<NavigationItem> = [
-  { label: 'Главная', to: '/dashboard', icon: 'lucide:home' },
+  { label: 'Дашборд', to: '/dashboard', icon: 'lucide:home' },
   { label: 'Алерты', to: '/alerts', icon: 'lucide:bell' },
   { label: 'Инциденты', to: '/incidents', icon: 'lucide:alert-triangle' },
 ]

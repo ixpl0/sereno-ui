@@ -37,3 +37,6 @@ coverage/
 
 # Local config files
 *.local.*
+
+# Claude temp files
+tmpclaude-*

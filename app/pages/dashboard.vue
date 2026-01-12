@@ -1,11 +1,11 @@
 <script setup lang="ts">
 definePageMeta({
   middleware: 'auth',
-  title: 'Главная',
+  title: 'Дашборд',
 })
 
 useSeoMeta({
-  title: 'Главная',
+  title: 'Дашборд',
   description: 'Личный кабинет пользователя',
 })
 
