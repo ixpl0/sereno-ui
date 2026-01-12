@@ -23,18 +23,8 @@ const pageTitle = computed(() => {
 const breadcrumbs = computed(() => {
   const crumbs: Array<{ label: string, to?: string }> = []
 
-  if (route.path.startsWith('/settings')) {
-    crumbs.push({ label: 'Настройки', to: '/settings' })
-
-    if (route.path === '/settings/sessions') {
-      crumbs.push({ label: 'Сессии' })
-    }
-    else if (route.path === '/settings/contacts') {
-      crumbs.push({ label: 'Контакты' })
-    }
-    else if (route.path === '/settings') {
-      crumbs.push({ label: 'Профиль' })
-    }
+  if (route.path === '/profile') {
+    crumbs.push({ label: 'Профиль' })
   }
 
   return crumbs

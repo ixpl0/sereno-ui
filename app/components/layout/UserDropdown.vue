@@ -104,7 +104,7 @@ onUnmounted(() => {
 
         <div class="py-1">
           <NuxtLink
-            to="/settings"
+            to="/profile"
             class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-base-content/5 transition-colors"
             @click="closeDropdown"
           >
