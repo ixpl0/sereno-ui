@@ -93,15 +93,6 @@ onUnmounted(() => {
         v-if="dropdownOpen && user"
         class="absolute right-0 mt-2 w-56 bg-base-200 shadow-lg ring-1 ring-base-content/5 py-1"
       >
-        <div class="px-4 py-3 border-b border-base-content/5">
-          <p class="text-sm font-medium">
-            {{ userName }}
-          </p>
-          <p class="text-xs text-base-content/60 truncate">
-            {{ user.timezone || 'Europe/Moscow' }}
-          </p>
-        </div>
-
         <div class="py-1">
           <NuxtLink
             to="/profile"
