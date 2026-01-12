@@ -38,22 +38,19 @@ const toggleMobileSidebar = () => {
       <div class="absolute inset-0 opacity-60 noise-overlay" />
     </div>
 
-    <div class="relative z-10 min-h-screen flex">
-      <LayoutAppSidebar
-        v-model:collapsed="sidebarCollapsed"
-        v-model:mobile-open="mobileSidebarOpen"
-      />
+    <div class="relative z-10 min-h-screen flex flex-col pt-16">
+      <LayoutAppHeader @toggle-mobile-sidebar="toggleMobileSidebar" />
 
-      <div
-        class="flex-1 flex flex-col transition-all duration-300 overflow-hidden"
-        :class="sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-64'"
-      >
-        <LayoutAppHeader
-          :sidebar-collapsed="sidebarCollapsed"
-          @toggle-mobile-sidebar="toggleMobileSidebar"
+      <div class="flex-1 flex">
+        <LayoutAppSidebar
+          v-model:collapsed="sidebarCollapsed"
+          v-model:mobile-open="mobileSidebarOpen"
         />
 
-        <main class="flex-1 overflow-y-auto">
+        <main
+          class="flex-1 overflow-y-auto transition-all duration-300"
+          :class="sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-64'"
+        >
           <slot />
         </main>
       </div>

@@ -41,33 +41,12 @@ const isActive = (path: string) => route.path === path || route.path.startsWith(
 
 <template>
   <aside
-    class="fixed inset-y-0 left-0 z-40 flex flex-col bg-base-200 lg:bg-base-200/35 lg:backdrop-blur-xl border-r border-base-content/5 transition-all duration-300"
+    class="fixed top-16 bottom-0 left-0 z-40 flex flex-col bg-base-200 lg:bg-base-200/35 lg:backdrop-blur-xl border-r border-base-content/5 transition-all duration-300"
     :class="[
       collapsed ? 'w-64 lg:w-16' : 'w-64',
       mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
     ]"
   >
-    <div
-      class="flex items-center h-16 border-b border-base-content/5 transition-all duration-300"
-      :class="collapsed ? 'px-4 lg:px-2 lg:justify-center' : 'px-4'"
-    >
-      <NuxtLink
-        to="/dashboard"
-        class="flex items-center gap-3 overflow-hidden"
-        @click="closeMobileMenu"
-      >
-        <div class="w-10 h-10 bg-primary flex items-center justify-center shrink-0">
-          <span class="text-primary-content font-bold text-sm">S</span>
-        </div>
-        <span
-          class="font-bold text-lg whitespace-nowrap"
-          :class="{ 'lg:hidden': collapsed }"
-        >
-          Sereno Systems
-        </span>
-      </NuxtLink>
-    </div>
-
     <nav class="flex-1 flex flex-col overflow-hidden py-4 px-2">
       <ul class="space-y-1">
         <li
@@ -154,7 +133,7 @@ const isActive = (path: string) => route.path === path || route.path.startsWith(
 
   <div
     v-if="mobileOpen"
-    class="fixed inset-0 z-30 bg-black/50 lg:hidden"
+    class="fixed top-16 inset-x-0 bottom-0 z-30 bg-black/50 lg:hidden"
     @click="closeMobileMenu"
   />
 </template>
