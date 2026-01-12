@@ -11,12 +11,12 @@ const tenantId = computed(() => route.params.id as string)
 definePageMeta({
   middleware: 'auth',
   layout: 'default',
-  title: 'Тенант',
+  title: 'Команда',
 })
 
 useSeoMeta({
-  title: 'Тенант',
-  description: 'Настройки тенанта',
+  title: 'Команда',
+  description: 'Настройки команды',
 })
 
 const { data: tenantsData, refresh: refreshTenants } = await useFetch<TenantResponseTenantsList>('/api/v1/tenants')
@@ -245,7 +245,7 @@ const formatDate = (timestamp: number | undefined): string => {
             class="w-16 h-16 mx-auto text-base-content/20 mb-4"
           />
           <p class="text-base-content/60">
-            Тенант не найден
+            Команда не найдена
           </p>
         </div>
 

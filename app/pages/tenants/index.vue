@@ -4,12 +4,12 @@ import type { TenantResponseTenantsList } from '~/api/types.gen'
 definePageMeta({
   middleware: 'auth',
   layout: 'default',
-  title: 'Тенанты',
+  title: 'Команды',
 })
 
 useSeoMeta({
-  title: 'Тенанты',
-  description: 'Управление тенантами',
+  title: 'Команды',
+  description: 'Управление командами',
 })
 
 const { data: tenantsData, status, refresh } = await useFetch<TenantResponseTenantsList>('/api/v1/tenants')
@@ -45,12 +45,12 @@ const handleCreate = async () => {
   const response = await createTenant(name)
 
   if ('error' in response && response.error) {
-    toast.error('Не удалось создать тенант')
+    toast.error('Не удалось создать команду')
     return
   }
 
   await refresh()
-  toast.success('Тенант создан')
+  toast.success('Команда создана')
   cancelCreate()
 }
 
@@ -72,7 +72,7 @@ const formatDate = (timestamp: number | undefined): string => {
       <UiCard class="animate-slide-up">
         <div class="flex items-center justify-between mb-6">
           <h1 class="text-xl font-semibold">
-            Тенанты
+            Команды
           </h1>
           <UiButton
             v-if="!isCreating"
@@ -106,7 +106,7 @@ const formatDate = (timestamp: number | undefined): string => {
             <UiInput
               ref="newTenantInputRef"
               v-model="newTenantName"
-              placeholder="Название тенанта"
+              placeholder="Название команды"
               @keyup.enter="handleCreate"
               @keyup.escape="cancelCreate"
             />
@@ -137,13 +137,13 @@ const formatDate = (timestamp: number | undefined): string => {
               class="w-16 h-16 mx-auto text-base-content/20 mb-4"
             />
             <p class="text-base-content/60 mb-4">
-              У вас пока нет тенантов
+              У вас пока нет команд
             </p>
             <UiButton
               variant="primary"
               @click="startCreate"
             >
-              Создать первый тенант
+              Создать первую команду
             </UiButton>
           </div>
 

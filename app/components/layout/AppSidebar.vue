@@ -24,7 +24,7 @@ const topNavigationItems: ReadonlyArray<NavigationItem> = [
 ]
 
 const bottomNavigationItems: ReadonlyArray<NavigationItem> = [
-  { label: 'Тенанты', to: '/tenants', icon: 'lucide:building-2' },
+  { label: 'Команды', to: '/tenants', icon: 'lucide:users' },
   { label: 'Профиль', to: '/profile', icon: 'lucide:user' },
 ]
 
