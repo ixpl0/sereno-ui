@@ -56,7 +56,7 @@ const isActive = (path: string) => route.path === path || route.path.startsWith(
         class="flex items-center gap-3 overflow-hidden"
         @click="closeMobileMenu"
       >
-        <div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center shrink-0">
+        <div class="w-10 h-10 bg-primary flex items-center justify-center shrink-0">
           <span class="text-primary-content font-bold text-sm">S</span>
         </div>
         <span
@@ -76,7 +76,7 @@ const isActive = (path: string) => route.path === path || route.path.startsWith(
         >
           <NuxtLink
             :to="item.to"
-            class="flex items-center h-10 rounded-lg transition-colors gap-3 px-3"
+            class="flex items-center h-10 transition-colors gap-3 px-3"
             :class="[
               collapsed ? 'lg:justify-center lg:w-10 lg:mx-auto lg:gap-0 lg:px-0' : '',
               isActive(item.to)
@@ -108,7 +108,7 @@ const isActive = (path: string) => route.path === path || route.path.startsWith(
         >
           <NuxtLink
             :to="item.to"
-            class="flex items-center h-10 rounded-lg transition-colors gap-3 px-3"
+            class="flex items-center h-10 transition-colors gap-3 px-3"
             :class="[
               collapsed ? 'lg:justify-center lg:w-10 lg:mx-auto lg:gap-0 lg:px-0' : '',
               isActive(item.to)
@@ -134,7 +134,7 @@ const isActive = (path: string) => route.path === path || route.path.startsWith(
 
     <div class="p-2 border-t border-base-content/5">
       <button
-        class="hidden lg:flex items-center h-10 rounded-lg hover:bg-base-content/5 text-base-content/60 transition-colors"
+        class="hidden lg:flex items-center h-10 hover:bg-base-content/5 text-base-content/60 transition-colors"
         :class="collapsed ? 'justify-center w-10 mx-auto' : 'w-full justify-center gap-2 px-3'"
         @click="toggleCollapse"
       >

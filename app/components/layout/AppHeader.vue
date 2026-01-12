@@ -43,11 +43,11 @@ const breadcrumbs = computed(() => {
 
 <template>
   <header
-    class="sticky top-0 z-20 flex items-center justify-between h-16 px-4 lg:px-6 bg-base-100/35 backdrop-blur-xl border-b border-base-content/5"
+    class="shrink-0 z-20 flex items-center justify-between h-16 px-4 lg:px-6 bg-base-100/35 backdrop-blur-xl border-b border-base-content/5"
   >
     <div class="flex items-center gap-4">
       <button
-        class="lg:hidden p-2 -ml-2 rounded-lg hover:bg-base-content/5 transition-colors"
+        class="lg:hidden p-2 -ml-2 hover:bg-base-content/5 transition-colors"
         @click="emit('toggleMobileSidebar')"
       >
         <Icon

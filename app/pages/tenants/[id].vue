@@ -252,7 +252,7 @@ const formatDate = (timestamp: number | undefined): string => {
         <template v-else>
           <div class="flex items-center justify-between mb-6">
             <div class="flex items-center gap-3">
-              <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+              <div class="w-12 h-12 bg-primary/10 flex items-center justify-center">
                 <Icon
                   name="lucide:building-2"
                   class="w-6 h-6 text-primary"
@@ -340,7 +340,7 @@ const formatDate = (timestamp: number | undefined): string => {
             >
               <div
                 v-if="isAddingMember"
-                class="p-4 bg-base-200 rounded-lg space-y-3"
+                class="p-4 bg-base-200 space-y-3"
               >
                 <UiInput
                   ref="newMemberInputRef"
@@ -378,7 +378,7 @@ const formatDate = (timestamp: number | undefined): string => {
               <div
                 v-for="member in membersData?.members"
                 :key="member.id"
-                class="flex items-center justify-between p-3 bg-base-100/50 rounded-lg"
+                class="flex items-center justify-between p-3 bg-base-100/50"
               >
                 <div class="flex items-center gap-3">
                   <div class="w-8 h-8 rounded-full bg-base-300 flex items-center justify-center">
@@ -469,7 +469,7 @@ const formatDate = (timestamp: number | undefined): string => {
             >
               <div
                 v-if="isCreatingToken && !createdTokenValue"
-                class="p-4 bg-base-200 rounded-lg space-y-3"
+                class="p-4 bg-base-200 space-y-3"
               >
                 <UiInput
                   ref="newTokenInputRef"
@@ -498,7 +498,7 @@ const formatDate = (timestamp: number | undefined): string => {
 
               <div
                 v-if="createdTokenValue"
-                class="p-4 bg-success/10 border border-success/30 rounded-lg space-y-3"
+                class="p-4 bg-success/10 border border-success/30 space-y-3"
               >
                 <div class="flex items-center gap-2 text-success">
                   <Icon
@@ -532,10 +532,10 @@ const formatDate = (timestamp: number | undefined): string => {
               <div
                 v-for="token in tokensData?.tokens"
                 :key="token.id"
-                class="flex items-center justify-between p-3 bg-base-200/50 rounded-lg"
+                class="flex items-center justify-between p-3 bg-base-200/50"
               >
                 <div class="flex items-center gap-3">
-                  <div class="w-8 h-8 rounded-lg bg-base-300 flex items-center justify-center">
+                  <div class="w-8 h-8 bg-base-300 flex items-center justify-center">
                     <Icon
                       name="lucide:key"
                       class="w-4 h-4 text-base-content/60"

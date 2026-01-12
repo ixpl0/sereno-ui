@@ -101,7 +101,7 @@ const formatDate = (timestamp: number | undefined): string => {
         >
           <div
             v-if="isCreating"
-            class="p-4 bg-base-200 rounded-lg space-y-3"
+            class="p-4 bg-base-200 space-y-3"
           >
             <UiInput
               ref="newTenantInputRef"
@@ -151,10 +151,10 @@ const formatDate = (timestamp: number | undefined): string => {
             v-for="tenant in tenantsData?.tenants"
             :key="tenant.id"
             :to="`/tenants/${tenant.id}`"
-            class="flex items-center justify-between p-4 bg-base-200/50 hover:bg-base-200 rounded-lg transition-colors"
+            class="flex items-center justify-between p-4 bg-base-200/50 hover:bg-base-200 transition-colors"
           >
             <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+              <div class="w-10 h-10 bg-primary/10 flex items-center justify-center">
                 <Icon
                   name="lucide:building-2"
                   class="w-5 h-5 text-primary"

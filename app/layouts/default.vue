@@ -45,7 +45,7 @@ const toggleMobileSidebar = () => {
       />
 
       <div
-        class="flex-1 flex flex-col transition-all duration-300 overflow-x-hidden"
+        class="flex-1 flex flex-col transition-all duration-300 overflow-hidden"
         :class="sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-64'"
       >
         <LayoutAppHeader
@@ -53,7 +53,7 @@ const toggleMobileSidebar = () => {
           @toggle-mobile-sidebar="toggleMobileSidebar"
         />
 
-        <main class="flex-1">
+        <main class="flex-1 overflow-y-auto">
           <slot />
         </main>
       </div>

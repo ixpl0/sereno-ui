@@ -12,7 +12,7 @@ const options: Array<{ value: ThemeOption, icon: string, label: string }> = [
 
 <template>
   <div
-    class="inline-flex items-center gap-0.5 p-0.5 rounded-md bg-base-content/5 border border-base-content/10"
+    class="inline-flex items-center gap-0.5 p-0.5 bg-base-content/5 border border-base-content/10"
     role="radiogroup"
     aria-label="Выбор темы"
   >
@@ -24,7 +24,7 @@ const options: Array<{ value: ThemeOption, icon: string, label: string }> = [
       :aria-checked="preference === option.value"
       :aria-label="option.label"
       :title="option.label"
-      class="relative w-5 h-5 flex items-center justify-center rounded transition-all duration-200"
+      class="relative w-5 h-5 flex items-center justify-center transition-all duration-200"
       :class="[
         preference === option.value
           ? 'bg-base-content/10 text-base-content'

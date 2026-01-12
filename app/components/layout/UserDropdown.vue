@@ -57,7 +57,7 @@ onUnmounted(() => {
   <div class="relative user-dropdown">
     <button
       v-if="user"
-      class="flex items-center gap-2 p-1.5 rounded-lg hover:bg-base-content/5 transition-colors"
+      class="flex items-center gap-2 p-1.5 hover:bg-base-content/5 transition-colors"
       @click="dropdownOpen = !dropdownOpen"
     >
       <div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
@@ -91,7 +91,7 @@ onUnmounted(() => {
     >
       <div
         v-if="dropdownOpen && user"
-        class="absolute right-0 mt-2 w-56 rounded-xl bg-base-200 shadow-lg ring-1 ring-base-content/5 py-1"
+        class="absolute right-0 mt-2 w-56 bg-base-200 shadow-lg ring-1 ring-base-content/5 py-1"
       >
         <div class="px-4 py-3 border-b border-base-content/5">
           <p class="text-sm font-medium">
