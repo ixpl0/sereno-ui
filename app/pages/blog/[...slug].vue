@@ -1,0 +1,35 @@
+<script setup lang="ts">
+definePageMeta({
+  layout: 'public',
+})
+
+const route = useRoute()
+const path = `/blog/${(route.params.slug as string[]).join('/')}`
+
+const { data: page } = await useAsyncData(`blog-${path}`, () => {
+  return queryCollection('content').path(path).first()
+})
+
+useSeoMeta({
+  title: page.value?.title,
+  description: page.value?.description,
+})
+</script>
+
+<template>
+  <div class="container mx-auto px-4 py-16">
+    <NuxtLink
+      to="/blog"
+      class="inline-flex items-center gap-2 text-base-content/70 hover:text-base-content mb-8"
+    >
+      <Icon name="lucide:arrow-left" />
+      Назад к блогу
+    </NuxtLink>
+
+    <ContentRenderer
+      v-if="page"
+      :value="page"
+      class="prose prose-lg max-w-none"
+    />
+  </div>
+</template>

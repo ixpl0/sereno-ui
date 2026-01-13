@@ -1,8 +1,277 @@
 basePath: /api/v1
 definitions:
+  event.RequestComment:
+    properties:
+      text:
+        example: Comment text
+        type: string
+    required:
+    - text
+    type: object
+  event.RequestID:
+    properties:
+      id:
+        example: 00112233-4455-6677-8899-aabbccddeeff
+        type: string
+    required:
+    - id
+    type: object
+  event.RequestIncident:
+    properties:
+      description:
+        example: Incident description
+        type: string
+      tenant:
+        $ref: '#/definitions/event.RequestID'
+      title:
+        example: Incident title
+        type: string
+    required:
+    - tenant
+    - title
+    type: object
+  event.RequestKey:
+    properties:
+      key:
+        example: Key
+        maxLength: 32
+        minLength: 1
+        type: string
+    required:
+    - key
+    type: object
+  event.RequestKeyValue:
+    properties:
+      key:
+        example: Key
+        maxLength: 32
+        minLength: 1
+        type: string
+      value:
+        example: Value
+        maxLength: 64
+        minLength: 1
+        type: string
+    required:
+    - key
+    - value
+    type: object
+  event.RequestStatus:
+    properties:
+      status:
+        enum:
+        - acknowledged
+        - resolved
+        example: acknowledged
+        type: string
+    required:
+    - status
+    type: object
+  event.ResponseAlert:
+    properties:
+      annotations:
+        items:
+          $ref: '#/definitions/event.ResponseAnnotation'
+        type: array
+      comments:
+        items:
+          $ref: '#/definitions/event.ResponseComment'
+        type: array
+      id:
+        example: 00112233-4455-6677-8899-aabbccddeeff
+        type: string
+      labels:
+        items:
+          $ref: '#/definitions/event.ResponseLabel'
+        type: array
+      source:
+        example: alertmanager
+        type: string
+      statuses:
+        items:
+          $ref: '#/definitions/event.ResponseStatus'
+        type: array
+      tenant:
+        $ref: '#/definitions/event.ResponseTenant'
+      time:
+        example: 1766412596
+        type: integer
+    required:
+    - annotations
+    - comments
+    - id
+    - labels
+    - source
+    - statuses
+    - tenant
+    - time
+    type: object
+  event.ResponseAlertList:
+    properties:
+      alerts:
+        items:
+          $ref: '#/definitions/event.ResponseAlert'
+        type: array
+      total:
+        example: 10
+        type: integer
+    required:
+    - alerts
+    - total
+    type: object
+  event.ResponseAnnotation:
+    properties:
+      deleted:
+        example: false
+        type: boolean
+      key:
+        example: description
+        type: string
+      since:
+        example: 1766412596
+        type: integer
+      value:
+        example: CPU usage is 92% in 5 minutes
+        type: string
+    required:
+    - deleted
+    - key
+    - since
+    - value
+    type: object
+  event.ResponseComment:
+    properties:
+      deleted:
+        example: false
+        type: boolean
+      id:
+        example: 00112233-4455-6677-8899-aabbccddeeff
+        type: string
+      since:
+        example: 1766412596
+        type: integer
+      text:
+        example: Comment text
+        type: string
+    required:
+    - deleted
+    - id
+    - since
+    - text
+    type: object
+  event.ResponseIncident:
+    properties:
+      alerts:
+        items:
+          $ref: '#/definitions/event.ResponseAlert'
+        type: array
+      comments:
+        items:
+          $ref: '#/definitions/event.ResponseComment'
+        type: array
+      description:
+        example: Incident description
+        type: string
+      id:
+        example: 00112233-4455-6677-8899-aabbccddeeff
+        type: string
+      labels:
+        items:
+          $ref: '#/definitions/event.ResponseLabel'
+        type: array
+      statuses:
+        items:
+          $ref: '#/definitions/event.ResponseStatus'
+        type: array
+      tenant:
+        $ref: '#/definitions/event.ResponseTenant'
+      time:
+        example: 1766412596
+        type: integer
+      title:
+        example: Incident title
+        type: string
+    required:
+    - alerts
+    - comments
+    - id
+    - labels
+    - statuses
+    - tenant
+    - time
+    - title
+    type: object
+  event.ResponseIncidentList:
+    properties:
+      incidents:
+        items:
+          $ref: '#/definitions/event.ResponseIncident'
+        type: array
+      total:
+        example: 10
+        type: integer
+    required:
+    - incidents
+    - total
+    type: object
+  event.ResponseLabel:
+    properties:
+      deleted:
+        example: false
+        type: boolean
+      key:
+        example: alertname
+        type: string
+      since:
+        example: 1766412596
+        type: integer
+      value:
+        example: CriticalCpuUsage
+        type: string
+    required:
+    - deleted
+    - key
+    - since
+    - value
+    type: object
+  event.ResponseSingleAlert:
+    properties:
+      alert:
+        $ref: '#/definitions/event.ResponseAlert'
+    required:
+    - alert
+    type: object
+  event.ResponseSingleIncident:
+    properties:
+      incident:
+        $ref: '#/definitions/event.ResponseIncident'
+    required:
+    - incident
+    type: object
+  event.ResponseStatus:
+    properties:
+      since:
+        example: 1766412596
+        type: integer
+      status:
+        example: created
+        type: string
+    required:
+    - since
+    - status
+    type: object
+  event.ResponseTenant:
+    properties:
+      id:
+        example: 00112233-4455-6677-8899-aabbccddeeff
+        type: string
+    required:
+    - id
+    type: object
   server.ResponseError:
     properties:
       error:
+        example: Error message
         type: string
       request_id:
         example: 00112233-4455-6677-8899-aabbccddeeff
@@ -43,6 +312,9 @@ definitions:
       admin:
         example: true
         type: boolean
+      email:
+        example: ivan@ivanov.ru
+        type: string
       id:
         example: 00112233-4455-6677-8899-aabbccddeeff
         type: string
@@ -57,7 +329,7 @@ definitions:
     - id
     - since
     type: object
-  tenant.ResponseMembersList:
+  tenant.ResponseMemberList:
     properties:
       members:
         items:
@@ -96,18 +368,16 @@ definitions:
         example: 00112233-4455-6677-8899-aabbccddeeff
         type: string
       name:
-        example: My first tenant
+        example: My team name
         type: string
       since:
         example: 1766412596
         type: integer
     required:
-    - admin
     - id
     - name
-    - since
     type: object
-  tenant.ResponseTenantsList:
+  tenant.ResponseTenantList:
     properties:
       tenants:
         items:
@@ -124,18 +394,18 @@ definitions:
       name:
         example: My first token
         type: string
+      secret:
+        example: sat_1234567890abcdefghijkABCDEFGHIJK
+        type: string
       since:
         example: 1766412596
         type: integer
-      value:
-        example: sat_1234567890abcdefghijkABCDEFGHIJK
-        type: string
     required:
     - id
     - name
     - since
     type: object
-  tenant.ResponseTokensList:
+  tenant.ResponseTokenList:
     properties:
       tokens:
         items:
@@ -284,6 +554,13 @@ definitions:
     required:
     - contact
     type: object
+  user.ResponseSingleUser:
+    properties:
+      user:
+        $ref: '#/definitions/user.ResponseUser'
+    required:
+    - user
+    type: object
   user.ResponseUser:
     properties:
       first_name:
@@ -304,9 +581,359 @@ definitions:
 host: localhost:8080
 info:
   contact: {}
-  description: Duty компонент Sereno Systems
-  title: Sereno Duty REST API
+  description: OnCall компонент Sereno Systems
+  title: Sereno OnCall REST API
 paths:
+  /alerts:
+    get:
+      description: Возвращает алерты всех доступных тенантов
+      parameters:
+      - description: Alerts limit
+        in: query
+        name: limit
+        type: integer
+      - description: Alerts offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/event.ResponseAlertList'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+      security:
+      - AccessJWT: []
+      summary: Алерты
+      tags:
+      - alerts
+  /alerts/{id}:
+    get:
+      description: Возвращает алерт по ID
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/event.ResponseSingleAlert'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+      security:
+      - AccessJWT: []
+      summary: Алерт
+      tags:
+      - alerts
+  /alerts/{id}/annotations/add:
+    post:
+      consumes:
+      - application/json
+      description: Добавляет аннотацию
+      parameters:
+      - description: Request JSON
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/event.RequestKeyValue'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/event.ResponseSingleAlert'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+      security:
+      - AccessJWT: []
+      summary: Добавление аннотации
+      tags:
+      - alerts
+  /alerts/{id}/annotations/delete:
+    post:
+      consumes:
+      - application/json
+      description: Удаляет аннотацию
+      parameters:
+      - description: Request JSON
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/event.RequestKey'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/event.ResponseSingleAlert'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+      security:
+      - AccessJWT: []
+      summary: Удаление аннотации
+      tags:
+      - alerts
+  /alerts/{id}/comments/add:
+    post:
+      consumes:
+      - application/json
+      description: Добавляет комментарий
+      parameters:
+      - description: Request JSON
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/event.RequestComment'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/event.ResponseSingleAlert'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+      security:
+      - AccessJWT: []
+      summary: Добавление комментария
+      tags:
+      - alerts
+  /alerts/{id}/comments/delete:
+    post:
+      consumes:
+      - application/json
+      description: Удаляет комментарий
+      parameters:
+      - description: Request JSON
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/event.RequestID'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/event.ResponseSingleAlert'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+      security:
+      - AccessJWT: []
+      summary: Удаление комментария
+      tags:
+      - alerts
+  /alerts/{id}/labels/add:
+    post:
+      consumes:
+      - application/json
+      description: Добавляет лейбл
+      parameters:
+      - description: Request JSON
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/event.RequestKeyValue'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/event.ResponseSingleAlert'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+      security:
+      - AccessJWT: []
+      summary: Добавление лейбла
+      tags:
+      - alerts
+  /alerts/{id}/labels/delete:
+    post:
+      consumes:
+      - application/json
+      description: Удаляет лейбл
+      parameters:
+      - description: Request JSON
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/event.RequestKey'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/event.ResponseSingleAlert'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+      security:
+      - AccessJWT: []
+      summary: Удаление лейбла
+      tags:
+      - alerts
+  /alerts/{id}/status/set:
+    post:
+      consumes:
+      - application/json
+      description: 'Устанавливает статус: acknowledged или resolved'
+      parameters:
+      - description: Request JSON
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/event.RequestStatus'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/event.ResponseSingleAlert'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+      security:
+      - AccessJWT: []
+      summary: Установка статуса
+      tags:
+      - alerts
+  /alerts/create:
+    post:
+      consumes:
+      - application/json
+      description: Принимает webhook от системы мониторинга, парсит и создает в базе
+        Alert
+      parameters:
+      - description: Webhook source
+        in: query
+        name: source
+        required: true
+        type: string
+      - description: Webhook JSON
+        in: body
+        name: request
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+      security:
+      - StaticAccessToken: []
+      summary: Создание алерта (integration webhook)
+      tags:
+      - alerts
   /auth/login/{provider}:
     get:
       description: Вход через поддерживаемых OAuth провайдеров
@@ -448,6 +1075,137 @@ paths:
       summary: Новый AccessJWT
       tags:
       - auth
+  /incidents:
+    get:
+      description: Возвращает инциденты всех доступных тенантов
+      parameters:
+      - description: Incidents limit
+        in: query
+        name: limit
+        type: integer
+      - description: Incidents offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/event.ResponseIncidentList'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+      security:
+      - AccessJWT: []
+      summary: Инциденты
+      tags:
+      - incidents
+  /incidents/{id}:
+    get:
+      description: Возвращает инцидент по ID
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/event.ResponseSingleIncident'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+      security:
+      - AccessJWT: []
+      summary: Инцидент
+      tags:
+      - incidents
+  /incidents/{id}/status/set:
+    post:
+      consumes:
+      - application/json
+      description: 'Устанавливает статус: acknowledged или resolved'
+      parameters:
+      - description: Request JSON
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/event.RequestStatus'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/event.ResponseSingleIncident'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+      security:
+      - AccessJWT: []
+      summary: Установка статуса
+      tags:
+      - incidents
+  /incidents/create:
+    post:
+      consumes:
+      - application/json
+      description: Создает инцидент
+      parameters:
+      - description: Request JSON
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/event.RequestIncident'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/event.ResponseIncident'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+      security:
+      - AccessJWT: []
+      summary: Создание инцидента
+      tags:
+      - incidents
   /tenants:
     get:
       description: Возвращает список тенантов текущего пользователя с указанием прав
@@ -458,7 +1216,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/tenant.ResponseTenantsList'
+            $ref: '#/definitions/tenant.ResponseTenantList'
         "401":
           description: Unauthorized
           schema:
@@ -481,7 +1239,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/tenant.ResponseMembersList'
+            $ref: '#/definitions/tenant.ResponseMemberList'
         "400":
           description: Bad Request
           schema:
@@ -587,7 +1345,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/tenant.ResponseTokensList'
+            $ref: '#/definitions/tenant.ResponseTokenList'
         "400":
           description: Bad Request
           schema:
@@ -760,7 +1518,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/user.ResponseUser'
+            $ref: '#/definitions/user.ResponseSingleUser'
         "400":
           description: Bad Request
           schema:
@@ -969,7 +1727,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/user.ResponseUser'
+            $ref: '#/definitions/user.ResponseSingleUser'
         "400":
           description: Bad Request
           schema:

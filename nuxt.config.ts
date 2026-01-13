@@ -3,6 +3,7 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineNuxtConfig({
 
   modules: [
+    '@nuxt/content',
     '@nuxt/eslint',
     '@nuxt/icon',
     '@pinia/nuxt',

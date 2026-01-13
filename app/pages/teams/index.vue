@@ -150,7 +150,7 @@ const formatDate = (timestamp: number | undefined): string => {
           <NuxtLink
             v-for="tenant in tenantsData?.tenants"
             :key="tenant.id"
-            :to="`/tenants/${tenant.id}`"
+            :to="`/teams/${tenant.id}`"
             class="flex items-center justify-between p-4 bg-base-200/50 hover:bg-base-200 transition-colors"
           >
             <div class="flex items-center gap-3">

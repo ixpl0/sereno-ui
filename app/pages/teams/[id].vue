@@ -224,7 +224,7 @@ const formatDate = (timestamp: number | undefined): string => {
     <div class="max-w-3xl mx-auto">
       <div class="mb-4">
         <NuxtLink
-          to="/tenants"
+          to="/teams"
           class="inline-flex items-center gap-1 text-sm text-base-content/60 hover:text-base-content transition-colors"
         >
           <Icon

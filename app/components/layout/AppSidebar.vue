@@ -24,8 +24,15 @@ const topNavigationItems: ReadonlyArray<NavigationItem> = [
 ]
 
 const bottomNavigationItems: ReadonlyArray<NavigationItem> = [
-  { label: 'Команды', to: '/tenants', icon: 'lucide:users' },
+  { label: 'Команды', to: '/teams', icon: 'lucide:users' },
   { label: 'Профиль', to: '/profile', icon: 'lucide:user' },
+]
+
+const publicNavigationItems: ReadonlyArray<NavigationItem> = [
+  { label: 'Главная', to: '/', icon: 'lucide:globe' },
+  { label: 'Блог', to: '/blog', icon: 'lucide:newspaper' },
+  { label: 'Документация', to: '/docs', icon: 'lucide:book-open' },
+  { label: 'Цены', to: '/pricing', icon: 'lucide:credit-card' },
 ]
 
 const toggleCollapse = () => {
@@ -104,6 +111,29 @@ const isActive = (path: string) => route.path === path || route.path.startsWith(
               class="whitespace-nowrap"
               :class="{ 'lg:hidden': collapsed }"
             >
+              {{ item.label }}
+            </span>
+          </NuxtLink>
+        </li>
+      </ul>
+
+      <div class="lg:hidden border-t border-base-content/10 my-4" />
+
+      <ul class="lg:hidden space-y-1">
+        <li
+          v-for="item in publicNavigationItems"
+          :key="item.to"
+        >
+          <NuxtLink
+            :to="item.to"
+            class="flex items-center h-10 transition-colors gap-3 px-3 hover:bg-base-content/5 text-base-content/50 hover:text-base-content"
+            @click="closeMobileMenu"
+          >
+            <Icon
+              :name="item.icon"
+              class="w-5 h-5 shrink-0"
+            />
+            <span class="whitespace-nowrap">
               {{ item.label }}
             </span>
           </NuxtLink>

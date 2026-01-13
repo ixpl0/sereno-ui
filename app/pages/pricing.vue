@@ -3,8 +3,8 @@ definePageMeta({
   layout: 'public',
 })
 
-const { data: page } = await useAsyncData('index', () => {
-  return queryCollection('content').path('/').first()
+const { data: page } = await useAsyncData('pricing', () => {
+  return queryCollection('content').path('/pricing').first()
 })
 
 useSeoMeta({

@@ -3,13 +3,13 @@ definePageMeta({
   layout: 'public',
 })
 
-const { data: page } = await useAsyncData('index', () => {
-  return queryCollection('content').path('/').first()
+const { data: page } = await useAsyncData('docs-index', () => {
+  return queryCollection('content').path('/docs').first()
 })
 
 useSeoMeta({
-  title: page.value?.title,
-  description: page.value?.description,
+  title: 'Документация',
+  description: 'Руководство по использованию Sereno',
 })
 </script>
 
