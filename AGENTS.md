@@ -43,15 +43,19 @@ pnpm test:unit:coverage # Run Vitest with coverage
 app/
 ├── api/              # Auto-generated API client (from swagger.yaml, do not edit)
 ├── assets/css/       # Global CSS (Tailwind, DaisyUI, animations)
-├── components/ui/    # Reusable UI components (UiButton, UiInput, UiCard, etc.)
-├── composables/      # Vue composables (useAuth, etc.)
+├── components/
+│   ├── ui/           # Reusable UI components (UiButton, UiInput, UiCard, etc.)
+│   └── layout/       # Layout components (AppHeader, AppSidebar, UserDropdown, etc.)
+├── composables/      # Vue composables (useAuth, useUser, useTenants, etc.)
 ├── layouts/          # Nuxt layouts (default, auth)
 ├── middleware/       # Route middleware (auth, guest)
 ├── pages/            # Nuxt pages (file-based routing)
+├── plugins/          # Nuxt plugins (api.ts)
 ├── stores/           # Pinia stores
 ├── types/            # TypeScript types
-├── utils/            # Utility functions
-└── app.vue           # Root component
+├── utils/            # Utility functions (api, url, validation)
+├── app.vue           # Root component
+└── error.vue         # Error page
 server/
 ├── api/v1/           # Mock API routes (used when mockApi=true)
 └── utils/            # Mock data and helpers
@@ -81,6 +85,51 @@ tests/
 - Generated directory excluded from ESLint
 - **IMPORTANT**: `swagger.yaml` is read-only and provided by backend team. Do not edit it manually.
 
+## Pages
+
+```
+pages/
+├── index.vue                    # Landing/redirect page
+├── dashboard.vue                # Main dashboard
+├── profile.vue                  # User profile settings
+├── alerts.vue                   # Alerts list
+├── incidents.vue                # Incidents list
+├── tenants/
+│   ├── index.vue                # Teams list
+│   └── [id].vue                 # Team details (members, tokens)
+├── auth/
+│   ├── index.vue                # OAuth provider selection
+│   └── callback/[provider].vue  # OAuth callback handler
+└── mock-oauth/[provider].vue    # Mock OAuth flow (dev only)
+```
+
+## Composables
+
+All composables in `app/composables/`:
+
+| Composable | Description |
+|------------|-------------|
+| **useAuth** | Authentication state, login/logout, OAuth flow |
+| **useUser** | Current user data, profile updates (name, timezone, language) |
+| **useSessions** | User sessions management, close other sessions |
+| **useContacts** | User contacts (email, telegram), verification flow |
+| **useTenants** | Teams list, create/update teams |
+| **useTenantMembers** | Team members management (add, remove, set admin) |
+| **useTenantTokens** | API tokens for teams (create, delete) |
+| **useToast** | Toast notifications (success, error, warning, info) |
+| **useTheme** | Theme preference (light, dark, system) with cookie persistence |
+| **useBreakpoints** | Responsive breakpoints helper (greater, smaller) |
+
+## Layout Components
+
+Components in `app/components/layout/`:
+
+- **AppHeader** - Main app header with logo and user menu
+- **AppSidebar** - Navigation sidebar with menu items
+- **AuthHeader** - Header for auth pages (logo only)
+- **UserDropdown** - User avatar dropdown with profile/logout
+- **ThemeSwitcher** - Theme toggle (light/dark/system)
+
 ## UI Components
 
 All reusable UI elements in `app/components/ui/` with `Ui` prefix:
@@ -100,6 +149,22 @@ CSS animations in `app/assets/css/animations.css`:
 - `animate-appear` - Scale + fade in with bounce
 - `animate-fade-in` - Simple fade in
 - `animate-slide-up` - Slide up + fade in
+
+## Utils
+
+Utility functions in `app/utils/`:
+
+| File | Functions |
+|------|-----------|
+| **api.ts** | `isApiError`, `extractApiError`, `getApiData` - API response handling |
+| **url.ts** | `isValidRedirectUrl`, `safeRedirect` - secure redirect validation |
+| **validation.ts** | `isValidEmail`, `isValidTelegram` - input validation |
+
+## Plugins
+
+Nuxt plugins in `app/plugins/`:
+
+- **api.ts** - Configures API client baseUrl for mock mode (`/api/v1`)
 
 ## Code Style
 
