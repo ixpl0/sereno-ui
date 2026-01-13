@@ -8,12 +8,6 @@ const emit = defineEmits<{
 const { data: user } = await useFetch<UserResponseUser>('/api/v1/user')
 
 const userOrNull = computed(() => user.value ?? null)
-
-const publicNavigation = [
-  { name: 'Блог', to: '/blog' },
-  { name: 'Документация', to: '/docs' },
-  { name: 'Цены', to: '/pricing' },
-]
 </script>
 
 <template>
@@ -43,17 +37,6 @@ const publicNavigation = [
         </span>
       </NuxtLink>
     </div>
-
-    <nav class="hidden lg:flex items-center gap-6">
-      <NuxtLink
-        v-for="item in publicNavigation"
-        :key="item.to"
-        :to="item.to"
-        class="text-sm text-base-content/70 hover:text-base-content transition-colors"
-      >
-        {{ item.name }}
-      </NuxtLink>
-    </nav>
 
     <div class="flex items-center gap-3 self-center">
       <LayoutUserDropdown :user="userOrNull" />

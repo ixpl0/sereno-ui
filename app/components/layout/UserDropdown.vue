@@ -95,6 +95,17 @@ onUnmounted(() => {
       >
         <div class="py-1">
           <NuxtLink
+            to="/"
+            class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-base-content/5 transition-colors"
+            @click="closeDropdown"
+          >
+            <Icon
+              name="lucide:home"
+              class="w-4 h-4 text-base-content/60"
+            />
+            <span>На сайт</span>
+          </NuxtLink>
+          <NuxtLink
             to="/profile"
             class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-base-content/5 transition-colors"
             @click="closeDropdown"
