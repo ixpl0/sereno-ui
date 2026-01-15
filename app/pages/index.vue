@@ -4,12 +4,12 @@ definePageMeta({
 })
 
 const { data: page } = await useAsyncData('index', () => {
-  return queryCollection('content').path('/').first()
+  return queryCollection('content').where('path', '=', '/').first()
 })
 
 useSeoMeta({
-  title: page.value?.title,
-  description: page.value?.description,
+  title: page.value?.title ?? 'Sereno Systems',
+  description: page.value?.description ?? 'Платформа для мониторинга и управления инцидентами',
 })
 </script>
 

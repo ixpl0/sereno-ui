@@ -57,7 +57,7 @@ onUnmounted(() => {
   <div class="relative user-dropdown">
     <button
       v-if="user"
-      class="flex items-center gap-2 p-1.5 hover:bg-base-content/5 transition-colors"
+      class="flex items-center gap-2 p-1.5 hover:bg-base-content/5 transition-colors rounded-sm"
       @click="dropdownOpen = !dropdownOpen"
     >
       <div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
@@ -76,9 +76,17 @@ onUnmounted(() => {
     <NuxtLink
       v-else
       to="/auth"
-      class="btn btn-primary btn-sm"
+      class="flex items-center gap-2 p-1.5 hover:bg-base-content/5 transition-colors rounded-sm"
     >
-      Войти
+      <div class="w-8 h-8 rounded-full bg-base-content/10 flex items-center justify-center">
+        <Icon
+          name="lucide:user"
+          class="w-4 h-4 text-base-content/60"
+        />
+      </div>
+      <span class="hidden sm:block text-sm font-medium whitespace-nowrap">
+        Вход / Регистрация
+      </span>
     </NuxtLink>
 
     <Transition
@@ -91,23 +99,23 @@ onUnmounted(() => {
     >
       <div
         v-if="dropdownOpen && user"
-        class="absolute right-0 mt-2 w-56 bg-base-200 shadow-lg ring-1 ring-base-content/5 py-1"
+        class="absolute right-0 mt-2 w-56 bg-base-200 shadow-lg ring-1 ring-base-content/5 py-1 rounded"
       >
         <div class="py-1">
           <NuxtLink
-            to="/"
-            class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-base-content/5 transition-colors"
+            to="/dashboard"
+            class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-base-content/5 transition-colors rounded-sm"
             @click="closeDropdown"
           >
             <Icon
-              name="lucide:home"
+              name="lucide:layout-dashboard"
               class="w-4 h-4 text-base-content/60"
             />
-            <span>На сайт</span>
+            <span>Дашборд</span>
           </NuxtLink>
           <NuxtLink
             to="/profile"
-            class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-base-content/5 transition-colors"
+            class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-base-content/5 transition-colors rounded-sm"
             @click="closeDropdown"
           >
             <Icon
@@ -120,7 +128,7 @@ onUnmounted(() => {
 
         <div class="border-t border-base-content/5 py-1">
           <button
-            class="flex items-center gap-3 w-full px-4 py-2 text-sm text-error hover:bg-error/10 transition-colors cursor-pointer"
+            class="flex items-center gap-3 w-full px-4 py-2 text-sm text-error hover:bg-error/10 transition-colors cursor-pointer rounded-sm"
             @click="handleLogout"
           >
             <Icon

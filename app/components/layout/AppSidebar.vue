@@ -28,13 +28,6 @@ const bottomNavigationItems: ReadonlyArray<NavigationItem> = [
   { label: 'Профиль', to: '/profile', icon: 'lucide:user' },
 ]
 
-const publicNavigationItems: ReadonlyArray<NavigationItem> = [
-  { label: 'Главная', to: '/', icon: 'lucide:globe' },
-  { label: 'Блог', to: '/blog', icon: 'lucide:newspaper' },
-  { label: 'Документация', to: '/docs', icon: 'lucide:book-open' },
-  { label: 'Цены', to: '/pricing', icon: 'lucide:credit-card' },
-]
-
 const toggleCollapse = () => {
   emit('update:collapsed', !props.collapsed)
 }
@@ -62,7 +55,7 @@ const isActive = (path: string) => route.path === path || route.path.startsWith(
         >
           <NuxtLink
             :to="item.to"
-            class="flex items-center h-10 transition-colors gap-3 px-3"
+            class="flex items-center h-10 transition-colors gap-3 px-3 rounded-sm"
             :class="[
               collapsed ? 'lg:justify-center lg:w-10 lg:mx-auto lg:gap-0 lg:px-0' : '',
               isActive(item.to)
@@ -94,7 +87,7 @@ const isActive = (path: string) => route.path === path || route.path.startsWith(
         >
           <NuxtLink
             :to="item.to"
-            class="flex items-center h-10 transition-colors gap-3 px-3"
+            class="flex items-center h-10 transition-colors gap-3 px-3 rounded-sm"
             :class="[
               collapsed ? 'lg:justify-center lg:w-10 lg:mx-auto lg:gap-0 lg:px-0' : '',
               isActive(item.to)
@@ -117,33 +110,32 @@ const isActive = (path: string) => route.path === path || route.path.startsWith(
         </li>
       </ul>
 
-      <div class="lg:hidden border-t border-base-content/10 my-4" />
+      <div class="border-t border-base-content/10 my-4" />
 
-      <ul class="lg:hidden space-y-1">
-        <li
-          v-for="item in publicNavigationItems"
-          :key="item.to"
+      <a
+        href="/"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="flex items-center h-10 transition-colors gap-3 px-3 hover:bg-base-content/5 text-base-content/50 hover:text-base-content rounded-sm"
+        :class="collapsed ? 'lg:justify-center lg:w-10 lg:mx-auto lg:gap-0 lg:px-0' : ''"
+        @click="closeMobileMenu"
+      >
+        <Icon
+          name="lucide:globe"
+          class="w-5 h-5 shrink-0"
+        />
+        <span
+          class="whitespace-nowrap"
+          :class="{ 'lg:hidden': collapsed }"
         >
-          <NuxtLink
-            :to="item.to"
-            class="flex items-center h-10 transition-colors gap-3 px-3 hover:bg-base-content/5 text-base-content/50 hover:text-base-content"
-            @click="closeMobileMenu"
-          >
-            <Icon
-              :name="item.icon"
-              class="w-5 h-5 shrink-0"
-            />
-            <span class="whitespace-nowrap">
-              {{ item.label }}
-            </span>
-          </NuxtLink>
-        </li>
-      </ul>
+          Сайт
+        </span>
+      </a>
     </nav>
 
     <div class="p-2 border-t border-base-content/5">
       <button
-        class="hidden lg:flex items-center h-10 hover:bg-base-content/5 text-base-content/60 transition-colors"
+        class="hidden lg:flex items-center h-10 hover:bg-base-content/5 text-base-content/60 transition-colors rounded-sm"
         :class="collapsed ? 'justify-center w-10 mx-auto' : 'w-full justify-center gap-2 px-3'"
         @click="toggleCollapse"
       >

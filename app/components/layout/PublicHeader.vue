@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import type { UserResponseUser } from '~/api/types.gen'
 
-const { isAuthenticated } = useAuth()
-
 const { data: user } = await useFetch<UserResponseUser>('/api/v1/user', {
   server: false,
   lazy: true,
@@ -13,9 +11,10 @@ const userOrNull = computed(() => user.value ?? null)
 const mobileMenuOpen = ref(false)
 
 const navigation = [
-  { name: 'Блог', to: '/blog', icon: 'lucide:newspaper' },
   { name: 'Документация', to: '/docs', icon: 'lucide:book-open' },
+  { name: 'Блог', to: '/blog', icon: 'lucide:newspaper' },
   { name: 'Цены', to: '/pricing', icon: 'lucide:credit-card' },
+  { name: 'О компании', to: '/about', icon: 'lucide:building-2' },
 ]
 
 const toggleMobileMenu = () => {
@@ -33,7 +32,7 @@ const closeMobileMenu = () => {
   >
     <div class="flex items-center gap-4">
       <button
-        class="lg:hidden p-2 -ml-2 hover:bg-base-content/5 transition-colors"
+        class="lg:hidden p-2 -ml-2 hover:bg-base-content/5 transition-colors rounded-sm"
         @click="toggleMobileMenu"
       >
         <Icon
@@ -46,7 +45,7 @@ const closeMobileMenu = () => {
         to="/"
         class="flex items-center gap-3"
       >
-        <div class="w-10 h-10 bg-primary flex items-center justify-center shrink-0">
+        <div class="w-10 h-10 bg-primary flex items-center justify-center shrink-0 rounded-sm">
           <span class="text-primary-content font-bold text-sm">S</span>
         </div>
         <span class="font-bold text-lg whitespace-nowrap hidden sm:block">
@@ -67,26 +66,7 @@ const closeMobileMenu = () => {
     </nav>
 
     <div class="flex items-center gap-3">
-      <NuxtLink
-        v-if="isAuthenticated"
-        to="/dashboard"
-        class="btn btn-primary btn-sm"
-      >
-        Дашборд
-      </NuxtLink>
-
-      <LayoutUserDropdown
-        v-if="isAuthenticated"
-        :user="userOrNull"
-      />
-
-      <NuxtLink
-        v-if="!isAuthenticated"
-        to="/auth"
-        class="btn btn-primary btn-sm"
-      >
-        Войти
-      </NuxtLink>
+      <LayoutUserDropdown :user="userOrNull" />
 
       <LayoutThemeSwitcher />
     </div>
@@ -101,7 +81,7 @@ const closeMobileMenu = () => {
         <li>
           <NuxtLink
             to="/"
-            class="flex items-center h-10 px-3 gap-3 hover:bg-base-content/5 text-base-content/70 hover:text-base-content transition-colors"
+            class="flex items-center h-10 px-3 gap-3 hover:bg-base-content/5 text-base-content/70 hover:text-base-content transition-colors rounded-sm"
             @click="closeMobileMenu"
           >
             <Icon
@@ -117,7 +97,7 @@ const closeMobileMenu = () => {
         >
           <NuxtLink
             :to="item.to"
-            class="flex items-center h-10 px-3 gap-3 hover:bg-base-content/5 text-base-content/70 hover:text-base-content transition-colors"
+            class="flex items-center h-10 px-3 gap-3 hover:bg-base-content/5 text-base-content/70 hover:text-base-content transition-colors rounded-sm"
             @click="closeMobileMenu"
           >
             <Icon

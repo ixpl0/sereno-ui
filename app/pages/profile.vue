@@ -495,7 +495,7 @@ const formatDate = (timestamp: number | undefined): string => {
             <div
               v-for="contact in contactsData?.contacts"
               :key="contact.id"
-              class="flex items-center justify-between p-3"
+              class="flex items-center justify-between p-3 rounded"
               :class="contact.verified ? 'bg-success/10' : 'bg-warning/10'"
             >
               <div class="flex items-center gap-3">
@@ -572,7 +572,7 @@ const formatDate = (timestamp: number | undefined): string => {
 
             <div
               v-if="isAddingContact"
-              class="p-4 bg-base-200 space-y-3"
+              class="p-4 bg-base-200 space-y-3 rounded"
             >
               <div class="flex gap-3">
                 <div class="w-32 shrink-0">
@@ -639,7 +639,7 @@ const formatDate = (timestamp: number | undefined): string => {
         >
           <div
             v-if="currentSession"
-            class="flex items-center justify-between p-3 bg-success/10"
+            class="flex items-center justify-between p-3 bg-success/10 rounded"
           >
             <div class="flex items-center gap-3">
               <div class="badge badge-success">
@@ -659,7 +659,7 @@ const formatDate = (timestamp: number | undefined): string => {
           <div
             v-for="session in otherSessions"
             :key="session.id"
-            class="flex items-center justify-between p-3 bg-base-200"
+            class="flex items-center justify-between p-3 bg-base-200 rounded"
           >
             <div>
               <div class="font-medium">

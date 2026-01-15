@@ -8,6 +8,9 @@
   --color-success-content: oklch(0.25 0.04 142);
   --color-error: oklch(0.69 0.17 26.15);
   --color-error-content: oklch(0.98 0.01 25);
+  --radius-box: 4px;
+  --radius-field: 2px;
+  --radius-selector: 2px;
 }
 
 @plugin "daisyui/theme" {
@@ -18,4 +21,7 @@
   --color-success-content: oklch(0.98 0.01 142);
   --color-error: oklch(0.72 0.15 25.42);
   --color-error-content: oklch(0.98 0.01 25);
+  --radius-box: 4px;
+  --radius-field: 2px;
+  --radius-selector: 2px;
 }

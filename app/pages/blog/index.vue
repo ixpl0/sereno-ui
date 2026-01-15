@@ -29,7 +29,7 @@ useSeoMeta({
         v-for="post in posts"
         :key="post.path"
         :to="post.path"
-        class="block p-6 bg-base-200/50 hover:bg-base-200 transition-colors rounded-lg"
+        class="block p-6 bg-base-200/50 hover:bg-base-200 transition-colors rounded"
       >
         <h2 class="text-xl font-semibold mb-2">
           {{ post.title }}

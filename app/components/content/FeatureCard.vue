@@ -6,10 +6,10 @@ defineProps<{
 </script>
 
 <template>
-  <div class="p-6 bg-base-200/50 hover:bg-base-200 transition-colors rounded-xl">
+  <div class="p-6 bg-base-200/50 hover:bg-base-200 transition-colors rounded">
     <div
       v-if="icon"
-      class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4"
+      class="w-12 h-12 bg-primary/10 rounded flex items-center justify-center mb-4"
     >
       <Icon
         :name="icon"

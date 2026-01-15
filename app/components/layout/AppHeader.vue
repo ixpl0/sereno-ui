@@ -16,7 +16,7 @@ const userOrNull = computed(() => user.value ?? null)
   >
     <div class="flex items-center gap-4">
       <button
-        class="lg:hidden p-2 -ml-2 hover:bg-base-content/5 transition-colors"
+        class="lg:hidden p-2 -ml-2 hover:bg-base-content/5 transition-colors rounded-sm"
         @click="emit('toggleMobileSidebar')"
       >
         <Icon
@@ -29,7 +29,7 @@ const userOrNull = computed(() => user.value ?? null)
         to="/dashboard"
         class="flex items-center gap-3"
       >
-        <div class="w-10 h-10 bg-primary flex items-center justify-center shrink-0">
+        <div class="w-10 h-10 bg-primary flex items-center justify-center shrink-0 rounded-sm">
           <span class="text-primary-content font-bold text-sm">S</span>
         </div>
         <span class="font-bold text-lg whitespace-nowrap hidden sm:block">

@@ -1,9 +1,4 @@
 :root {
-  --radius-box: 0;
-  --radius-btn: 0;
-  --radius-field: 0;
-  --radius-selector: 0;
-
   --glow-1: oklch(0.75 0.15 280 / 0.15);
   --glow-2: oklch(0.7 0.14 220 / 0.14);
 }

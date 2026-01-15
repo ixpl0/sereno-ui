@@ -12,7 +12,7 @@ const options: Array<{ value: ThemeOption, icon: string, label: string }> = [
 
 <template>
   <div
-    class="inline-flex items-center gap-0.5 p-0.5 bg-base-content/5 border border-base-content/10"
+    class="inline-flex items-center gap-0.5 p-0.5 bg-base-content/5 border border-base-content/10 rounded-sm"
     role="radiogroup"
     aria-label="Выбор темы"
   >
