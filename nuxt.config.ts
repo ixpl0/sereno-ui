@@ -18,6 +18,9 @@ export default defineNuxtConfig({
       type: 'sqlite',
       filename: ':memory:',
     },
+    experimental: {
+      sqliteConnector: 'native',
+    },
   },
   runtimeConfig: {
     public: {
