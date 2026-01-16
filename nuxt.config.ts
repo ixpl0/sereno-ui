@@ -67,4 +67,11 @@ export default defineNuxtConfig({
       stylistic: true,
     },
   },
+
+  icon: {
+    mode: 'svg',
+    clientBundle: {
+      scan: true,
+    },
+  },
 })

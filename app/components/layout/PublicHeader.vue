@@ -76,7 +76,7 @@ const closeMobileMenu = () => {
     class="fixed top-16 bottom-0 left-0 z-40 w-64 flex flex-col bg-base-200 border-r border-base-content/5 transition-transform duration-300 lg:hidden"
     :class="mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'"
   >
-    <nav class="flex-1 flex flex-col py-4 px-2">
+    <nav class="flex-1 flex flex-col overflow-y-auto py-4 px-2">
       <ul class="space-y-1">
         <li>
           <NuxtLink

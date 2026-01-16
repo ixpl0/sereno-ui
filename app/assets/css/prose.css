@@ -66,3 +66,9 @@
 .prose hr {
   border-color: color-mix(in oklch, var(--color-base-content) 10%, transparent);
 }
+
+.prose table {
+  display: block;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}

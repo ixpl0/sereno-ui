@@ -6,7 +6,7 @@ useSeoMeta({
 })
 
 const sidebarCollapsed = ref(false)
-const mobileSidebarOpen = ref(false)
+const { sidebarOpen, toggleSidebar, closeSidebar } = useMobileMenus()
 
 const breakpoints = useBreakpoints({
   lg: 1024,
@@ -24,14 +24,10 @@ onMounted(() => {
     sidebarCollapsed.value = true
   }
 })
-
-const toggleMobileSidebar = () => {
-  mobileSidebarOpen.value = !mobileSidebarOpen.value
-}
 </script>
 
 <template>
-  <div class="min-h-screen auth-gradient relative overflow-hidden">
+  <div class="min-h-screen auth-gradient relative overflow-x-hidden">
     <div class="absolute inset-0 overflow-hidden">
       <div class="absolute -bottom-[60rem] -right-[60rem] w-[85rem] h-[85rem] rounded-full blur-[180px] bg-[var(--glow-1)] transition-colors duration-500" />
       <div class="absolute -bottom-[60rem] -left-[60rem] w-[85rem] h-[85rem] rounded-full blur-[180px] bg-[var(--glow-2)] transition-colors duration-500" />
@@ -39,12 +35,13 @@ const toggleMobileSidebar = () => {
     </div>
 
     <div class="relative z-10 min-h-screen flex flex-col pt-16">
-      <LayoutAppHeader @toggle-mobile-sidebar="toggleMobileSidebar" />
+      <LayoutAppHeader @toggle-mobile-sidebar="toggleSidebar" />
 
       <div class="flex-1 flex">
         <LayoutAppSidebar
           v-model:collapsed="sidebarCollapsed"
-          v-model:mobile-open="mobileSidebarOpen"
+          :mobile-open="sidebarOpen"
+          @update:mobile-open="closeSidebar"
         />
 
         <main

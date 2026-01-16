@@ -47,7 +47,7 @@ const isActive = (path: string) => route.path === path || route.path.startsWith(
       mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
     ]"
   >
-    <nav class="flex-1 flex flex-col overflow-hidden py-4 px-2">
+    <nav class="flex-1 flex flex-col overflow-y-auto py-4 px-2">
       <ul class="space-y-1">
         <li
           v-for="item in topNavigationItems"

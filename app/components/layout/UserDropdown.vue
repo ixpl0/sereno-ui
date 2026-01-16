@@ -7,8 +7,13 @@ const props = defineProps<{
 
 const { logout } = useAuth()
 const router = useRouter()
+const { resolvedTheme } = useTheme()
+const { userDropdownOpen, toggleUserDropdown, closeUserDropdown } = useMobileMenus()
 
-const dropdownOpen = ref(false)
+const breakpoints = useBreakpoints({
+  lg: 1024,
+})
+const isLargeScreen = breakpoints.greater('lg')
 
 const userInitials = computed(() => {
   if (!props.user) {
@@ -28,21 +33,26 @@ const userName = computed(() => {
 })
 
 const handleLogout = async () => {
-  dropdownOpen.value = false
+  closeUserDropdown()
   await logout()
   router.push('/auth')
-}
-
-const closeDropdown = () => {
-  dropdownOpen.value = false
 }
 
 const handleClickOutside = (event: MouseEvent) => {
   const target = event.target as HTMLElement
   if (!target.closest('.user-dropdown')) {
-    closeDropdown()
+    closeUserDropdown()
   }
 }
+
+watch(userDropdownOpen, (open) => {
+  if (open && !isLargeScreen.value) {
+    document.body.style.overflow = 'hidden'
+  }
+  else {
+    document.body.style.overflow = ''
+  }
+})
 
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
@@ -50,6 +60,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
+  document.body.style.overflow = ''
 })
 </script>
 
@@ -58,7 +69,7 @@ onUnmounted(() => {
     <button
       v-if="user"
       class="flex items-center gap-2 p-1.5 hover:bg-base-content/5 transition-colors rounded-sm"
-      @click="dropdownOpen = !dropdownOpen"
+      @click="toggleUserDropdown"
     >
       <div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
         <span class="text-sm font-medium text-primary">{{ userInitials }}</span>
@@ -69,7 +80,7 @@ onUnmounted(() => {
       <Icon
         name="lucide:chevron-down"
         class="w-4 h-4 text-base-content/60 transition-transform"
-        :class="{ 'rotate-180': dropdownOpen }"
+        :class="{ 'rotate-180': userDropdownOpen }"
       />
     </button>
 
@@ -98,14 +109,14 @@ onUnmounted(() => {
       leave-to-class="transform opacity-0 scale-95"
     >
       <div
-        v-if="dropdownOpen && user"
+        v-if="userDropdownOpen && user && isLargeScreen"
         class="absolute right-0 mt-2 w-56 bg-base-200 shadow-lg ring-1 ring-base-content/5 py-1 rounded"
       >
         <div class="py-1">
           <NuxtLink
             to="/dashboard"
             class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-base-content/5 transition-colors rounded-sm"
-            @click="closeDropdown"
+            @click="closeUserDropdown"
           >
             <Icon
               name="lucide:layout-dashboard"
@@ -116,7 +127,7 @@ onUnmounted(() => {
           <NuxtLink
             to="/profile"
             class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-base-content/5 transition-colors rounded-sm"
-            @click="closeDropdown"
+            @click="closeUserDropdown"
           >
             <Icon
               name="lucide:user"
@@ -140,5 +151,81 @@ onUnmounted(() => {
         </div>
       </div>
     </Transition>
+
+    <Teleport to="body">
+      <aside
+        v-if="user && !isLargeScreen"
+        :data-theme="resolvedTheme"
+        class="fixed top-16 bottom-0 right-0 z-40 w-64 flex flex-col bg-base-200 border-l border-base-content/5 transition-all duration-300"
+        :class="userDropdownOpen ? 'translate-x-0' : 'translate-x-full'"
+      >
+        <div class="flex items-center gap-3 p-4 border-b border-base-content/5">
+          <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+            <span class="font-medium text-primary">{{ userInitials }}</span>
+          </div>
+          <div class="min-w-0 flex-1">
+            <div class="font-medium truncate">
+              {{ userName }}
+            </div>
+            <div class="text-sm text-base-content/60 truncate">
+              {{ user?.email }}
+            </div>
+          </div>
+        </div>
+
+        <nav class="flex-1 flex flex-col overflow-y-auto py-4 px-2">
+          <ul class="space-y-1">
+            <li>
+              <NuxtLink
+                to="/dashboard"
+                class="flex items-center h-10 transition-colors gap-3 px-3 rounded-sm hover:bg-base-content/5 text-base-content/70 hover:text-base-content"
+                @click="closeUserDropdown"
+              >
+                <Icon
+                  name="lucide:layout-dashboard"
+                  class="w-5 h-5 shrink-0"
+                />
+                <span>Дашборд</span>
+              </NuxtLink>
+            </li>
+            <li>
+              <NuxtLink
+                to="/profile"
+                class="flex items-center h-10 transition-colors gap-3 px-3 rounded-sm hover:bg-base-content/5 text-base-content/70 hover:text-base-content"
+                @click="closeUserDropdown"
+              >
+                <Icon
+                  name="lucide:user"
+                  class="w-5 h-5 shrink-0"
+                />
+                <span>Профиль</span>
+              </NuxtLink>
+            </li>
+          </ul>
+
+          <div class="flex-1" />
+
+          <div class="border-t border-base-content/10 my-4" />
+
+          <button
+            class="flex items-center h-10 transition-colors gap-3 px-3 rounded-sm text-error hover:bg-error/10 cursor-pointer"
+            @click="handleLogout"
+          >
+            <Icon
+              name="lucide:log-out"
+              class="w-5 h-5 shrink-0"
+            />
+            <span>Выйти</span>
+          </button>
+        </nav>
+      </aside>
+
+      <div
+        v-if="userDropdownOpen && user && !isLargeScreen"
+        :data-theme="resolvedTheme"
+        class="fixed top-16 inset-x-0 bottom-0 z-30 bg-black/50"
+        @click="closeUserDropdown"
+      />
+    </Teleport>
   </div>
 </template>
