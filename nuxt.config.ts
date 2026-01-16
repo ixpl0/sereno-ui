@@ -32,6 +32,13 @@ export default defineNuxtConfig({
   },
   compatibilityDate: '2025-07-15',
 
+  nitro: {
+    prerender: {
+      routes: ['/', '/about', '/pricing', '/blog', '/docs'],
+      crawlLinks: true,
+    },
+  },
+
   vite: {
     plugins: [tailwindcss()],
     optimizeDeps: {
