@@ -12,6 +12,13 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
 
   css: ['~/assets/css/main.css'],
+
+  content: {
+    database: {
+      type: 'sqlite',
+      filename: ':memory:',
+    },
+  },
   runtimeConfig: {
     public: {
       mockApi: false,
