@@ -1,10 +1,7 @@
 <script setup lang="ts">
 import type { UserResponseUser } from '~/api/types.gen'
 
-const { data: user } = await useFetch<UserResponseUser>('/api/v1/user', {
-  server: false,
-  lazy: true,
-})
+const { data: user } = await useFetch<UserResponseUser>('/api/v1/user')
 
 const userOrNull = computed(() => user.value ?? null)
 
