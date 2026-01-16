@@ -17,6 +17,15 @@ export default defineNuxtConfig({
       mockApi: false,
     },
   },
+  routeRules: {
+    '/': { prerender: true },
+    '/about': { prerender: true },
+    '/pricing': { prerender: true },
+    '/blog': { prerender: true },
+    '/blog/**': { prerender: true },
+    '/docs': { prerender: true },
+    '/docs/**': { prerender: true },
+  },
 
   future: {
     compatibilityVersion: 4,

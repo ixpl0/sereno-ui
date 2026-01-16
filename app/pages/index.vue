@@ -4,7 +4,7 @@ definePageMeta({
 })
 
 const { data: page } = await useAsyncData('index', () => {
-  return queryCollection('content').where('path', '=', '/').first()
+  return queryCollection('content').path('/').first()
 })
 
 useSeoMeta({
