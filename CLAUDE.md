@@ -1,6 +1,6 @@
-# AGENTS.md
+# CLAUDE.md
 
-This file provides guidance to AI agents when working with code in this repository.
+This file provides guidance to Claude Code when working with this repository.
 
 ## Commands
 
@@ -71,6 +71,27 @@ tests/
 - Full server-side rendering with Nuxt 4
 - Cookie-based auth (works on SSR, no localStorage)
 - Route middleware runs on server
+
+#### SSR Hydration Mismatch Prevention
+
+Common causes and solutions:
+
+1. **Browser-only APIs (window, document)**
+   - Wrap in `onMounted()` or use `<ClientOnly>` component
+   - Example: `useBreakpoints` uses `isMounted` flag to return consistent values during SSR
+
+2. **Cookies not available on server**
+   - Always use `sameSite: 'lax'` in `useCookie()` options
+   - Example: `useCookie('auth_token', { sameSite: 'lax' })`
+
+3. **Dynamic content that differs server/client**
+   - Wrap in `<ClientOnly>` component
+   - Example: tokens, timestamps, user-specific data
+
+4. **Responsive breakpoints**
+   - `useBreakpoints` composable is SSR-safe
+   - Returns `false` for all breakpoint checks until mounted
+   - Use `watch` with `immediate: true` to update state after mount
 
 ### Mock API
 - Run `pnpm dev:mock` to use mock API instead of real backend
