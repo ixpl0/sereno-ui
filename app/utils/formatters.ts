@@ -74,9 +74,9 @@ export const getStatusColor = (status: string | undefined): string => {
 
 export const getStatusBorderColor = (status: string | undefined): string => {
   const colorMap: Record<string, string> = {
-    created: 'border-l-error',
-    acknowledged: 'border-l-warning',
-    resolved: 'border-l-success',
+    created: 'border-r-warning',
+    acknowledged: 'border-r-info',
+    resolved: 'border-r-success',
   }
-  return colorMap[status ?? ''] ?? 'border-l-base-content/20'
+  return colorMap[status ?? ''] ?? 'border-r-base-content/20'
 }

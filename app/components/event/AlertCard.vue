@@ -38,64 +38,65 @@ const getDisplayAnnotations = (alert: EventResponseAlert) =>
 
 <template>
   <div
-    class="bg-base-200/50 hover:bg-base-200 border border-base-content/10 border-l-4 rounded-lg p-4 cursor-pointer transition-all hover:shadow-md"
+    class="bg-base-200/50 hover:bg-base-200 border border-base-content/10 border-r-4 rounded-lg py-3 px-4 cursor-pointer transition-all hover:shadow-md flex gap-4"
     :class="getStatusBorderColor(currentStatus)"
     @click="emit('click')"
   >
-    <div class="flex items-center justify-between gap-3 mb-2 text-sm">
-      <div class="flex items-center gap-2 text-base-content/60">
+    <div class="flex-1 min-w-0">
+      <div class="flex items-center gap-2 text-sm text-base-content/60 mb-2">
         <Icon
           name="lucide:clock"
-          class="w-3.5 h-3.5"
+          class="w-3.5 h-3.5 shrink-0"
         />
         <span>{{ formatDateTime(alert.time) }}</span>
       </div>
-      <div class="flex items-center gap-2">
+
+      <h3 class="font-medium text-lg mb-1">
+        {{ getAlertTitle(alert) }}
+      </h3>
+
+      <p
+        v-if="getAlertDescription(alert)"
+        class="text-sm text-base-content/70 line-clamp-2 mb-3"
+      >
+        {{ getAlertDescription(alert) }}
+      </p>
+
+      <div
+        v-if="getActiveLabels(alert).length > 0"
+        class="flex flex-wrap gap-1.5 mb-2"
+      >
         <span
-          class="badge badge-sm"
-          :class="getStatusColor(currentStatus)"
+          v-for="label in getActiveLabels(alert)"
+          :key="label.key"
+          class="badge badge-sm badge-success"
         >
-          {{ formatStatus(currentStatus) }}
+          {{ label.key }}: {{ label.value }}
         </span>
-        <span class="text-base-content/50">{{ alert.tenant.id }}</span>
+      </div>
+
+      <div
+        v-if="getDisplayAnnotations(alert).length > 0"
+        class="flex flex-wrap gap-1.5"
+      >
+        <span
+          v-for="annotation in getDisplayAnnotations(alert)"
+          :key="annotation.key"
+          class="badge badge-sm badge-warning"
+        >
+          {{ annotation.key }}: {{ annotation.value }}
+        </span>
       </div>
     </div>
 
-    <h3 class="font-medium text-lg mb-1">
-      {{ getAlertTitle(alert) }}
-    </h3>
-
-    <p
-      v-if="getAlertDescription(alert)"
-      class="text-sm text-base-content/70 line-clamp-2 mb-3"
-    >
-      {{ getAlertDescription(alert) }}
-    </p>
-
-    <div
-      v-if="getActiveLabels(alert).length > 0"
-      class="flex flex-wrap gap-1.5 mb-2"
-    >
+    <div class="flex flex-col items-end gap-2 shrink-0">
       <span
-        v-for="label in getActiveLabels(alert)"
-        :key="label.key"
-        class="badge badge-sm badge-success"
+        class="badge badge-sm"
+        :class="getStatusColor(currentStatus)"
       >
-        {{ label.key }}: {{ label.value }}
+        {{ formatStatus(currentStatus) }}
       </span>
-    </div>
-
-    <div
-      v-if="getDisplayAnnotations(alert).length > 0"
-      class="flex flex-wrap gap-1.5"
-    >
-      <span
-        v-for="annotation in getDisplayAnnotations(alert)"
-        :key="annotation.key"
-        class="badge badge-sm badge-warning"
-      >
-        {{ annotation.key }}: {{ annotation.value }}
-      </span>
+      <span class="text-sm text-base-content/50">{{ alert.tenant.id }}</span>
     </div>
   </div>
 </template>
