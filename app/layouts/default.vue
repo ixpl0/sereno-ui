@@ -13,7 +13,11 @@ const router = useRouter()
 const { data: user } = await useFetch<UserResponseUser>('/api/v1/user')
 const userOrNull = computed(() => user.value ?? null)
 
-const sidebarCollapsed = ref(false)
+const sidebarCollapsedCookie = useCookie<boolean>('sidebar_collapsed', {
+  default: () => false,
+  sameSite: 'lax',
+})
+const sidebarCollapsed = ref(sidebarCollapsedCookie.value)
 const { sidebarOpen, toggleSidebar, closeSidebar } = useMobileMenus()
 
 const breakpoints = useBreakpoints({
@@ -21,15 +25,18 @@ const breakpoints = useBreakpoints({
 })
 const isLargeScreen = breakpoints.greater('lg')
 
+watch(sidebarCollapsed, (collapsed) => {
+  if (isLargeScreen.value) {
+    sidebarCollapsedCookie.value = collapsed
+  }
+})
+
 watch(isLargeScreen, (large) => {
   if (!large) {
     sidebarCollapsed.value = true
   }
-})
-
-onMounted(() => {
-  if (!isLargeScreen.value) {
-    sidebarCollapsed.value = true
+  else {
+    sidebarCollapsed.value = sidebarCollapsedCookie.value
   }
 })
 

@@ -6,6 +6,7 @@ export const useAuthStore = defineStore('auth', () => {
   const tokenCookie = useCookie<string | null>(AUTH_TOKEN_KEY, {
     default: () => null,
     watch: true,
+    sameSite: 'lax',
   })
 
   const token = computed(() => tokenCookie.value)
