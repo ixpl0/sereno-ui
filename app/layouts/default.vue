@@ -1,9 +1,17 @@
 <script setup lang="ts">
+import type { UserResponseUser } from '~/api/types.gen'
+
 useSeoMeta({
   titleTemplate: '%s | Sereno UI',
   ogSiteName: 'Sereno UI',
   ogType: 'website',
 })
+
+const { logout } = useAuth()
+const router = useRouter()
+
+const { data: user } = await useFetch<UserResponseUser>('/api/v1/user')
+const userOrNull = computed(() => user.value ?? null)
 
 const sidebarCollapsed = ref(false)
 const { sidebarOpen, toggleSidebar, closeSidebar } = useMobileMenus()
@@ -24,6 +32,11 @@ onMounted(() => {
     sidebarCollapsed.value = true
   }
 })
+
+const handleLogout = async () => {
+  await logout()
+  router.push('/')
+}
 </script>
 
 <template>
@@ -35,7 +48,11 @@ onMounted(() => {
     </div>
 
     <div class="relative z-10 min-h-screen flex flex-col pt-16">
-      <LayoutAppHeader @toggle-mobile-sidebar="toggleSidebar" />
+      <LayoutAppHeader
+        :user="userOrNull"
+        @toggle-mobile-sidebar="toggleSidebar"
+        @logout="handleLogout"
+      />
 
       <div class="flex-1 flex">
         <LayoutAppSidebar

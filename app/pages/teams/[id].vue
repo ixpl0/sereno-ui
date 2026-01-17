@@ -4,6 +4,7 @@ import type {
   TenantResponseMembersList,
   TenantResponseTokensList,
 } from '~/api/types.gen'
+import { formatDate } from '~/utils/formatters'
 
 const route = useRoute()
 const tenantId = computed(() => route.params.id as string)
@@ -205,17 +206,6 @@ const handleDeleteToken = async (tokenId: string) => {
 
   await refreshTokens()
   toast.success('Токен удалён')
-}
-
-const formatDate = (timestamp: number | undefined): string => {
-  if (!timestamp) {
-    return ''
-  }
-  return new Date(timestamp * 1000).toLocaleDateString('ru-RU', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  })
 }
 </script>
 

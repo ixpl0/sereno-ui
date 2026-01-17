@@ -10,6 +10,10 @@ const { data: page } = await useAsyncData(`docs-${path}`, () => {
   return queryCollection('content').path(path).first()
 })
 
+if (!page.value) {
+  throw createError({ statusCode: 404, statusMessage: 'Страница не найдена' })
+}
+
 useSeoMeta({
   title: page.value?.title,
   description: page.value?.description,

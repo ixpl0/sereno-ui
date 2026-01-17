@@ -16,13 +16,19 @@ const getAlertClass = (type: ToastType): string => {
 </script>
 
 <template>
-  <div class="toast toast-top toast-end z-[99999]">
+  <div
+    class="toast toast-top toast-end z-[99999]"
+    role="region"
+    aria-label="Уведомления"
+    aria-live="polite"
+  >
     <TransitionGroup name="toast">
       <div
         v-for="toast in toasts"
         :key="toast.id"
         :class="getAlertClass(toast.type)"
         :data-testid="`toast-${toast.type}`"
+        :role="toast.type === 'error' ? 'alert' : 'status'"
         class="alert shadow-lg cursor-pointer"
         @click="removeToast(toast.id)"
       >

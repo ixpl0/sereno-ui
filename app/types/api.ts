@@ -21,3 +21,11 @@ export type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse
 export interface OAuthRedirectResponse {
   redirect_url: string
 }
+
+export interface UserWithLanguage {
+  id: string
+  first_name?: string
+  last_name?: string
+  timezone?: string
+  language?: string
+}

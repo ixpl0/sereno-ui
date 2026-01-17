@@ -5,8 +5,10 @@ const props = defineProps<{
   user: UserResponseUser | null
 }>()
 
-const { logout } = useAuth()
-const router = useRouter()
+const emit = defineEmits<{
+  logout: []
+}>()
+
 const { resolvedTheme } = useTheme()
 const { userDropdownOpen, toggleUserDropdown, closeUserDropdown } = useMobileMenus()
 
@@ -32,10 +34,9 @@ const userName = computed(() => {
   return parts.join(' ') || 'Пользователь'
 })
 
-const handleLogout = async () => {
+const handleLogout = () => {
   closeUserDropdown()
-  await logout()
-  router.push('/')
+  emit('logout')
 }
 
 const handleClickOutside = (event: MouseEvent) => {
@@ -69,6 +70,9 @@ onUnmounted(() => {
     <button
       v-if="user"
       class="flex items-center gap-2 py-1.5 px-2.5 hover:bg-base-content/5 transition-colors rounded"
+      aria-haspopup="menu"
+      :aria-expanded="userDropdownOpen"
+      aria-controls="user-menu"
       @click="toggleUserDropdown"
     >
       <div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
@@ -81,6 +85,7 @@ onUnmounted(() => {
         name="lucide:chevron-down"
         class="w-4 h-4 text-base-content/60 transition-transform"
         :class="{ 'rotate-180': userDropdownOpen }"
+        aria-hidden="true"
       />
     </button>
 
@@ -88,11 +93,13 @@ onUnmounted(() => {
       v-else
       to="/auth"
       class="flex items-center gap-2 py-1.5 px-2.5 hover:bg-base-content/5 transition-colors rounded"
+      aria-label="Вход или регистрация"
     >
       <div class="w-8 h-8 rounded-full bg-base-content/10 flex items-center justify-center">
         <Icon
           name="lucide:user"
           class="w-4 h-4 text-base-content/60"
+          aria-hidden="true"
         />
       </div>
       <span class="hidden sm:block text-sm font-medium whitespace-nowrap">
@@ -110,28 +117,35 @@ onUnmounted(() => {
     >
       <div
         v-if="userDropdownOpen && user && isLargeScreen"
+        id="user-menu"
+        role="menu"
+        aria-label="Меню пользователя"
         class="absolute right-0 mt-2 w-56 bg-base-200 shadow-lg ring-1 ring-base-content/5 py-1 rounded"
       >
         <div class="py-1">
           <NuxtLink
             to="/dashboard"
+            role="menuitem"
             class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-base-content/5 transition-colors rounded-sm"
             @click="closeUserDropdown"
           >
             <Icon
               name="lucide:layout-dashboard"
               class="w-4 h-4 text-base-content/60"
+              aria-hidden="true"
             />
             <span>Дашборд</span>
           </NuxtLink>
           <NuxtLink
             to="/profile"
+            role="menuitem"
             class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-base-content/5 transition-colors rounded-sm"
             @click="closeUserDropdown"
           >
             <Icon
               name="lucide:user"
               class="w-4 h-4 text-base-content/60"
+              aria-hidden="true"
             />
             <span>Профиль</span>
           </NuxtLink>
@@ -139,12 +153,14 @@ onUnmounted(() => {
 
         <div class="border-t border-base-content/5 py-1">
           <button
+            role="menuitem"
             class="flex items-center gap-3 w-full px-4 py-2 text-sm text-error hover:bg-error/10 transition-colors cursor-pointer rounded-sm"
             @click="handleLogout"
           >
             <Icon
               name="lucide:log-out"
               class="w-4 h-4"
+              aria-hidden="true"
             />
             <span>Выйти</span>
           </button>
@@ -156,6 +172,9 @@ onUnmounted(() => {
       <aside
         v-if="user && !isLargeScreen"
         :data-theme="resolvedTheme"
+        role="dialog"
+        aria-label="Меню пользователя"
+        :aria-hidden="!userDropdownOpen"
         class="fixed top-16 bottom-0 right-0 z-40 w-64 flex flex-col bg-base-200 border-l border-base-content/5 transition-all duration-300"
         :class="userDropdownOpen ? 'translate-x-0' : 'translate-x-full'"
       >
@@ -167,13 +186,13 @@ onUnmounted(() => {
             <div class="font-medium truncate">
               {{ userName }}
             </div>
-            <div class="text-sm text-base-content/60 truncate">
-              {{ user?.email }}
-            </div>
           </div>
         </div>
 
-        <nav class="flex-1 flex flex-col overflow-y-auto py-4 px-2">
+        <nav
+          class="flex-1 flex flex-col overflow-y-auto py-4 px-2"
+          aria-label="Навигация пользователя"
+        >
           <ul class="space-y-1">
             <li>
               <NuxtLink
@@ -184,6 +203,7 @@ onUnmounted(() => {
                 <Icon
                   name="lucide:layout-dashboard"
                   class="w-5 h-5 shrink-0"
+                  aria-hidden="true"
                 />
                 <span>Дашборд</span>
               </NuxtLink>
@@ -197,6 +217,7 @@ onUnmounted(() => {
                 <Icon
                   name="lucide:user"
                   class="w-5 h-5 shrink-0"
+                  aria-hidden="true"
                 />
                 <span>Профиль</span>
               </NuxtLink>
@@ -205,7 +226,10 @@ onUnmounted(() => {
 
           <div class="flex-1" />
 
-          <div class="border-t border-base-content/10 my-4" />
+          <div
+            class="border-t border-base-content/10 my-4"
+            aria-hidden="true"
+          />
 
           <button
             class="flex items-center h-10 transition-colors gap-3 px-3 rounded-sm text-error hover:bg-error/10 cursor-pointer"
@@ -214,6 +238,7 @@ onUnmounted(() => {
             <Icon
               name="lucide:log-out"
               class="w-5 h-5 shrink-0"
+              aria-hidden="true"
             />
             <span>Выйти</span>
           </button>

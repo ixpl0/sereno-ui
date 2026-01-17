@@ -56,6 +56,7 @@ onMounted(() => {
             <Icon
               name="lucide:x"
               class="w-4 h-4"
+              aria-hidden="true"
             />
           </button>
 
@@ -84,6 +85,7 @@ onMounted(() => {
           >
             <div
               v-if="isExpanded"
+              id="cookie-details"
               class="overflow-hidden"
             >
               <p class="mt-3 pt-3 border-t border-base-content/10 text-sm text-base-content/70">
@@ -108,12 +110,14 @@ onMounted(() => {
               class="flex items-center gap-1 text-sm text-base-content/60 hover:text-base-content transition-colors"
               :aria-expanded="isExpanded"
               aria-controls="cookie-details"
+              aria-label="Показать подробности"
               @click="toggleExpanded"
             >
               <Icon
                 name="lucide:chevron-down"
                 class="w-4 h-4 transition-transform duration-200"
                 :class="{ 'rotate-180': isExpanded }"
+                aria-hidden="true"
               />
             </button>
           </div>

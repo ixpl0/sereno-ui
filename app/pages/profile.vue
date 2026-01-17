@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import type { UserResponseUser, UserResponseContactsList, UserResponseSessions, UserRequestContact } from '~/api/types.gen'
+import type { UserResponseContactsList, UserResponseSessions, UserRequestContact } from '~/api/types.gen'
+import type { UserWithLanguage } from '~/types/api'
+import { formatDate, formatDevice, formatContactKind } from '~/utils/formatters'
 
 definePageMeta({
   middleware: 'auth',
@@ -12,7 +14,7 @@ useSeoMeta({
   description: 'Настройки профиля пользователя',
 })
 
-const { data: user, status: userStatus, refresh: refreshUser } = await useFetch<UserResponseUser>('/api/v1/user')
+const { data: user, status: userStatus, refresh: refreshUser } = await useFetch<UserWithLanguage>('/api/v1/user')
 const { data: contactsData, status: contactsStatus, refresh: refreshContacts } = await useFetch<UserResponseContactsList>('/api/v1/user/contacts')
 const { data: sessionsData, status: sessionsStatus, refresh: refreshSessions } = await useFetch<UserResponseSessions>('/api/v1/user/sessions')
 
@@ -51,7 +53,7 @@ const startEdit = (field: 'first_name' | 'last_name' | 'timezone' | 'language') 
     editValue.value = user.value?.timezone ?? 'Europe/Moscow'
   }
   else {
-    editValue.value = (user.value as { language?: string } | null)?.language ?? 'ru'
+    editValue.value = user.value?.language ?? 'ru'
   }
 
   nextTick(() => {
@@ -97,7 +99,7 @@ const saveEdit = async () => {
 }
 
 const currentLanguageLabel = computed(() => {
-  const code = (user.value as { language?: string } | null)?.language ?? 'ru'
+  const code = user.value?.language ?? 'ru'
   return languageOptions.find(l => l.value === code)?.label ?? 'Русский'
 })
 
@@ -202,16 +204,6 @@ const handleVerifyContact = async () => {
   cancelVerifyContact()
 }
 
-const formatContactKind = (kind: string | undefined): string => {
-  if (kind === 'email') {
-    return 'Email'
-  }
-  if (kind === 'telegram') {
-    return 'Telegram'
-  }
-  return kind ?? ''
-}
-
 const currentSession = computed(() =>
   sessionsData.value?.sessions?.find(s => s.current === true),
 )
@@ -224,39 +216,6 @@ const handleCloseAllSessions = async () => {
   await closeAllSessions()
   await refreshSessions()
   toast.success('Все сессии закрыты')
-}
-
-const formatDevice = (device: string | undefined): string => {
-  if (!device) {
-    return 'Неизвестное устройство'
-  }
-  if (device.includes('Windows')) {
-    return 'Windows'
-  }
-  if (device.includes('Mac')) {
-    return 'macOS'
-  }
-  if (device.includes('iPhone')) {
-    return 'iPhone'
-  }
-  if (device.includes('Android')) {
-    return 'Android'
-  }
-  if (device.includes('Linux')) {
-    return 'Linux'
-  }
-  return 'Браузер'
-}
-
-const formatDate = (timestamp: number | undefined): string => {
-  if (!timestamp) {
-    return ''
-  }
-  return new Date(timestamp * 1000).toLocaleDateString('ru-RU', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  })
 }
 </script>
 

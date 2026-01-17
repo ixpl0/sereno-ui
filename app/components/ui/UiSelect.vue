@@ -13,6 +13,7 @@ interface Props {
   options: ReadonlyArray<SelectOption>
   placeholder?: string
   label?: string
+  hint?: string
   variant?: SelectVariant
   size?: SelectSize
   state?: SelectState
@@ -26,6 +27,7 @@ const props = withDefaults(defineProps<Props>(), {
   modelValue: '',
   placeholder: '',
   label: '',
+  hint: '',
   variant: 'bordered',
   size: 'md',
   state: 'default',
@@ -40,6 +42,7 @@ const emit = defineEmits<{
 }>()
 
 const selectId = computed(() => props.name || `select-${useId()}`)
+const hintId = computed(() => props.hint ? `${selectId.value}-hint` : undefined)
 
 const variantClasses: Record<SelectVariant, string> = {
   bordered: 'select-bordered',
@@ -58,6 +61,13 @@ const stateClasses: Record<SelectState, string> = {
   error: 'select-error',
   success: 'select-success',
   warning: 'select-warning',
+}
+
+const hintColorClasses: Record<SelectState, string> = {
+  default: 'text-base-content/60',
+  error: 'text-error',
+  success: 'text-success',
+  warning: 'text-warning',
 }
 
 const selectClasses = computed(() => [
@@ -105,6 +115,8 @@ defineExpose({ focus })
         :disabled="disabled"
         :required="required"
         :name="name"
+        :aria-describedby="hintId"
+        :aria-invalid="state === 'error'"
         :class="selectClasses"
         @change="handleChange"
       >
@@ -124,5 +136,13 @@ defineExpose({ focus })
         </option>
       </select>
     </div>
+    <p
+      v-if="hint"
+      :id="hintId"
+      class="label"
+      :class="hintColorClasses[state]"
+    >
+      {{ hint }}
+    </p>
   </div>
 </template>

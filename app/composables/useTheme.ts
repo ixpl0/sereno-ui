@@ -22,13 +22,22 @@ export const useTheme = () => {
     preference.value = value
   }
 
-  onMounted(() => {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-    systemTheme.value = mediaQuery.matches ? 'dark' : 'light'
+  let mediaQuery: MediaQueryList | null = null
 
-    mediaQuery.addEventListener('change', (event) => {
-      systemTheme.value = event.matches ? 'dark' : 'light'
-    })
+  const handleMediaChange = (event: MediaQueryListEvent) => {
+    systemTheme.value = event.matches ? 'dark' : 'light'
+  }
+
+  onMounted(() => {
+    mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    systemTheme.value = mediaQuery.matches ? 'dark' : 'light'
+    mediaQuery.addEventListener('change', handleMediaChange)
+  })
+
+  onUnmounted(() => {
+    if (mediaQuery) {
+      mediaQuery.removeEventListener('change', handleMediaChange)
+    }
   })
 
   return {

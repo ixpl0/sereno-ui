@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { TenantResponseTenantsList } from '~/api/types.gen'
+import { formatDate } from '~/utils/formatters'
 
 definePageMeta({
   middleware: 'auth',
@@ -52,17 +53,6 @@ const handleCreate = async () => {
   await refresh()
   toast.success('Команда создана')
   cancelCreate()
-}
-
-const formatDate = (timestamp: number | undefined): string => {
-  if (!timestamp) {
-    return ''
-  }
-  return new Date(timestamp * 1000).toLocaleDateString('ru-RU', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  })
 }
 </script>
 
