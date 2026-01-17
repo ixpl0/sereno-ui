@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { EventResponseIncident } from '~/api/types.gen'
-import { formatDateTime, formatStatus, getStatusColor } from '~/utils/formatters'
+import { formatDateTime, formatStatus, getStatusColor, getStatusBorderColor } from '~/utils/formatters'
 
 interface Props {
   incident: EventResponseIncident
@@ -12,30 +12,39 @@ defineProps<Props>()
 const emit = defineEmits<{
   click: []
 }>()
+
+const getActiveLabels = (incident: EventResponseIncident) =>
+  incident.labels.filter(label => !label.deleted)
 </script>
 
 <template>
   <div
-    class="bg-base-200/50 hover:bg-base-200 border border-base-content/5 rounded-lg p-4 cursor-pointer transition-all hover:shadow-md"
+    class="bg-base-200/50 hover:bg-base-200 border border-base-content/10 border-l-4 rounded-lg p-4 cursor-pointer transition-all hover:shadow-md"
+    :class="getStatusBorderColor(currentStatus)"
     @click="emit('click')"
   >
-    <div class="flex items-start justify-between gap-3 mb-2">
-      <div class="flex items-center gap-2 min-w-0">
+    <div class="flex items-center justify-between gap-3 mb-2 text-sm">
+      <div class="flex items-center gap-2 text-base-content/60">
         <Icon
-          name="lucide:alert-triangle"
-          class="w-5 h-5 text-error shrink-0"
+          name="lucide:clock"
+          class="w-3.5 h-3.5"
         />
-        <h3 class="font-medium truncate">
-          {{ incident.title }}
-        </h3>
+        <span>{{ formatDateTime(incident.time) }}</span>
       </div>
-      <span
-        class="badge badge-sm shrink-0"
-        :class="getStatusColor(currentStatus)"
-      >
-        {{ formatStatus(currentStatus) }}
-      </span>
+      <div class="flex items-center gap-2">
+        <span
+          class="badge badge-sm"
+          :class="getStatusColor(currentStatus)"
+        >
+          {{ formatStatus(currentStatus) }}
+        </span>
+        <span class="text-base-content/50">{{ incident.tenant.id }}</span>
+      </div>
     </div>
+
+    <h3 class="font-medium text-lg mb-1">
+      {{ incident.title }}
+    </h3>
 
     <p
       v-if="incident.description"
@@ -44,61 +53,28 @@ const emit = defineEmits<{
       {{ incident.description }}
     </p>
 
-    <div class="flex items-center gap-2 text-sm text-base-content/60 mb-3">
-      <Icon
-        name="lucide:clock"
-        class="w-3.5 h-3.5"
-      />
-      <span>{{ formatDateTime(incident.time) }}</span>
+    <div
+      v-if="getActiveLabels(incident).length > 0"
+      class="flex flex-wrap gap-1.5 mb-2"
+    >
+      <span
+        v-for="label in getActiveLabels(incident)"
+        :key="label.key"
+        class="badge badge-sm badge-success"
+      >
+        {{ label.key }}: {{ label.value }}
+      </span>
     </div>
 
-    <div class="flex items-center justify-between">
-      <div class="flex items-center gap-2 text-sm text-base-content/50">
-        <Icon
-          name="lucide:building-2"
-          class="w-3.5 h-3.5"
-        />
-        <span>{{ incident.tenant.id }}</span>
-      </div>
-
-      <div class="flex items-center gap-1">
-        <div
-          v-if="incident.alerts.length > 0"
-          class="flex items-center gap-1"
-        >
-          <Icon
-            name="lucide:bell"
-            class="w-3.5 h-3.5 text-base-content/40"
-          />
-          <span class="text-xs text-base-content/50">
-            {{ incident.alerts.length }}
-          </span>
-        </div>
-        <div
-          v-if="incident.labels.filter(l => !l.deleted).length > 0"
-          class="flex items-center gap-1 ml-2"
-        >
-          <Icon
-            name="lucide:tag"
-            class="w-3.5 h-3.5 text-base-content/40"
-          />
-          <span class="text-xs text-base-content/50">
-            {{ incident.labels.filter(l => !l.deleted).length }}
-          </span>
-        </div>
-        <div
-          v-if="incident.comments.filter(c => !c.deleted).length > 0"
-          class="flex items-center gap-1 ml-2"
-        >
-          <Icon
-            name="lucide:message-square"
-            class="w-3.5 h-3.5 text-base-content/40"
-          />
-          <span class="text-xs text-base-content/50">
-            {{ incident.comments.filter(c => !c.deleted).length }}
-          </span>
-        </div>
-      </div>
+    <div
+      v-if="incident.alerts.length > 0"
+      class="flex items-center gap-1.5 text-sm text-base-content/60"
+    >
+      <Icon
+        name="lucide:bell"
+        class="w-3.5 h-3.5"
+      />
+      <span>{{ incident.alerts.length }} алертов</span>
     </div>
   </div>
 </template>

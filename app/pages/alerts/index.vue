@@ -37,7 +37,7 @@ const handleRefresh = async () => {
 
 <template>
   <div class="p-4 lg:p-6">
-    <div :class="viewMode === 'cards' ? '' : 'max-w-6xl mx-auto'">
+    <div>
       <div class="flex items-center justify-between mb-6">
         <h1 class="text-2xl font-semibold">
           Алерты
@@ -99,7 +99,7 @@ const handleRefresh = async () => {
 
       <div
         v-else-if="viewMode === 'cards'"
-        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4"
+        class="flex flex-col gap-3 max-w-4xl mx-auto"
       >
         <EventAlertCard
           v-for="alert in filteredAlerts"

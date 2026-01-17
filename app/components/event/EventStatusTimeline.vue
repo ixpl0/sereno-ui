@@ -42,7 +42,7 @@ const sortedStatuses = computed(() =>
           :class="index === 0 ? 'border-primary' : 'border-base-300'"
         />
 
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-3 ml-6">
           <span
             class="badge"
             :class="getStatusColor(status.status)"

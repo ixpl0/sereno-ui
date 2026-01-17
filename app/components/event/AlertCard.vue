@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { EventResponseAlert } from '~/api/types.gen'
-import { formatDateTime, formatStatus, getStatusColor } from '~/utils/formatters'
+import { formatDateTime, formatStatus, getStatusColor, getStatusBorderColor } from '~/utils/formatters'
 
 interface Props {
   alert: EventResponseAlert
@@ -12,74 +12,90 @@ defineProps<Props>()
 const emit = defineEmits<{
   click: []
 }>()
+
+const getActiveLabels = (alert: EventResponseAlert) =>
+  alert.labels.filter(label => !label.deleted)
+
+const getAlertTitle = (alert: EventResponseAlert) => {
+  const titleAnnotation = alert.annotations.find(
+    annotation => annotation.key === 'title' && !annotation.deleted,
+  )
+  return titleAnnotation?.value ?? alert.source
+}
+
+const getAlertDescription = (alert: EventResponseAlert) => {
+  const descAnnotation = alert.annotations.find(
+    annotation => annotation.key === 'description' && !annotation.deleted,
+  )
+  return descAnnotation?.value
+}
+
+const getDisplayAnnotations = (alert: EventResponseAlert) =>
+  alert.annotations.filter(
+    annotation => !annotation.deleted && annotation.key !== 'title' && annotation.key !== 'description',
+  )
 </script>
 
 <template>
   <div
-    class="bg-base-200/50 hover:bg-base-200 border border-base-content/5 rounded-lg p-4 cursor-pointer transition-all hover:shadow-md"
+    class="bg-base-200/50 hover:bg-base-200 border border-base-content/10 border-l-4 rounded-lg p-4 cursor-pointer transition-all hover:shadow-md"
+    :class="getStatusBorderColor(currentStatus)"
     @click="emit('click')"
   >
-    <div class="flex items-start justify-between gap-3 mb-3">
-      <div class="flex items-center gap-2 min-w-0">
+    <div class="flex items-center justify-between gap-3 mb-2 text-sm">
+      <div class="flex items-center gap-2 text-base-content/60">
         <Icon
-          name="lucide:bell"
-          class="w-5 h-5 text-warning shrink-0"
+          name="lucide:clock"
+          class="w-3.5 h-3.5"
         />
-        <h3 class="font-medium truncate">
-          {{ alert.source }}
-        </h3>
+        <span>{{ formatDateTime(alert.time) }}</span>
       </div>
+      <div class="flex items-center gap-2">
+        <span
+          class="badge badge-sm"
+          :class="getStatusColor(currentStatus)"
+        >
+          {{ formatStatus(currentStatus) }}
+        </span>
+        <span class="text-base-content/50">{{ alert.tenant.id }}</span>
+      </div>
+    </div>
+
+    <h3 class="font-medium text-lg mb-1">
+      {{ getAlertTitle(alert) }}
+    </h3>
+
+    <p
+      v-if="getAlertDescription(alert)"
+      class="text-sm text-base-content/70 line-clamp-2 mb-3"
+    >
+      {{ getAlertDescription(alert) }}
+    </p>
+
+    <div
+      v-if="getActiveLabels(alert).length > 0"
+      class="flex flex-wrap gap-1.5 mb-2"
+    >
       <span
-        class="badge badge-sm shrink-0"
-        :class="getStatusColor(currentStatus)"
+        v-for="label in getActiveLabels(alert)"
+        :key="label.key"
+        class="badge badge-sm badge-success"
       >
-        {{ formatStatus(currentStatus) }}
+        {{ label.key }}: {{ label.value }}
       </span>
     </div>
 
-    <div class="flex items-center gap-2 text-sm text-base-content/60 mb-3">
-      <Icon
-        name="lucide:clock"
-        class="w-3.5 h-3.5"
-      />
-      <span>{{ formatDateTime(alert.time) }}</span>
-    </div>
-
-    <div class="flex items-center justify-between">
-      <div class="flex items-center gap-2 text-sm text-base-content/50">
-        <Icon
-          name="lucide:building-2"
-          class="w-3.5 h-3.5"
-        />
-        <span>{{ alert.tenant.id }}</span>
-      </div>
-
-      <div class="flex items-center gap-1">
-        <div
-          v-if="alert.labels.filter(l => !l.deleted).length > 0"
-          class="flex items-center gap-1"
-        >
-          <Icon
-            name="lucide:tag"
-            class="w-3.5 h-3.5 text-base-content/40"
-          />
-          <span class="text-xs text-base-content/50">
-            {{ alert.labels.filter(l => !l.deleted).length }}
-          </span>
-        </div>
-        <div
-          v-if="alert.comments.filter(c => !c.deleted).length > 0"
-          class="flex items-center gap-1 ml-2"
-        >
-          <Icon
-            name="lucide:message-square"
-            class="w-3.5 h-3.5 text-base-content/40"
-          />
-          <span class="text-xs text-base-content/50">
-            {{ alert.comments.filter(c => !c.deleted).length }}
-          </span>
-        </div>
-      </div>
+    <div
+      v-if="getDisplayAnnotations(alert).length > 0"
+      class="flex flex-wrap gap-1.5"
+    >
+      <span
+        v-for="annotation in getDisplayAnnotations(alert)"
+        :key="annotation.key"
+        class="badge badge-sm badge-warning"
+      >
+        {{ annotation.key }}: {{ annotation.value }}
+      </span>
     </div>
   </div>
 </template>
