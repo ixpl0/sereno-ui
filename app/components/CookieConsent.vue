@@ -1,7 +1,9 @@
 <script setup lang="ts">
+type CookieConsentValue = 'all' | 'essential' | null
+
 const COOKIE_KEY = 'cookie_consent'
 
-const consentCookie = useCookie<boolean | null>(COOKIE_KEY, {
+const consentCookie = useCookie<CookieConsentValue>(COOKIE_KEY, {
   default: () => null,
   maxAge: 60 * 60 * 24 * 365,
 })
@@ -9,13 +11,13 @@ const consentCookie = useCookie<boolean | null>(COOKIE_KEY, {
 const isVisible = ref(false)
 const isExpanded = ref(false)
 
-const acceptCookies = () => {
-  consentCookie.value = true
+const acceptAll = () => {
+  consentCookie.value = 'all'
   isVisible.value = false
 }
 
-const dismiss = () => {
-  consentCookie.value = true
+const acceptEssentialOnly = () => {
+  consentCookie.value = 'essential'
   isVisible.value = false
 }
 
@@ -49,7 +51,7 @@ onMounted(() => {
             type="button"
             class="absolute top-3 right-3 w-6 h-6 flex items-center justify-center text-base-content/50 hover:text-base-content transition-colors"
             aria-label="Закрыть"
-            @click="dismiss"
+            @click="acceptEssentialOnly"
           >
             <Icon
               name="lucide:x"
@@ -96,7 +98,7 @@ onMounted(() => {
             <UiButton
               variant="primary"
               size="sm"
-              @click="acceptCookies"
+              @click="acceptAll"
             >
               Согласен
             </UiButton>
