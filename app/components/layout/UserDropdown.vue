@@ -68,7 +68,7 @@ onUnmounted(() => {
   <div class="relative user-dropdown">
     <button
       v-if="user"
-      class="flex items-center gap-2 p-1.5 hover:bg-base-content/5 transition-colors rounded-sm"
+      class="flex items-center gap-2 py-1.5 px-2.5 hover:bg-base-content/5 transition-colors rounded"
       @click="toggleUserDropdown"
     >
       <div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
@@ -87,7 +87,7 @@ onUnmounted(() => {
     <NuxtLink
       v-else
       to="/auth"
-      class="flex items-center gap-2 p-1.5 hover:bg-base-content/5 transition-colors rounded-sm"
+      class="flex items-center gap-2 py-1.5 px-2.5 hover:bg-base-content/5 transition-colors rounded"
     >
       <div class="w-8 h-8 rounded-full bg-base-content/10 flex items-center justify-center">
         <Icon
