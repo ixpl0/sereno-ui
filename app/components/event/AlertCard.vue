@@ -7,11 +7,29 @@ interface Props {
   currentStatus: string
 }
 
-defineProps<Props>()
+const props = defineProps<Props>()
 
 const emit = defineEmits<{
   click: []
+  statusChange: [newStatus: string]
 }>()
+
+const nextStatus = computed(() => {
+  if (props.currentStatus === 'created') {
+    return { status: 'acknowledged', label: 'Подтвердить' }
+  }
+  if (props.currentStatus === 'acknowledged') {
+    return { status: 'resolved', label: 'Закрыть' }
+  }
+  return null
+})
+
+const handleStatusChange = (event: Event) => {
+  event.stopPropagation()
+  if (nextStatus.value) {
+    emit('statusChange', nextStatus.value.status)
+  }
+}
 
 const getActiveLabels = (alert: EventResponseAlert) =>
   alert.labels.filter(label => !label.deleted)
@@ -38,22 +56,42 @@ const getDisplayAnnotations = (alert: EventResponseAlert) =>
 
 <template>
   <div
-    class="bg-base-200/50 hover:bg-base-200 border border-base-content/10 border-r-4 rounded-lg py-3 px-4 cursor-pointer transition-all hover:shadow-md flex gap-4"
+    class="bg-base-200/50 hover:bg-base-200 border border-base-content/10 border-l-4 border-t-4 rounded-lg cursor-pointer transition-all hover:shadow-md overflow-hidden"
     :class="getStatusBorderColor(currentStatus)"
     @click="emit('click')"
   >
-    <div class="flex-1 min-w-0">
-      <div class="flex items-center gap-2 text-sm text-base-content/60 mb-2">
-        <Icon
-          name="lucide:clock"
-          class="w-3.5 h-3.5 shrink-0"
-        />
-        <span>{{ formatDateTime(alert.time) }}</span>
+    <div class="flex items-start gap-3 pr-4 pb-2">
+      <span
+        class="badge rounded-none rounded-br-lg -ml-1 -mt-1"
+        :class="getStatusColor(currentStatus)"
+      >
+        {{ formatStatus(currentStatus) }}
+      </span>
+      <div class="flex items-center gap-4 text-sm ml-auto">
+        <span class="text-base-content/50">{{ alert.tenant.id }}</span>
+        <div class="flex items-center gap-1.5 text-base-content/60">
+          <Icon
+            name="lucide:clock"
+            class="w-3.5 h-3.5"
+          />
+          <span>{{ formatDateTime(alert.time) }}</span>
+        </div>
       </div>
+    </div>
 
-      <h3 class="font-medium text-lg mb-1">
-        {{ getAlertTitle(alert) }}
-      </h3>
+    <div class="px-4 pb-3">
+      <div class="flex items-center gap-3 mb-1">
+        <h3 class="font-medium text-lg">
+          {{ getAlertTitle(alert) }}
+        </h3>
+        <button
+          v-if="nextStatus"
+          class="btn btn-xs btn-outline"
+          @click="handleStatusChange"
+        >
+          {{ nextStatus.label }}
+        </button>
+      </div>
 
       <p
         v-if="getAlertDescription(alert)"
@@ -87,16 +125,6 @@ const getDisplayAnnotations = (alert: EventResponseAlert) =>
           {{ annotation.key }}: {{ annotation.value }}
         </span>
       </div>
-    </div>
-
-    <div class="flex flex-col items-end gap-2 shrink-0">
-      <span
-        class="badge badge-sm"
-        :class="getStatusColor(currentStatus)"
-      >
-        {{ formatStatus(currentStatus) }}
-      </span>
-      <span class="text-sm text-base-content/50">{{ alert.tenant.id }}</span>
     </div>
   </div>
 </template>
