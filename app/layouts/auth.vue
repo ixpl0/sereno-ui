@@ -8,7 +8,7 @@ useSeoMeta({
 
 <template>
   <div class="min-h-screen auth-gradient relative overflow-hidden">
-    <LayoutAuthHeader />
+    <LayoutPublicHeader />
     <div class="absolute inset-0 overflow-hidden">
       <div class="absolute -bottom-[60rem] -right-[60rem] w-[85rem] h-[85rem] rounded-full blur-[180px] bg-[var(--glow-1)] transition-colors duration-500" />
       <div class="absolute -bottom-[60rem] -left-[60rem] w-[85rem] h-[85rem] rounded-full blur-[180px] bg-[var(--glow-2)] transition-colors duration-500" />
