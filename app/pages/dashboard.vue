@@ -1,4 +1,6 @@
 <script setup lang="ts">
+console.log('[dashboard] script setup start', { isServer: import.meta.server })
+
 definePageMeta({
   middleware: 'auth',
   title: 'Дашборд',
@@ -10,6 +12,7 @@ useSeoMeta({
 })
 
 const { token } = useAuth()
+console.log('[dashboard] token:', token.value ? `${token.value.slice(0, 10)}...` : null)
 
 const maskedToken = computed(() => {
   if (!token.value) {
