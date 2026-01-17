@@ -8,5 +8,6 @@ const { resolvedTheme } = useTheme()
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>
+    <CookieConsent />
   </div>
 </template>
