@@ -35,7 +35,7 @@ const userName = computed(() => {
 const handleLogout = async () => {
   closeUserDropdown()
   await logout()
-  router.push('/auth')
+  router.push('/')
 }
 
 const handleClickOutside = (event: MouseEvent) => {
