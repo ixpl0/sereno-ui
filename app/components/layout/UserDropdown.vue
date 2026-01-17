@@ -168,89 +168,91 @@ onUnmounted(() => {
       </div>
     </Transition>
 
-    <Teleport to="body">
-      <aside
-        v-if="user && !isLargeScreen"
-        :data-theme="resolvedTheme"
-        role="dialog"
-        aria-label="Меню пользователя"
-        :aria-hidden="!userDropdownOpen"
-        class="fixed top-16 bottom-0 right-0 z-40 w-64 flex flex-col bg-base-200 border-l border-base-content/5 transition-all duration-300"
-        :class="userDropdownOpen ? 'translate-x-0' : 'translate-x-full'"
-      >
-        <div class="flex items-center gap-3 p-4 border-b border-base-content/5">
-          <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-            <span class="font-medium text-primary">{{ userInitials }}</span>
-          </div>
-          <div class="min-w-0 flex-1">
-            <div class="font-medium truncate">
-              {{ userName }}
+    <ClientOnly>
+      <Teleport to="body">
+        <aside
+          v-if="user && !isLargeScreen"
+          :data-theme="resolvedTheme"
+          role="dialog"
+          aria-label="Меню пользователя"
+          :aria-hidden="!userDropdownOpen"
+          class="fixed top-16 bottom-0 right-0 z-40 w-64 flex flex-col bg-base-200 border-l border-base-content/5 transition-all duration-300"
+          :class="userDropdownOpen ? 'translate-x-0' : 'translate-x-full'"
+        >
+          <div class="flex items-center gap-3 p-4 border-b border-base-content/5">
+            <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+              <span class="font-medium text-primary">{{ userInitials }}</span>
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="font-medium truncate">
+                {{ userName }}
+              </div>
             </div>
           </div>
-        </div>
 
-        <nav
-          class="flex-1 flex flex-col overflow-y-auto py-4 px-2"
-          aria-label="Навигация пользователя"
-        >
-          <ul class="space-y-1">
-            <li>
-              <NuxtLink
-                to="/dashboard"
-                class="flex items-center h-10 transition-colors gap-3 px-3 rounded-sm hover:bg-base-content/5 text-base-content/70 hover:text-base-content"
-                @click="closeUserDropdown"
-              >
-                <Icon
-                  name="lucide:layout-dashboard"
-                  class="w-5 h-5 shrink-0"
-                  aria-hidden="true"
-                />
-                <span>Дашборд</span>
-              </NuxtLink>
-            </li>
-            <li>
-              <NuxtLink
-                to="/profile"
-                class="flex items-center h-10 transition-colors gap-3 px-3 rounded-sm hover:bg-base-content/5 text-base-content/70 hover:text-base-content"
-                @click="closeUserDropdown"
-              >
-                <Icon
-                  name="lucide:user"
-                  class="w-5 h-5 shrink-0"
-                  aria-hidden="true"
-                />
-                <span>Профиль</span>
-              </NuxtLink>
-            </li>
-          </ul>
-
-          <div class="flex-1" />
-
-          <div
-            class="border-t border-base-content/10 my-4"
-            aria-hidden="true"
-          />
-
-          <button
-            class="flex items-center h-10 transition-colors gap-3 px-3 rounded-sm text-error hover:bg-error/10 cursor-pointer"
-            @click="handleLogout"
+          <nav
+            class="flex-1 flex flex-col overflow-y-auto py-4 px-2"
+            aria-label="Навигация пользователя"
           >
-            <Icon
-              name="lucide:log-out"
-              class="w-5 h-5 shrink-0"
+            <ul class="space-y-1">
+              <li>
+                <NuxtLink
+                  to="/dashboard"
+                  class="flex items-center h-10 transition-colors gap-3 px-3 rounded-sm hover:bg-base-content/5 text-base-content/70 hover:text-base-content"
+                  @click="closeUserDropdown"
+                >
+                  <Icon
+                    name="lucide:layout-dashboard"
+                    class="w-5 h-5 shrink-0"
+                    aria-hidden="true"
+                  />
+                  <span>Дашборд</span>
+                </NuxtLink>
+              </li>
+              <li>
+                <NuxtLink
+                  to="/profile"
+                  class="flex items-center h-10 transition-colors gap-3 px-3 rounded-sm hover:bg-base-content/5 text-base-content/70 hover:text-base-content"
+                  @click="closeUserDropdown"
+                >
+                  <Icon
+                    name="lucide:user"
+                    class="w-5 h-5 shrink-0"
+                    aria-hidden="true"
+                  />
+                  <span>Профиль</span>
+                </NuxtLink>
+              </li>
+            </ul>
+
+            <div class="flex-1" />
+
+            <div
+              class="border-t border-base-content/10 my-4"
               aria-hidden="true"
             />
-            <span>Выйти</span>
-          </button>
-        </nav>
-      </aside>
 
-      <div
-        v-if="userDropdownOpen && user && !isLargeScreen"
-        :data-theme="resolvedTheme"
-        class="fixed top-16 inset-x-0 bottom-0 z-30 bg-black/50"
-        @click="closeUserDropdown"
-      />
-    </Teleport>
+            <button
+              class="flex items-center h-10 transition-colors gap-3 px-3 rounded-sm text-error hover:bg-error/10 cursor-pointer"
+              @click="handleLogout"
+            >
+              <Icon
+                name="lucide:log-out"
+                class="w-5 h-5 shrink-0"
+                aria-hidden="true"
+              />
+              <span>Выйти</span>
+            </button>
+          </nav>
+        </aside>
+
+        <div
+          v-if="userDropdownOpen && user && !isLargeScreen"
+          :data-theme="resolvedTheme"
+          class="fixed top-16 inset-x-0 bottom-0 z-30 bg-black/50"
+          @click="closeUserDropdown"
+        />
+      </Teleport>
+    </ClientOnly>
   </div>
 </template>

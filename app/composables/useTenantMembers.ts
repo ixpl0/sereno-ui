@@ -1,7 +1,7 @@
 import { client } from '~/api/client.gen'
 import type {
   TenantResponseMember,
-  TenantResponseMembersList,
+  TenantResponseMemberList,
   TenantResponseSingleMember,
   TenantRequestMember,
   TenantRequestId,
@@ -22,7 +22,7 @@ export const useTenantMembers = (tenantId: Ref<string>) => {
     members.value.filter(m => m.admin !== true),
   )
 
-  const fetchMembers = async (): Promise<ApiResponse<TenantResponseMembersList> | null> => {
+  const fetchMembers = async (): Promise<ApiResponse<TenantResponseMemberList> | null> => {
     loading.value = true
     error.value = null
 
@@ -33,7 +33,7 @@ export const useTenantMembers = (tenantId: Ref<string>) => {
 
     loading.value = false
 
-    const data = getApiData(response as ApiResponse<TenantResponseMembersList>)
+    const data = getApiData(response as ApiResponse<TenantResponseMemberList>)
     if (data?.members) {
       members.value = data.members
     }
@@ -41,7 +41,7 @@ export const useTenantMembers = (tenantId: Ref<string>) => {
       error.value = 'Failed to fetch members'
     }
 
-    return response as ApiResponse<TenantResponseMembersList>
+    return response as ApiResponse<TenantResponseMemberList>
   }
 
   const updateMember = async (memberId: string, admin: boolean): Promise<ApiResponse<TenantResponseSingleMember>> => {

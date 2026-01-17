@@ -6,6 +6,55 @@ export interface User {
   language: string
 }
 
+export interface MockComment {
+  id: string
+  text: string
+  since: number
+  deleted: boolean
+}
+
+export interface MockLabel {
+  key: string
+  value: string
+  since: number
+  deleted: boolean
+}
+
+export interface MockStatus {
+  status: string
+  since: number
+}
+
+export interface MockAnnotation {
+  key: string
+  value: string
+  since: number
+  deleted: boolean
+}
+
+export interface MockAlert {
+  id: string
+  source: string
+  time: number
+  tenantId: string
+  annotations: MockAnnotation[]
+  labels: MockLabel[]
+  comments: MockComment[]
+  statuses: MockStatus[]
+}
+
+export interface MockIncident {
+  id: string
+  title: string
+  description: string
+  time: number
+  tenantId: string
+  alertIds: string[]
+  labels: MockLabel[]
+  comments: MockComment[]
+  statuses: MockStatus[]
+}
+
 export interface Session {
   id: string
   device: string
@@ -49,6 +98,8 @@ interface MockState {
   tenants: Tenant[]
   tenantMembers: Map<string, TenantMember[]>
   tenantTokens: Map<string, TenantToken[]>
+  alerts: MockAlert[]
+  incidents: MockIncident[]
 }
 
 const generateId = (prefix: string = 'id'): string => `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
@@ -132,6 +183,103 @@ const defaultState: MockState = {
     ]],
     ['tenant-2', []],
   ]),
+  alerts: [
+    {
+      id: 'alert-1',
+      source: 'prometheus',
+      time: Math.floor(Date.now() / 1000) - 3600,
+      tenantId: 'tenant-1',
+      annotations: [
+        { key: 'description', value: 'CPU usage is above 90% for 5 minutes', since: Math.floor(Date.now() / 1000) - 3600, deleted: false },
+        { key: 'summary', value: 'High CPU usage on server-1', since: Math.floor(Date.now() / 1000) - 3600, deleted: false },
+      ],
+      labels: [
+        { key: 'alertname', value: 'HighCpuUsage', since: Math.floor(Date.now() / 1000) - 3600, deleted: false },
+        { key: 'severity', value: 'critical', since: Math.floor(Date.now() / 1000) - 3600, deleted: false },
+        { key: 'instance', value: 'server-1:9090', since: Math.floor(Date.now() / 1000) - 3600, deleted: false },
+      ],
+      comments: [
+        { id: 'comment-1', text: 'Investigating the issue', since: Math.floor(Date.now() / 1000) - 1800, deleted: false },
+      ],
+      statuses: [
+        { status: 'created', since: Math.floor(Date.now() / 1000) - 3600 },
+        { status: 'acknowledged', since: Math.floor(Date.now() / 1000) - 1800 },
+      ],
+    },
+    {
+      id: 'alert-2',
+      source: 'alertmanager',
+      time: Math.floor(Date.now() / 1000) - 7200,
+      tenantId: 'tenant-1',
+      annotations: [
+        { key: 'description', value: 'Memory usage is above 85%', since: Math.floor(Date.now() / 1000) - 7200, deleted: false },
+      ],
+      labels: [
+        { key: 'alertname', value: 'HighMemoryUsage', since: Math.floor(Date.now() / 1000) - 7200, deleted: false },
+        { key: 'severity', value: 'warning', since: Math.floor(Date.now() / 1000) - 7200, deleted: false },
+      ],
+      comments: [],
+      statuses: [
+        { status: 'created', since: Math.floor(Date.now() / 1000) - 7200 },
+      ],
+    },
+    {
+      id: 'alert-3',
+      source: 'grafana',
+      time: Math.floor(Date.now() / 1000) - 86400,
+      tenantId: 'tenant-2',
+      annotations: [
+        { key: 'description', value: 'Disk space is running low', since: Math.floor(Date.now() / 1000) - 86400, deleted: false },
+      ],
+      labels: [
+        { key: 'alertname', value: 'LowDiskSpace', since: Math.floor(Date.now() / 1000) - 86400, deleted: false },
+        { key: 'severity', value: 'warning', since: Math.floor(Date.now() / 1000) - 86400, deleted: false },
+      ],
+      comments: [],
+      statuses: [
+        { status: 'created', since: Math.floor(Date.now() / 1000) - 86400 },
+        { status: 'resolved', since: Math.floor(Date.now() / 1000) - 43200 },
+      ],
+    },
+  ],
+  incidents: [
+    {
+      id: 'incident-1',
+      title: 'Production server performance degradation',
+      description: 'Multiple alerts indicate performance issues on production servers',
+      time: Math.floor(Date.now() / 1000) - 3600,
+      tenantId: 'tenant-1',
+      alertIds: ['alert-1', 'alert-2'],
+      labels: [
+        { key: 'priority', value: 'high', since: Math.floor(Date.now() / 1000) - 3600, deleted: false },
+        { key: 'team', value: 'infrastructure', since: Math.floor(Date.now() / 1000) - 3600, deleted: false },
+      ],
+      comments: [
+        { id: 'incident-comment-1', text: 'Created incident to track related alerts', since: Math.floor(Date.now() / 1000) - 3600, deleted: false },
+        { id: 'incident-comment-2', text: 'Team is investigating', since: Math.floor(Date.now() / 1000) - 1800, deleted: false },
+      ],
+      statuses: [
+        { status: 'created', since: Math.floor(Date.now() / 1000) - 3600 },
+        { status: 'acknowledged', since: Math.floor(Date.now() / 1000) - 1800 },
+      ],
+    },
+    {
+      id: 'incident-2',
+      title: 'Storage capacity issue',
+      description: 'Disk space alerts on multiple servers',
+      time: Math.floor(Date.now() / 1000) - 172800,
+      tenantId: 'tenant-2',
+      alertIds: ['alert-3'],
+      labels: [
+        { key: 'priority', value: 'medium', since: Math.floor(Date.now() / 1000) - 172800, deleted: false },
+      ],
+      comments: [],
+      statuses: [
+        { status: 'created', since: Math.floor(Date.now() / 1000) - 172800 },
+        { status: 'resolved', since: Math.floor(Date.now() / 1000) - 86400 },
+      ],
+    },
+  ],
 }
 
 const state: MockState = {
@@ -141,6 +289,8 @@ const state: MockState = {
   tenants: [...defaultState.tenants],
   tenantMembers: new Map(defaultState.tenantMembers),
   tenantTokens: new Map(defaultState.tenantTokens),
+  alerts: [...defaultState.alerts],
+  incidents: [...defaultState.incidents],
 }
 
 export const getMockUser = (): User => state.user
@@ -339,4 +489,293 @@ export const deleteMockTenantToken = (tenantId: string, tokenId: string): boolea
   const initialLength = tokens.length
   state.tenantTokens.set(tenantId, tokens.filter(t => t.id !== tokenId))
   return (state.tenantTokens.get(tenantId)?.length ?? 0) < initialLength
+}
+
+const alertToResponse = (alert: MockAlert) => ({
+  id: alert.id,
+  source: alert.source,
+  time: alert.time,
+  tenant: { id: alert.tenantId },
+  annotations: alert.annotations.filter(a => !a.deleted),
+  labels: alert.labels.filter(l => !l.deleted),
+  comments: alert.comments.filter(c => !c.deleted),
+  statuses: alert.statuses,
+})
+
+const incidentToResponse = (incident: MockIncident) => ({
+  id: incident.id,
+  title: incident.title,
+  description: incident.description,
+  time: incident.time,
+  tenant: { id: incident.tenantId },
+  alerts: incident.alertIds
+    .map(alertId => state.alerts.find(a => a.id === alertId))
+    .filter((a): a is MockAlert => a !== undefined)
+    .map(alertToResponse),
+  labels: incident.labels.filter(l => !l.deleted),
+  comments: incident.comments.filter(c => !c.deleted),
+  statuses: incident.statuses,
+})
+
+export const getMockAlerts = (limit?: number, offset?: number): { alerts: ReturnType<typeof alertToResponse>[], total: number } => {
+  const allAlerts = state.alerts
+  const total = allAlerts.length
+  const startIndex = offset ?? 0
+  const endIndex = limit ? startIndex + limit : allAlerts.length
+  const alerts = allAlerts.slice(startIndex, endIndex).map(alertToResponse)
+  return { alerts, total }
+}
+
+export const getMockAlert = (id: string): ReturnType<typeof alertToResponse> | null => {
+  const alert = state.alerts.find(a => a.id === id)
+  if (!alert) {
+    return null
+  }
+  return alertToResponse(alert)
+}
+
+export const addMockAlertComment = (alertId: string, text: string): ReturnType<typeof alertToResponse> | null => {
+  const alert = state.alerts.find(a => a.id === alertId)
+  if (!alert) {
+    return null
+  }
+  const comment: MockComment = {
+    id: generateId('comment'),
+    text,
+    since: Math.floor(Date.now() / 1000),
+    deleted: false,
+  }
+  const updatedAlert: MockAlert = {
+    ...alert,
+    comments: [...alert.comments, comment],
+  }
+  state.alerts = state.alerts.map(a => a.id === alertId ? updatedAlert : a)
+  return alertToResponse(updatedAlert)
+}
+
+export const deleteMockAlertComment = (alertId: string, commentId: string): ReturnType<typeof alertToResponse> | null => {
+  const alert = state.alerts.find(a => a.id === alertId)
+  if (!alert) {
+    return null
+  }
+  const updatedAlert: MockAlert = {
+    ...alert,
+    comments: alert.comments.map(c => c.id === commentId ? { ...c, deleted: true } : c),
+  }
+  state.alerts = state.alerts.map(a => a.id === alertId ? updatedAlert : a)
+  return alertToResponse(updatedAlert)
+}
+
+export const addMockAlertLabel = (alertId: string, key: string, value: string): ReturnType<typeof alertToResponse> | null => {
+  const alert = state.alerts.find(a => a.id === alertId)
+  if (!alert) {
+    return null
+  }
+  const existingLabel = alert.labels.find(l => l.key === key && !l.deleted)
+  if (existingLabel) {
+    const updatedAlert: MockAlert = {
+      ...alert,
+      labels: alert.labels.map(l => l.key === key && !l.deleted ? { ...l, value, since: Math.floor(Date.now() / 1000) } : l),
+    }
+    state.alerts = state.alerts.map(a => a.id === alertId ? updatedAlert : a)
+    return alertToResponse(updatedAlert)
+  }
+  const label: MockLabel = {
+    key,
+    value,
+    since: Math.floor(Date.now() / 1000),
+    deleted: false,
+  }
+  const updatedAlert: MockAlert = {
+    ...alert,
+    labels: [...alert.labels, label],
+  }
+  state.alerts = state.alerts.map(a => a.id === alertId ? updatedAlert : a)
+  return alertToResponse(updatedAlert)
+}
+
+export const deleteMockAlertLabel = (alertId: string, key: string): ReturnType<typeof alertToResponse> | null => {
+  const alert = state.alerts.find(a => a.id === alertId)
+  if (!alert) {
+    return null
+  }
+  const updatedAlert: MockAlert = {
+    ...alert,
+    labels: alert.labels.map(l => l.key === key ? { ...l, deleted: true } : l),
+  }
+  state.alerts = state.alerts.map(a => a.id === alertId ? updatedAlert : a)
+  return alertToResponse(updatedAlert)
+}
+
+export const setMockAlertStatus = (alertId: string, status: string): ReturnType<typeof alertToResponse> | null => {
+  const alert = state.alerts.find(a => a.id === alertId)
+  if (!alert) {
+    return null
+  }
+  const newStatus: MockStatus = {
+    status,
+    since: Math.floor(Date.now() / 1000),
+  }
+  const updatedAlert: MockAlert = {
+    ...alert,
+    statuses: [...alert.statuses, newStatus],
+  }
+  state.alerts = state.alerts.map(a => a.id === alertId ? updatedAlert : a)
+  return alertToResponse(updatedAlert)
+}
+
+export const getMockIncidents = (limit?: number, offset?: number): { incidents: ReturnType<typeof incidentToResponse>[], total: number } => {
+  const allIncidents = state.incidents
+  const total = allIncidents.length
+  const startIndex = offset ?? 0
+  const endIndex = limit ? startIndex + limit : allIncidents.length
+  const incidents = allIncidents.slice(startIndex, endIndex).map(incidentToResponse)
+  return { incidents, total }
+}
+
+export const getMockIncident = (id: string): ReturnType<typeof incidentToResponse> | null => {
+  const incident = state.incidents.find(i => i.id === id)
+  if (!incident) {
+    return null
+  }
+  return incidentToResponse(incident)
+}
+
+export const createMockIncident = (tenantId: string, title: string, description?: string): ReturnType<typeof incidentToResponse> => {
+  const incident: MockIncident = {
+    id: generateId('incident'),
+    title,
+    description: description ?? '',
+    time: Math.floor(Date.now() / 1000),
+    tenantId,
+    alertIds: [],
+    labels: [],
+    comments: [],
+    statuses: [{ status: 'created', since: Math.floor(Date.now() / 1000) }],
+  }
+  state.incidents = [...state.incidents, incident]
+  return incidentToResponse(incident)
+}
+
+export const addMockIncidentComment = (incidentId: string, text: string): ReturnType<typeof incidentToResponse> | null => {
+  const incident = state.incidents.find(i => i.id === incidentId)
+  if (!incident) {
+    return null
+  }
+  const comment: MockComment = {
+    id: generateId('comment'),
+    text,
+    since: Math.floor(Date.now() / 1000),
+    deleted: false,
+  }
+  const updatedIncident: MockIncident = {
+    ...incident,
+    comments: [...incident.comments, comment],
+  }
+  state.incidents = state.incidents.map(i => i.id === incidentId ? updatedIncident : i)
+  return incidentToResponse(updatedIncident)
+}
+
+export const deleteMockIncidentComment = (incidentId: string, commentId: string): ReturnType<typeof incidentToResponse> | null => {
+  const incident = state.incidents.find(i => i.id === incidentId)
+  if (!incident) {
+    return null
+  }
+  const updatedIncident: MockIncident = {
+    ...incident,
+    comments: incident.comments.map(c => c.id === commentId ? { ...c, deleted: true } : c),
+  }
+  state.incidents = state.incidents.map(i => i.id === incidentId ? updatedIncident : i)
+  return incidentToResponse(updatedIncident)
+}
+
+export const addMockIncidentLabel = (incidentId: string, key: string, value: string): ReturnType<typeof incidentToResponse> | null => {
+  const incident = state.incidents.find(i => i.id === incidentId)
+  if (!incident) {
+    return null
+  }
+  const existingLabel = incident.labels.find(l => l.key === key && !l.deleted)
+  if (existingLabel) {
+    const updatedIncident: MockIncident = {
+      ...incident,
+      labels: incident.labels.map(l => l.key === key && !l.deleted ? { ...l, value, since: Math.floor(Date.now() / 1000) } : l),
+    }
+    state.incidents = state.incidents.map(i => i.id === incidentId ? updatedIncident : i)
+    return incidentToResponse(updatedIncident)
+  }
+  const label: MockLabel = {
+    key,
+    value,
+    since: Math.floor(Date.now() / 1000),
+    deleted: false,
+  }
+  const updatedIncident: MockIncident = {
+    ...incident,
+    labels: [...incident.labels, label],
+  }
+  state.incidents = state.incidents.map(i => i.id === incidentId ? updatedIncident : i)
+  return incidentToResponse(updatedIncident)
+}
+
+export const deleteMockIncidentLabel = (incidentId: string, key: string): ReturnType<typeof incidentToResponse> | null => {
+  const incident = state.incidents.find(i => i.id === incidentId)
+  if (!incident) {
+    return null
+  }
+  const updatedIncident: MockIncident = {
+    ...incident,
+    labels: incident.labels.map(l => l.key === key ? { ...l, deleted: true } : l),
+  }
+  state.incidents = state.incidents.map(i => i.id === incidentId ? updatedIncident : i)
+  return incidentToResponse(updatedIncident)
+}
+
+export const setMockIncidentStatus = (incidentId: string, status: string): ReturnType<typeof incidentToResponse> | null => {
+  const incident = state.incidents.find(i => i.id === incidentId)
+  if (!incident) {
+    return null
+  }
+  const newStatus: MockStatus = {
+    status,
+    since: Math.floor(Date.now() / 1000),
+  }
+  const updatedIncident: MockIncident = {
+    ...incident,
+    statuses: [...incident.statuses, newStatus],
+  }
+  state.incidents = state.incidents.map(i => i.id === incidentId ? updatedIncident : i)
+  return incidentToResponse(updatedIncident)
+}
+
+export const addMockIncidentAlert = (incidentId: string, alertId: string): ReturnType<typeof incidentToResponse> | null => {
+  const incident = state.incidents.find(i => i.id === incidentId)
+  if (!incident) {
+    return null
+  }
+  const alert = state.alerts.find(a => a.id === alertId)
+  if (!alert) {
+    return null
+  }
+  if (incident.alertIds.includes(alertId)) {
+    return incidentToResponse(incident)
+  }
+  const updatedIncident: MockIncident = {
+    ...incident,
+    alertIds: [...incident.alertIds, alertId],
+  }
+  state.incidents = state.incidents.map(i => i.id === incidentId ? updatedIncident : i)
+  return incidentToResponse(updatedIncident)
+}
+
+export const removeMockIncidentAlert = (incidentId: string, alertId: string): ReturnType<typeof incidentToResponse> | null => {
+  const incident = state.incidents.find(i => i.id === incidentId)
+  if (!incident) {
+    return null
+  }
+  const updatedIncident: MockIncident = {
+    ...incident,
+    alertIds: incident.alertIds.filter(id => id !== alertId),
+  }
+  state.incidents = state.incidents.map(i => i.id === incidentId ? updatedIncident : i)
+  return incidentToResponse(updatedIncident)
 }

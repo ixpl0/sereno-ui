@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { TenantResponseTenantsList } from '~/api/types.gen'
+import type { TenantResponseTenantList } from '~/api/types.gen'
 import { formatDate } from '~/utils/formatters'
 
 definePageMeta({
@@ -13,7 +13,7 @@ useSeoMeta({
   description: 'Управление командами',
 })
 
-const { data: tenantsData, status, refresh } = await useFetch<TenantResponseTenantsList>('/api/v1/tenants')
+const { data: tenantsData, status, refresh } = await useFetch<TenantResponseTenantList>('/api/v1/tenants')
 
 const loading = computed(() => status.value === 'pending' && !tenantsData.value)
 

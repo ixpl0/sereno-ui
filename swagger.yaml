@@ -647,7 +647,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Добавляет аннотацию
+      description: Добавляет аннотацию алерту
       parameters:
       - description: Request JSON
         in: body
@@ -676,14 +676,14 @@ paths:
             $ref: '#/definitions/server.ResponseError'
       security:
       - AccessJWT: []
-      summary: Добавление аннотации
+      summary: Добавление аннотации алерту
       tags:
       - alerts
   /alerts/{id}/annotations/delete:
     post:
       consumes:
       - application/json
-      description: Удаляет аннотацию
+      description: Удаляет аннотацию у улерта
       parameters:
       - description: Request JSON
         in: body
@@ -712,14 +712,14 @@ paths:
             $ref: '#/definitions/server.ResponseError'
       security:
       - AccessJWT: []
-      summary: Удаление аннотации
+      summary: Удаление аннотации у алерта
       tags:
       - alerts
   /alerts/{id}/comments/add:
     post:
       consumes:
       - application/json
-      description: Добавляет комментарий
+      description: Добавляет комментарий алерту
       parameters:
       - description: Request JSON
         in: body
@@ -748,14 +748,14 @@ paths:
             $ref: '#/definitions/server.ResponseError'
       security:
       - AccessJWT: []
-      summary: Добавление комментария
+      summary: Добавление комментария алерту
       tags:
       - alerts
   /alerts/{id}/comments/delete:
     post:
       consumes:
       - application/json
-      description: Удаляет комментарий
+      description: Удаляет комментарий у алерта
       parameters:
       - description: Request JSON
         in: body
@@ -784,14 +784,14 @@ paths:
             $ref: '#/definitions/server.ResponseError'
       security:
       - AccessJWT: []
-      summary: Удаление комментария
+      summary: Удаление комментария у алерта
       tags:
       - alerts
   /alerts/{id}/labels/add:
     post:
       consumes:
       - application/json
-      description: Добавляет лейбл
+      description: Добавляет лейбл алерту
       parameters:
       - description: Request JSON
         in: body
@@ -820,14 +820,14 @@ paths:
             $ref: '#/definitions/server.ResponseError'
       security:
       - AccessJWT: []
-      summary: Добавление лейбла
+      summary: Добавление лейбла алерту
       tags:
       - alerts
   /alerts/{id}/labels/delete:
     post:
       consumes:
       - application/json
-      description: Удаляет лейбл
+      description: Удаляет лейбл у алерта
       parameters:
       - description: Request JSON
         in: body
@@ -856,7 +856,7 @@ paths:
             $ref: '#/definitions/server.ResponseError'
       security:
       - AccessJWT: []
-      summary: Удаление лейбла
+      summary: Удаление лейбла у алерта
       tags:
       - alerts
   /alerts/{id}/status/set:
@@ -1132,6 +1132,222 @@ paths:
       security:
       - AccessJWT: []
       summary: Инцидент
+      tags:
+      - incidents
+  /incidents/{id}/alerts/add:
+    post:
+      consumes:
+      - application/json
+      description: Добавляет алерт в инцидент
+      parameters:
+      - description: Request JSON
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/event.RequestID'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/event.ResponseSingleIncident'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+      security:
+      - AccessJWT: []
+      summary: Добавление алерта в инцидент
+      tags:
+      - incidents
+  /incidents/{id}/alerts/delete:
+    post:
+      consumes:
+      - application/json
+      description: Удаляет алерт из инцидент
+      parameters:
+      - description: Request JSON
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/event.RequestID'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/event.ResponseSingleIncident'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+      security:
+      - AccessJWT: []
+      summary: Удаление алерта из инцидента
+      tags:
+      - incidents
+  /incidents/{id}/comments/add:
+    post:
+      consumes:
+      - application/json
+      description: Добавляет комментарий инциденту
+      parameters:
+      - description: Request JSON
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/event.RequestComment'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/event.ResponseSingleIncident'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+      security:
+      - AccessJWT: []
+      summary: Добавление комментария инциденту
+      tags:
+      - incidents
+  /incidents/{id}/comments/delete:
+    post:
+      consumes:
+      - application/json
+      description: Удаляет комментарий у инцидента
+      parameters:
+      - description: Request JSON
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/event.RequestID'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/event.ResponseSingleIncident'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+      security:
+      - AccessJWT: []
+      summary: Удаление комментария у инцидента
+      tags:
+      - incidents
+  /incidents/{id}/labels/add:
+    post:
+      consumes:
+      - application/json
+      description: Добавляет лейбл инциденту
+      parameters:
+      - description: Request JSON
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/event.RequestKeyValue'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/event.ResponseSingleIncident'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+      security:
+      - AccessJWT: []
+      summary: Добавление лейбла инциденту
+      tags:
+      - incidents
+  /incidents/{id}/labels/delete:
+    post:
+      consumes:
+      - application/json
+      description: Удаляет лейбл у инцидента
+      parameters:
+      - description: Request JSON
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/event.RequestKey'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/event.ResponseSingleIncident'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+      security:
+      - AccessJWT: []
+      summary: Удаление лейбла у инцидента
       tags:
       - incidents
   /incidents/{id}/status/set:

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type {
-  TenantResponseTenantsList,
-  TenantResponseMembersList,
-  TenantResponseTokensList,
+  TenantResponseTenantList,
+  TenantResponseMemberList,
+  TenantResponseTokenList,
 } from '~/api/types.gen'
 import { formatDate } from '~/utils/formatters'
 
@@ -20,15 +20,15 @@ useSeoMeta({
   description: 'Настройки команды',
 })
 
-const { data: tenantsData, refresh: refreshTenants } = await useFetch<TenantResponseTenantsList>('/api/v1/tenants')
-const { data: membersData, status: membersStatus, refresh: refreshMembers } = await useFetch<TenantResponseMembersList>(
+const { data: tenantsData, refresh: refreshTenants } = await useFetch<TenantResponseTenantList>('/api/v1/tenants')
+const { data: membersData, status: membersStatus, refresh: refreshMembers } = await useFetch<TenantResponseMemberList>(
   () => `/api/v1/tenants/${tenantId.value}/members`,
 )
-const { data: tokensData, status: tokensStatus, refresh: refreshTokens } = await useFetch<TenantResponseTokensList>(
+const { data: tokensData, status: tokensStatus, refresh: refreshTokens } = await useFetch<TenantResponseTokenList>(
   () => `/api/v1/tenants/${tenantId.value}/tokens`,
 )
 
-const tenant = computed(() => tenantsData.value?.tenants?.find(t => t.id === tenantId.value))
+const tenant = computed(() => tenantsData.value?.tenants?.find((t: { id: string }) => t.id === tenantId.value))
 const isAdmin = computed(() => tenant.value?.admin === true)
 const membersLoading = computed(() => membersStatus.value === 'pending' && !membersData.value)
 const tokensLoading = computed(() => tokensStatus.value === 'pending' && !tokensData.value)
@@ -173,7 +173,7 @@ const handleCreateToken = async () => {
     return
   }
 
-  const tokenValue = 'data' in response && response.data?.token?.value
+  const tokenValue = 'data' in response && response.data?.token?.secret
   if (tokenValue) {
     createdTokenValue.value = tokenValue
     toast.success('Токен создан. Скопируйте его сейчас — он больше не будет показан.')

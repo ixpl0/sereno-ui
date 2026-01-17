@@ -1,7 +1,7 @@
 import { client } from '~/api/client.gen'
 import type {
   TenantResponseTenant,
-  TenantResponseTenantsList,
+  TenantResponseTenantList,
   TenantResponseSingleTenant,
   TenantRequestName,
 } from '~/api/types.gen'
@@ -17,7 +17,7 @@ export const useTenants = () => {
     tenants.value.filter(t => t.admin === true),
   )
 
-  const fetchTenants = async (): Promise<ApiResponse<TenantResponseTenantsList> | null> => {
+  const fetchTenants = async (): Promise<ApiResponse<TenantResponseTenantList> | null> => {
     loading.value = true
     error.value = null
 
@@ -27,7 +27,7 @@ export const useTenants = () => {
 
     loading.value = false
 
-    const data = getApiData(response as ApiResponse<TenantResponseTenantsList>)
+    const data = getApiData(response as ApiResponse<TenantResponseTenantList>)
     if (data?.tenants) {
       tenants.value = data.tenants
     }
@@ -35,7 +35,7 @@ export const useTenants = () => {
       error.value = 'Failed to fetch tenants'
     }
 
-    return response as ApiResponse<TenantResponseTenantsList>
+    return response as ApiResponse<TenantResponseTenantList>
   }
 
   const createTenant = async (name: string): Promise<ApiResponse<TenantResponseSingleTenant>> => {

@@ -40,3 +40,34 @@ export const formatContactKind = (kind: string | undefined): string => {
   }
   return kind ?? ''
 }
+
+export const formatDateTime = (timestamp: number | undefined): string => {
+  if (!timestamp) {
+    return ''
+  }
+  return new Date(timestamp * 1000).toLocaleString('ru-RU', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+export const formatStatus = (status: string | undefined): string => {
+  const statusMap: Record<string, string> = {
+    created: 'Создан',
+    acknowledged: 'Подтверждён',
+    resolved: 'Закрыт',
+  }
+  return statusMap[status ?? ''] ?? status ?? ''
+}
+
+export const getStatusColor = (status: string | undefined): string => {
+  const colorMap: Record<string, string> = {
+    created: 'badge-warning',
+    acknowledged: 'badge-info',
+    resolved: 'badge-success',
+  }
+  return colorMap[status ?? ''] ?? 'badge-ghost'
+}

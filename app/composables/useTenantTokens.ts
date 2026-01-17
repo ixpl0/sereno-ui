@@ -1,7 +1,7 @@
 import { client } from '~/api/client.gen'
 import type {
   TenantResponseToken,
-  TenantResponseTokensList,
+  TenantResponseTokenList,
   TenantResponseSingleToken,
   TenantRequestName,
   TenantRequestId,
@@ -14,7 +14,7 @@ export const useTenantTokens = (tenantId: Ref<string>) => {
   const loading = ref(false)
   const error = ref<string | null>(null)
 
-  const fetchTokens = async (): Promise<ApiResponse<TenantResponseTokensList> | null> => {
+  const fetchTokens = async (): Promise<ApiResponse<TenantResponseTokenList> | null> => {
     loading.value = true
     error.value = null
 
@@ -25,7 +25,7 @@ export const useTenantTokens = (tenantId: Ref<string>) => {
 
     loading.value = false
 
-    const data = getApiData(response as ApiResponse<TenantResponseTokensList>)
+    const data = getApiData(response as ApiResponse<TenantResponseTokenList>)
     if (data?.tokens) {
       tokens.value = data.tokens
     }
@@ -33,7 +33,7 @@ export const useTenantTokens = (tenantId: Ref<string>) => {
       error.value = 'Failed to fetch tokens'
     }
 
-    return response as ApiResponse<TenantResponseTokensList>
+    return response as ApiResponse<TenantResponseTokenList>
   }
 
   const createToken = async (name: string): Promise<ApiResponse<TenantResponseSingleToken>> => {
