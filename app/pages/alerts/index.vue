@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { client } from '~/api/client.gen'
 import type { EventResponseAlertList } from '~/api/types.gen'
 import { formatDateTime, formatStatus, getStatusColor } from '~/utils/formatters'
 
@@ -10,6 +11,7 @@ definePageMeta({
 
 const { currentStatus } = useAlerts()
 const { viewMode, setViewMode } = useViewMode('alerts')
+const { showToast } = useToast()
 
 const { data, status, refresh } = await useFetch<EventResponseAlertList>('/api/v1/alerts')
 
@@ -31,6 +33,22 @@ const getAlertLabelsPreview = (alert: typeof alerts.value[0]) => {
 }
 
 const handleRefresh = async () => {
+  await refresh()
+}
+
+const handleStatusChange = async (alertId: string, newStatus: string) => {
+  const response = await client.post({
+    url: '/alerts/{id}/status/set',
+    path: { id: alertId },
+    body: { status: newStatus as 'acknowledged' | 'resolved' },
+  })
+
+  if (response.error) {
+    showToast('Не удалось изменить статус', 'error')
+    return
+  }
+
+  showToast(newStatus === 'acknowledged' ? 'Алерт подтверждён' : 'Алерт закрыт', 'success')
   await refresh()
 }
 </script>
@@ -99,7 +117,7 @@ const handleRefresh = async () => {
 
       <div
         v-else-if="viewMode === 'cards'"
-        class="flex flex-col gap-3 max-w-4xl mx-auto"
+        class="flex flex-col gap-6 max-w-4xl mx-auto"
       >
         <EventAlertCard
           v-for="alert in filteredAlerts"
@@ -107,6 +125,7 @@ const handleRefresh = async () => {
           :alert="alert"
           :current-status="currentStatus(alert)"
           @click="navigateTo(`/alerts/${alert.id}`)"
+          @status-change="(newStatus) => handleStatusChange(alert.id, newStatus)"
         />
       </div>
 

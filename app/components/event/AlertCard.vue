@@ -60,14 +60,25 @@ const getDisplayAnnotations = (alert: EventResponseAlert) =>
     :class="getStatusBorderColor(currentStatus)"
     @click="emit('click')"
   >
-    <div class="flex items-start gap-3 pr-4 pb-2">
-      <span
-        class="badge rounded-none rounded-br-lg -ml-1 -mt-1"
-        :class="getStatusColor(currentStatus)"
-      >
-        {{ formatStatus(currentStatus) }}
-      </span>
-      <div class="flex items-center gap-4 text-sm ml-auto">
+    <div class="flex items-center gap-3 pr-4 pb-2">
+      <div class="flex items-center -ml-1 -mt-1">
+        <span
+          class="badge rounded-none rounded-br-lg"
+          :class="getStatusColor(currentStatus)"
+        >
+          {{ formatStatus(currentStatus) }}
+        </span>
+        <template v-if="nextStatus">
+          <span class="text-base-content/40 px-2">→</span>
+          <span
+            class="text-sm link link-primary"
+            @click="handleStatusChange"
+          >
+            {{ formatStatus(nextStatus.status) }}
+          </span>
+        </template>
+      </div>
+      <div class="flex items-center gap-4 text-sm ml-auto pt-0.5">
         <span class="text-base-content/50">{{ alert.tenant.id }}</span>
         <div class="flex items-center gap-1.5 text-base-content/60">
           <Icon
@@ -80,18 +91,9 @@ const getDisplayAnnotations = (alert: EventResponseAlert) =>
     </div>
 
     <div class="px-4 pb-3">
-      <div class="flex items-center gap-3 mb-1">
-        <h3 class="font-medium text-lg">
-          {{ getAlertTitle(alert) }}
-        </h3>
-        <button
-          v-if="nextStatus"
-          class="btn btn-xs btn-outline"
-          @click="handleStatusChange"
-        >
-          {{ nextStatus.label }}
-        </button>
-      </div>
+      <h3 class="font-medium text-lg mb-1">
+        {{ getAlertTitle(alert) }}
+      </h3>
 
       <p
         v-if="getAlertDescription(alert)"

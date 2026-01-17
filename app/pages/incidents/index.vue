@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { client } from '~/api/client.gen'
 import type { EventResponseIncidentList } from '~/api/types.gen'
 import { formatDateTime, formatStatus, getStatusColor } from '~/utils/formatters'
 
@@ -10,6 +11,7 @@ definePageMeta({
 
 const { currentStatus } = useIncidents()
 const { viewMode, setViewMode } = useViewMode('incidents')
+const { showToast } = useToast()
 
 const { data, status, refresh } = await useFetch<EventResponseIncidentList>('/api/v1/incidents')
 
@@ -26,6 +28,22 @@ const filteredIncidents = computed(() => {
 })
 
 const handleRefresh = async () => {
+  await refresh()
+}
+
+const handleStatusChange = async (incidentId: string, newStatus: string) => {
+  const response = await client.post({
+    url: '/incidents/{id}/status/set',
+    path: { id: incidentId },
+    body: { status: newStatus as 'acknowledged' | 'resolved' },
+  })
+
+  if (response.error) {
+    showToast('Не удалось изменить статус', 'error')
+    return
+  }
+
+  showToast(newStatus === 'acknowledged' ? 'Инцидент подтверждён' : 'Инцидент закрыт', 'success')
   await refresh()
 }
 </script>
@@ -105,7 +123,7 @@ const handleRefresh = async () => {
 
       <div
         v-else-if="viewMode === 'cards'"
-        class="flex flex-col gap-3 max-w-4xl mx-auto"
+        class="flex flex-col gap-6 max-w-4xl mx-auto"
       >
         <EventIncidentCard
           v-for="incident in filteredIncidents"
@@ -113,6 +131,7 @@ const handleRefresh = async () => {
           :incident="incident"
           :current-status="currentStatus(incident)"
           @click="navigateTo(`/incidents/${incident.id}`)"
+          @status-change="(newStatus) => handleStatusChange(incident.id, newStatus)"
         />
       </div>
 
