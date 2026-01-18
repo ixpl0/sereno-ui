@@ -109,7 +109,7 @@ const getDisplayAnnotations = (alert: EventResponseAlert) =>
         <span
           v-for="label in getActiveLabels(alert)"
           :key="label.key"
-          class="badge badge-sm bg-info/8 text-info border-info/25"
+          class="badge badge-sm bg-base-content/8 text-base-content/70 border-base-content/15"
         >
           {{ label.key }}: {{ label.value }}
         </span>
@@ -122,7 +122,7 @@ const getDisplayAnnotations = (alert: EventResponseAlert) =>
         <span
           v-for="annotation in getDisplayAnnotations(alert)"
           :key="annotation.key"
-          class="badge badge-sm bg-secondary/5 text-secondary/70 border-secondary/20"
+          class="badge badge-sm bg-base-content/3 text-base-content/50 border-base-content/14"
         >
           {{ annotation.key }}: {{ annotation.value }}
         </span>

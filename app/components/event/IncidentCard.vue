@@ -90,7 +90,7 @@ const getActiveLabels = (incident: EventResponseIncident) =>
         <span
           v-for="label in getActiveLabels(incident)"
           :key="label.key"
-          class="badge badge-sm bg-info/8 text-info border-info/25"
+          class="badge badge-sm bg-base-content/8 text-base-content/70 border-base-content/15"
         >
           {{ label.key }}: {{ label.value }}
         </span>

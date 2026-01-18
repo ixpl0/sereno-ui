@@ -4,8 +4,8 @@
   name: "dark";
   --color-primary: oklch(0.66 0.15 250);
   --color-primary-content: oklch(0.98 0.01 250);
-  --color-secondary: oklch(0.57 0.24 304);
-  --color-secondary-content: oklch(0.98 0.02 304);
+  --color-secondary: oklch(0.75 0.21 346.38);
+  --color-secondary-content: oklch(0.20 0.02 346);
   --color-success: oklch(0.72 0.16 142);
   --color-success-content: oklch(0.25 0.04 142);
   --color-error: oklch(0.69 0.17 26.15);
