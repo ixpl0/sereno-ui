@@ -20,12 +20,16 @@ useSeoMeta({
   description: 'Настройки команды',
 })
 
-const { data: tenantsData, refresh: refreshTenants } = await useFetch<TenantResponseTenantList>('/api/v1/tenants')
+const headers = useRequestHeaders(['cookie'])
+
+const { data: tenantsData, refresh: refreshTenants } = await useFetch<TenantResponseTenantList>('/api/v1/tenants', { headers })
 const { data: membersData, status: membersStatus, refresh: refreshMembers } = await useFetch<TenantResponseMemberList>(
   () => `/api/v1/tenants/${tenantId.value}/members`,
+  { headers },
 )
 const { data: tokensData, status: tokensStatus, refresh: refreshTokens } = await useFetch<TenantResponseTokenList>(
   () => `/api/v1/tenants/${tenantId.value}/tokens`,
+  { headers },
 )
 
 const tenant = computed(() => tenantsData.value?.tenants?.find((t: { id: string }) => t.id === tenantId.value))
