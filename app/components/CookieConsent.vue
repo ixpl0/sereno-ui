@@ -66,13 +66,13 @@ onMounted(() => {
 
           <p class="mt-2 text-sm text-base-content/70">
             Продолжая пользоваться сайтом, вы соглашаетесь на обработку
-            обязательных cookie. Подробнее — в
+            обязательных cookie.
             <a
               href="/files/legal/privacy-policy.pdf"
               target="_blank"
               rel="noopener"
               class="text-primary hover:underline"
-            >Политике конфиденциальности</a>.
+            >Прочитать Политику конфиденциальности</a>.
           </p>
 
           <Transition
@@ -96,7 +96,7 @@ onMounted(() => {
             </div>
           </Transition>
 
-          <div class="mt-4 flex items-center gap-3">
+          <div class="mt-4 flex items-center justify-between">
             <UiButton
               variant="primary"
               size="sm"
@@ -110,11 +110,11 @@ onMounted(() => {
               class="flex items-center gap-1 text-sm text-base-content/60 hover:text-base-content transition-colors"
               :aria-expanded="isExpanded"
               aria-controls="cookie-details"
-              aria-label="Показать подробности"
               @click="toggleExpanded"
             >
+              <span>Подробности</span>
               <Icon
-                name="lucide:chevron-down"
+                name="lucide:chevron-up"
                 class="w-4 h-4 transition-transform duration-200"
                 :class="{ 'rotate-180': isExpanded }"
                 aria-hidden="true"
