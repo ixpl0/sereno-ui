@@ -12,6 +12,13 @@ definePageMeta({
 const { currentStatus } = useAlerts()
 const { viewMode, setViewMode } = useViewMode('alerts')
 const { error: showError, success: showSuccess } = useToast()
+const { data: tenantsData } = await useFetch('/api/v1/tenants')
+
+const getTenantName = (tenantId: string) => {
+  const tenants = (tenantsData.value as { tenants?: Array<{ id: string, name: string }> })?.tenants ?? []
+  const tenant = tenants.find(t => t.id === tenantId)
+  return tenant?.name ?? tenantId
+}
 
 const { data, status, refresh } = await useFetch<EventResponseAlertList>('/api/v1/alerts')
 
@@ -124,6 +131,7 @@ const handleStatusChange = async (alertId: string, newStatus: string) => {
           :key="alert.id"
           :alert="alert"
           :current-status="currentStatus(alert)"
+          :tenant-name="getTenantName(alert.tenant.id)"
           @click="navigateTo(`/alerts/${alert.id}`)"
           @status-change="(newStatus) => handleStatusChange(alert.id, newStatus)"
         />
@@ -172,7 +180,7 @@ const handleStatusChange = async (alertId: string, newStatus: string) => {
                 </td>
                 <td>
                   <div class="text-sm text-base-content/70">
-                    {{ alert.tenant.id }}
+                    {{ getTenantName(alert.tenant.id) }}
                   </div>
                 </td>
                 <td>

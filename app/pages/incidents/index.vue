@@ -12,6 +12,13 @@ definePageMeta({
 const { currentStatus } = useIncidents()
 const { viewMode, setViewMode } = useViewMode('incidents')
 const { error: showError, success: showSuccess } = useToast()
+const { data: tenantsData } = await useFetch('/api/v1/tenants')
+
+const getTenantName = (tenantId: string) => {
+  const tenants = (tenantsData.value as { tenants?: Array<{ id: string, name: string }> })?.tenants ?? []
+  const tenant = tenants.find(t => t.id === tenantId)
+  return tenant?.name ?? tenantId
+}
 
 const { data, status, refresh } = await useFetch<EventResponseIncidentList>('/api/v1/incidents')
 
@@ -130,6 +137,7 @@ const handleStatusChange = async (incidentId: string, newStatus: string) => {
           :key="incident.id"
           :incident="incident"
           :current-status="currentStatus(incident)"
+          :tenant-name="getTenantName(incident.tenant.id)"
           @click="navigateTo(`/incidents/${incident.id}`)"
           @status-change="(newStatus) => handleStatusChange(incident.id, newStatus)"
         />
@@ -189,7 +197,7 @@ const handleStatusChange = async (incidentId: string, newStatus: string) => {
                 </td>
                 <td>
                   <div class="text-sm text-base-content/70">
-                    {{ incident.tenant.id }}
+                    {{ getTenantName(incident.tenant.id) }}
                   </div>
                 </td>
                 <td>

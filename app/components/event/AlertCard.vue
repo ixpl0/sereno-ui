@@ -5,6 +5,7 @@ import { formatDateTime, formatStatus, getStatusColor, getStatusBorderColor } fr
 interface Props {
   alert: EventResponseAlert
   currentStatus: string
+  tenantName?: string
 }
 
 const props = defineProps<Props>()
@@ -79,7 +80,7 @@ const getDisplayAnnotations = (alert: EventResponseAlert) =>
         </template>
       </div>
       <div class="flex items-center gap-4 text-sm ml-auto pt-0.5">
-        <span class="text-base-content/50">{{ alert.tenant.id }}</span>
+        <span class="text-base-content/50">{{ tenantName ?? alert.tenant.id }}</span>
         <div class="flex items-center gap-1.5 text-base-content/60">
           <Icon
             name="lucide:clock"

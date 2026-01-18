@@ -5,6 +5,7 @@ import { formatDateTime, formatStatus, getStatusColor, getStatusBorderColor } fr
 interface Props {
   incident: EventResponseIncident
   currentStatus: string
+  tenantName?: string
 }
 
 const props = defineProps<Props>()
@@ -60,7 +61,7 @@ const getActiveLabels = (incident: EventResponseIncident) =>
         </template>
       </div>
       <div class="flex items-center gap-4 text-sm ml-auto pt-0.5">
-        <span class="text-base-content/50">{{ incident.tenant.id }}</span>
+        <span class="text-base-content/50">{{ tenantName ?? incident.tenant.id }}</span>
         <div class="flex items-center gap-1.5 text-base-content/60">
           <Icon
             name="lucide:clock"

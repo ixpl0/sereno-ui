@@ -155,13 +155,13 @@ const defaultState: MockState = {
   tenants: [
     {
       id: 'tenant-1',
-      name: 'Lorem Ipsum Inc.',
+      name: 'DevOps&SRE',
       since: Math.floor(Date.now() / 1000) - 2592000,
       adminUserIds: ['user-1'],
     },
     {
       id: 'tenant-2',
-      name: 'Acme Corp',
+      name: 'Отдел обеспечения надежности и доступности внешних сервисов',
       since: Math.floor(Date.now() / 1000) - 604800,
       adminUserIds: ['user-2'],
     },
