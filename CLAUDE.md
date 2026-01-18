@@ -93,6 +93,22 @@ Common causes and solutions:
    - Returns `false` for all breakpoint checks until mounted
    - Use `watch` with `immediate: true` to update state after mount
 
+#### Prerender and Protected Routes
+
+**IMPORTANT**: Protected pages (requiring auth) must NOT be prerendered. Otherwise they get cached with empty data.
+
+Configuration in `nuxt.config.ts`:
+- `nitro.prerender.crawlLinks: true` - crawls links to find pages
+- `nitro.prerender.ignore` - function that allows ONLY static pages (`/`, `/about`, `/pricing`, `/blog/**`, `/docs/**`)
+- All other routes are automatically ignored from prerender
+
+If adding new static public pages, add them to the `allowed` array in `nitro.prerender.ignore`.
+
+Auth middleware (`app/middleware/auth.ts`):
+- Uses `parseCookies` from `h3` to read cookies on server (must be imported!)
+- Uses `useCookie` on client
+- `useRequestEvent()` provides the H3 event for server-side cookie parsing
+
 ### Mock API
 - Run `pnpm dev:mock` to use mock API instead of real backend
 - Mocks implemented as Nuxt server routes in `server/api/v1/`
