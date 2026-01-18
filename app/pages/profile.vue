@@ -222,7 +222,10 @@ const handleCloseAllSessions = async () => {
 <template>
   <div class="p-4 lg:p-6">
     <div class="max-w-3xl mx-auto">
-      <UiCard class="animate-slide-up">
+      <UiCard class="animate-slide-up mb-3">
+        <h2 class="text-lg font-medium mb-4">
+          Личные данные
+        </h2>
         <div
           v-if="userLoading"
           class="flex justify-center py-8"
@@ -231,9 +234,9 @@ const handleCloseAllSessions = async () => {
         </div>
         <div
           v-else
-          class="space-y-4"
+          class="space-y-3"
         >
-          <div class="flex items-center justify-between">
+          <div class="flex items-center justify-between p-3 bg-base-200/50 rounded">
             <div>
               <div class="text-sm text-base-content/60">
                 Имя
@@ -283,9 +286,7 @@ const handleCloseAllSessions = async () => {
             </div>
           </div>
 
-          <div class="divider my-2" />
-
-          <div class="flex items-center justify-between">
+          <div class="flex items-center justify-between p-3 bg-base-200/50 rounded">
             <div>
               <div class="text-sm text-base-content/60">
                 Фамилия
@@ -335,9 +336,7 @@ const handleCloseAllSessions = async () => {
             </div>
           </div>
 
-          <div class="divider my-2" />
-
-          <div class="flex items-center justify-between">
+          <div class="flex items-center justify-between p-3 bg-base-200/50 rounded">
             <div>
               <div class="text-sm text-base-content/60">
                 Часовой пояс
@@ -385,9 +384,7 @@ const handleCloseAllSessions = async () => {
             </div>
           </div>
 
-          <div class="divider my-2" />
-
-          <div class="flex items-center justify-between">
+          <div class="flex items-center justify-between p-3 bg-base-200/50 rounded">
             <div>
               <div class="text-sm text-base-content/60">
                 Язык
@@ -435,156 +432,156 @@ const handleCloseAllSessions = async () => {
             </div>
           </div>
         </div>
+      </UiCard>
 
-        <div class="mt-16 -mx-4 sm:-mx-6 px-4 sm:px-6 pt-12 pb-6 bg-base-200/30">
-          <h2 class="text-xl font-semibold text-base-content mb-6">
-            Контакты
-          </h2>
+      <UiCard class="animate-slide-up mb-3">
+        <h2 class="text-lg font-medium mb-4">
+          Контакты
+        </h2>
 
+        <div
+          v-if="contactsLoading"
+          class="flex justify-center py-8"
+        >
+          <span class="loading loading-spinner loading-lg" />
+        </div>
+        <div
+          v-else
+          class="space-y-3"
+        >
           <div
-            v-if="contactsLoading"
-            class="flex justify-center py-8"
+            v-for="contact in contactsData?.contacts"
+            :key="contact.id"
+            class="flex items-center justify-between p-3 rounded"
+            :class="contact.verified ? 'bg-success/10' : 'bg-warning/10'"
           >
-            <span class="loading loading-spinner loading-lg" />
-          </div>
-          <div
-            v-else
-            class="space-y-4"
-          >
-            <div
-              v-for="contact in contactsData?.contacts"
-              :key="contact.id"
-              class="flex items-center justify-between p-3 rounded"
-              :class="contact.verified ? 'bg-success/10' : 'bg-warning/10'"
-            >
-              <div class="flex items-center gap-3">
-                <div
-                  class="badge whitespace-nowrap shrink-0"
-                  :class="contact.verified ? 'badge-success' : 'badge-warning'"
-                >
-                  {{ contact.verified ? 'Подтверждён' : 'Не подтверждён' }}
-                </div>
-                <div class="min-w-0">
-                  <div class="font-medium break-all">
-                    {{ contact.value }}
-                  </div>
-                  <div class="text-sm text-base-content/60">
-                    {{ formatContactKind(contact.kind) }}
-                  </div>
-                </div>
+            <div class="flex items-center gap-3">
+              <div
+                class="badge whitespace-nowrap shrink-0"
+                :class="contact.verified ? 'badge-success' : 'badge-warning'"
+              >
+                {{ contact.verified ? 'Подтверждён' : 'Не подтверждён' }}
               </div>
-              <div class="flex items-center gap-1 sm:gap-2 shrink-0">
-                <template v-if="!contact.verified && verifyingContactId !== contact.id">
-                  <UiButton
-                    variant="ghost"
-                    size="sm"
-                    @click="startVerifyContact(contact.id!)"
-                  >
-                    <Icon
-                      name="lucide:check"
-                      class="w-4 h-4 sm:hidden"
-                    />
-                    <span class="hidden sm:inline">Подтвердить</span>
-                  </UiButton>
-                </template>
-                <template v-if="verifyingContactId === contact.id">
-                  <UiInput
-                    v-model="verificationCode"
-                    placeholder="Код"
-                    class="w-20 sm:w-24"
-                    @keyup.enter="handleVerifyContact"
-                    @keyup.escape="cancelVerifyContact"
-                  />
-                  <UiButton
-                    variant="primary"
-                    size="sm"
-                    @click="handleVerifyContact"
-                  >
-                    OK
-                  </UiButton>
-                  <UiButton
-                    variant="ghost"
-                    size="sm"
-                    @click="cancelVerifyContact"
-                  >
-                    <Icon
-                      name="lucide:x"
-                      class="w-4 h-4 sm:hidden"
-                    />
-                    <span class="hidden sm:inline">Отмена</span>
-                  </UiButton>
-                </template>
-                <UiButton
-                  v-if="verifyingContactId !== contact.id"
-                  variant="ghost"
-                  size="sm"
-                  @click="handleDeleteContact(contact.id!)"
-                >
-                  <Icon
-                    name="lucide:trash-2"
-                    class="w-4 h-4 sm:hidden"
-                  />
-                  <span class="hidden sm:inline">Удалить</span>
-                </UiButton>
+              <div class="min-w-0">
+                <div class="font-medium break-all">
+                  {{ contact.value }}
+                </div>
+                <div class="text-sm text-base-content/60">
+                  {{ formatContactKind(contact.kind) }}
+                </div>
               </div>
             </div>
-
-            <div
-              v-if="isAddingContact"
-              class="p-4 bg-base-200 space-y-3 rounded"
-            >
-              <div class="flex gap-3">
-                <div class="w-32 shrink-0">
-                  <UiSelect
-                    v-model="newContactKind"
-                    :options="contactKindOptions"
+            <div class="flex items-center gap-1 sm:gap-2 shrink-0">
+              <template v-if="!contact.verified && verifyingContactId !== contact.id">
+                <UiButton
+                  variant="ghost"
+                  size="sm"
+                  @click="startVerifyContact(contact.id!)"
+                >
+                  <Icon
+                    name="lucide:check"
+                    class="w-4 h-4 sm:hidden"
                   />
-                </div>
+                  <span class="hidden sm:inline">Подтвердить</span>
+                </UiButton>
+              </template>
+              <template v-if="verifyingContactId === contact.id">
                 <UiInput
-                  v-model="newContactValue"
-                  :placeholder="newContactKind === 'email' ? 'user@example.com' : '@username'"
-                  class="min-w-0 flex-1"
-                  @keyup.enter="handleAddContact"
-                  @keyup.escape="cancelAddContact"
+                  v-model="verificationCode"
+                  placeholder="Код"
+                  class="w-20 sm:w-24"
+                  @keyup.enter="handleVerifyContact"
+                  @keyup.escape="cancelVerifyContact"
                 />
-              </div>
-              <div class="flex gap-2 justify-end">
                 <UiButton
                   variant="primary"
                   size="sm"
-                  @click="handleAddContact"
+                  @click="handleVerifyContact"
                 >
-                  Добавить
+                  OK
                 </UiButton>
                 <UiButton
                   variant="ghost"
                   size="sm"
-                  @click="cancelAddContact"
+                  @click="cancelVerifyContact"
                 >
-                  Отмена
+                  <Icon
+                    name="lucide:x"
+                    class="w-4 h-4 sm:hidden"
+                  />
+                  <span class="hidden sm:inline">Отмена</span>
                 </UiButton>
-              </div>
-            </div>
-
-            <div
-              v-if="!isAddingContact"
-              class="text-center"
-            >
+              </template>
               <UiButton
+                v-if="verifyingContactId !== contact.id"
                 variant="ghost"
-                @click="startAddContact"
+                size="sm"
+                @click="handleDeleteContact(contact.id!)"
               >
-                + Добавить контакт
+                <Icon
+                  name="lucide:trash-2"
+                  class="w-4 h-4 sm:hidden"
+                />
+                <span class="hidden sm:inline">Удалить</span>
               </UiButton>
             </div>
           </div>
-        </div>
 
-        <div class="pt-12">
-          <h2 class="text-xl font-semibold text-base-content mb-6">
-            Сессии
-          </h2>
+          <div
+            v-if="isAddingContact"
+            class="p-4 bg-base-200 space-y-3 rounded"
+          >
+            <div class="flex gap-3">
+              <div class="w-32 shrink-0">
+                <UiSelect
+                  v-model="newContactKind"
+                  :options="contactKindOptions"
+                />
+              </div>
+              <UiInput
+                v-model="newContactValue"
+                :placeholder="newContactKind === 'email' ? 'user@example.com' : '@username'"
+                class="min-w-0 flex-1"
+                @keyup.enter="handleAddContact"
+                @keyup.escape="cancelAddContact"
+              />
+            </div>
+            <div class="flex gap-2 justify-end">
+              <UiButton
+                variant="primary"
+                size="sm"
+                @click="handleAddContact"
+              >
+                Добавить
+              </UiButton>
+              <UiButton
+                variant="ghost"
+                size="sm"
+                @click="cancelAddContact"
+              >
+                Отмена
+              </UiButton>
+            </div>
+          </div>
+
+          <div
+            v-if="!isAddingContact"
+            class="text-center"
+          >
+            <UiButton
+              variant="ghost"
+              @click="startAddContact"
+            >
+              + Добавить контакт
+            </UiButton>
+          </div>
         </div>
+      </UiCard>
+
+      <UiCard class="animate-slide-up">
+        <h2 class="text-lg font-medium mb-4">
+          Сессии
+        </h2>
 
         <div
           v-if="sessionsLoading"
@@ -594,7 +591,7 @@ const handleCloseAllSessions = async () => {
         </div>
         <div
           v-else
-          class="space-y-4"
+          class="space-y-3"
         >
           <div
             v-if="currentSession"
@@ -618,7 +615,7 @@ const handleCloseAllSessions = async () => {
           <div
             v-for="session in otherSessions"
             :key="session.id"
-            class="flex items-center justify-between p-3 bg-base-200 rounded"
+            class="flex items-center justify-between p-3 bg-base-200/50 rounded"
           >
             <div>
               <div class="font-medium">
