@@ -1,7 +1,17 @@
 export default defineNuxtRouteMiddleware(() => {
-  const token = useCookie<string | undefined>('auth_token')
+  const event = useRequestEvent()
 
-  if (!token.value) {
+  let token: string | undefined
+
+  if (import.meta.server && event) {
+    const cookies = parseCookies(event)
+    token = cookies.auth_token
+  }
+  else {
+    token = useCookie<string | undefined>('auth_token').value
+  }
+
+  if (!token) {
     return navigateTo('/auth')
   }
 })
