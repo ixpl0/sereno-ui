@@ -23,14 +23,12 @@ const {
 const { currentStatus: alertCurrentStatus } = useAlerts()
 const toast = useToast()
 
-const headers = useRequestHeaders(['cookie'])
-
 const { data, status, refresh } = await useFetch<EventResponseSingleIncident>(
   `/api/v1/incidents/${route.params.id}`,
-  { key: `incident-${route.params.id}`, headers },
+  { key: `incident-${route.params.id}` },
 )
 
-const { data: alertsData } = await useFetch<EventResponseAlertList>('/api/v1/alerts', { headers })
+const { data: alertsData } = await useFetch<EventResponseAlertList>('/api/v1/alerts')
 
 const incident = computed(() => data.value?.incident)
 const isLoading = computed(() => status.value === 'pending' && !data.value)

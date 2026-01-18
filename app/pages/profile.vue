@@ -14,11 +14,9 @@ useSeoMeta({
   description: 'Настройки профиля пользователя',
 })
 
-const headers = useRequestHeaders(['cookie'])
-
-const { data: user, status: userStatus, refresh: refreshUser } = await useFetch<UserWithLanguage>('/api/v1/user', { headers })
-const { data: contactsData, status: contactsStatus, refresh: refreshContacts } = await useFetch<UserResponseContactsList>('/api/v1/user/contacts', { headers })
-const { data: sessionsData, status: sessionsStatus, refresh: refreshSessions } = await useFetch<UserResponseSessions>('/api/v1/user/sessions', { headers })
+const { data: user, status: userStatus, refresh: refreshUser } = await useFetch<UserWithLanguage>('/api/v1/user')
+const { data: contactsData, status: contactsStatus, refresh: refreshContacts } = await useFetch<UserResponseContactsList>('/api/v1/user/contacts')
+const { data: sessionsData, status: sessionsStatus, refresh: refreshSessions } = await useFetch<UserResponseSessions>('/api/v1/user/sessions')
 
 const userLoading = computed(() => userStatus.value === 'pending' && !user.value)
 const contactsLoading = computed(() => contactsStatus.value === 'pending' && !contactsData.value)

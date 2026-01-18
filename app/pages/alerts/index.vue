@@ -13,8 +13,7 @@ const { currentStatus } = useAlerts()
 const { viewMode, setViewMode } = useViewMode('alerts')
 const { error: showError, success: showSuccess } = useToast()
 
-const headers = useRequestHeaders(['cookie'])
-const { data, status, refresh } = await useFetch<EventResponseAlertList>('/api/v1/alerts', { headers })
+const { data, status, refresh } = await useFetch<EventResponseAlertList>('/api/v1/alerts')
 
 const alerts = computed(() => data.value?.alerts ?? [])
 const isLoading = computed(() => status.value === 'pending' && !data.value)

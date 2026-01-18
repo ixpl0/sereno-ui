@@ -11,8 +11,7 @@ const router = useRouter()
 const { createIncident } = useIncidents()
 const toast = useToast()
 
-const headers = useRequestHeaders(['cookie'])
-const { data: tenantsData } = await useFetch<TenantResponseTenantList>('/api/v1/tenants', { headers })
+const { data: tenantsData } = await useFetch<TenantResponseTenantList>('/api/v1/tenants')
 
 const tenants = computed(() => tenantsData.value?.tenants ?? [])
 

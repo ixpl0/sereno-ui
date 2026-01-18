@@ -13,8 +13,7 @@ const { currentStatus } = useIncidents()
 const { viewMode, setViewMode } = useViewMode('incidents')
 const { error: showError, success: showSuccess } = useToast()
 
-const headers = useRequestHeaders(['cookie'])
-const { data, status, refresh } = await useFetch<EventResponseIncidentList>('/api/v1/incidents', { headers })
+const { data, status, refresh } = await useFetch<EventResponseIncidentList>('/api/v1/incidents')
 
 const incidents = computed(() => data.value?.incidents ?? [])
 const isLoading = computed(() => status.value === 'pending' && !data.value)

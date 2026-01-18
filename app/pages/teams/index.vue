@@ -13,8 +13,7 @@ useSeoMeta({
   description: 'Управление командами',
 })
 
-const headers = useRequestHeaders(['cookie'])
-const { data: tenantsData, status, refresh } = await useFetch<TenantResponseTenantList>('/api/v1/tenants', { headers })
+const { data: tenantsData, status, refresh } = await useFetch<TenantResponseTenantList>('/api/v1/tenants')
 
 const loading = computed(() => status.value === 'pending' && !tenantsData.value)
 
