@@ -80,3 +80,21 @@ export const getStatusBorderColor = (status: string | undefined): string => {
   }
   return colorMap[status ?? ''] ?? 'border-l-base-content/20'
 }
+
+export const getStatusTextColor = (status: string | undefined): string => {
+  const colorMap: Record<string, string> = {
+    created: 'text-error',
+    acknowledged: 'text-warning',
+    resolved: 'text-success',
+  }
+  return colorMap[status ?? ''] ?? 'text-base-content/60'
+}
+
+export const getStatusBgLight = (status: string | undefined): string => {
+  const colorMap: Record<string, string> = {
+    created: 'bg-error/15',
+    acknowledged: 'bg-warning/15',
+    resolved: 'bg-success/15',
+  }
+  return colorMap[status ?? ''] ?? 'bg-base-content/10'
+}

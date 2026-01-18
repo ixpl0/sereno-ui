@@ -149,7 +149,7 @@ const handleStatusChange = async (alertId: string, newStatus: string) => {
                 <th>Время</th>
                 <th>Статус</th>
                 <th>Команда</th>
-                <th>Метки</th>
+                <th>Лейблы</th>
                 <th />
               </tr>
             </thead>

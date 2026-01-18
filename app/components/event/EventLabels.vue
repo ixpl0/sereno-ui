@@ -58,7 +58,7 @@ const activeLabels = computed(() => props.labels.filter(l => !l.deleted))
   <div class="space-y-4">
     <div class="flex items-center justify-between">
       <h3 class="text-lg font-medium">
-        Метки
+        Лейблы
       </h3>
       <UiButton
         v-if="!readonly && !isAdding"

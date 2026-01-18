@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { EventResponseAlert } from '~/api/types.gen'
-import { formatDateTime, formatStatus, getStatusColor, getStatusBorderColor } from '~/utils/formatters'
+import { formatDateTime, formatStatus, getStatusColor, getStatusBorderColor, getStatusTextColor, getStatusBgLight } from '~/utils/formatters'
 
 interface Props {
   alert: EventResponseAlert
@@ -62,7 +62,7 @@ const getDisplayAnnotations = (alert: EventResponseAlert) =>
     @click="emit('click')"
   >
     <div class="flex items-center gap-3 pr-4 pb-2">
-      <div class="flex items-center -ml-1 -mt-1">
+      <div class="flex items-center -ml-1 mt-0">
         <span
           class="badge rounded-none rounded-br-lg"
           :class="getStatusColor(currentStatus)"
@@ -70,9 +70,11 @@ const getDisplayAnnotations = (alert: EventResponseAlert) =>
           {{ formatStatus(currentStatus) }}
         </span>
         <template v-if="nextStatus">
-          <span class="text-base-content/40 px-2">→</span>
+          <span class="text-base-content/40 px-2 flex items-center">→</span>
           <span
-            class="text-sm link link-hover text-base-content/60 hover:text-base-content"
+            class="badge font-semibold cursor-pointer hover:opacity-80 transition-opacity border-transparent"
+            :class="[getStatusTextColor(nextStatus.status), getStatusBgLight(nextStatus.status)]"
+            :title="`Сменить статус на «${formatStatus(nextStatus.status)}»`"
             @click="handleStatusChange"
           >
             {{ formatStatus(nextStatus.status) }}
@@ -105,8 +107,9 @@ const getDisplayAnnotations = (alert: EventResponseAlert) =>
 
       <div
         v-if="getActiveLabels(alert).length > 0"
-        class="flex flex-wrap gap-1.5 mb-2"
+        class="flex flex-wrap items-center gap-1.5 mb-2"
       >
+        <span class="text-xs text-base-content/40 mr-1">Лейблы:</span>
         <span
           v-for="label in getActiveLabels(alert)"
           :key="label.key"
@@ -118,8 +121,9 @@ const getDisplayAnnotations = (alert: EventResponseAlert) =>
 
       <div
         v-if="getDisplayAnnotations(alert).length > 0"
-        class="flex flex-wrap gap-1.5"
+        class="flex flex-wrap items-center gap-1.5"
       >
+        <span class="text-xs text-base-content/40 mr-1">Аннотации:</span>
         <span
           v-for="annotation in getDisplayAnnotations(alert)"
           :key="annotation.key"
