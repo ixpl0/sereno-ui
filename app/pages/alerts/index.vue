@@ -11,7 +11,7 @@ definePageMeta({
 
 const { currentStatus } = useAlerts()
 const { viewMode, setViewMode } = useViewMode('alerts')
-const { showToast } = useToast()
+const { error: showError, success: showSuccess } = useToast()
 
 const { data, status, refresh } = await useFetch<EventResponseAlertList>('/api/v1/alerts')
 
@@ -44,11 +44,11 @@ const handleStatusChange = async (alertId: string, newStatus: string) => {
   })
 
   if (response.error) {
-    showToast('Не удалось изменить статус', 'error')
+    showError('Не удалось изменить статус')
     return
   }
 
-  showToast(newStatus === 'acknowledged' ? 'Алерт подтверждён' : 'Алерт закрыт', 'success')
+  showSuccess(newStatus === 'acknowledged' ? 'Алерт подтверждён' : 'Алерт закрыт')
   await refresh()
 }
 </script>

@@ -11,7 +11,7 @@ definePageMeta({
 
 const { currentStatus } = useIncidents()
 const { viewMode, setViewMode } = useViewMode('incidents')
-const { showToast } = useToast()
+const { error: showError, success: showSuccess } = useToast()
 
 const { data, status, refresh } = await useFetch<EventResponseIncidentList>('/api/v1/incidents')
 
@@ -39,11 +39,11 @@ const handleStatusChange = async (incidentId: string, newStatus: string) => {
   })
 
   if (response.error) {
-    showToast('Не удалось изменить статус', 'error')
+    showError('Не удалось изменить статус')
     return
   }
 
-  showToast(newStatus === 'acknowledged' ? 'Инцидент подтверждён' : 'Инцидент закрыт', 'success')
+  showSuccess(newStatus === 'acknowledged' ? 'Инцидент подтверждён' : 'Инцидент закрыт')
   await refresh()
 }
 </script>
