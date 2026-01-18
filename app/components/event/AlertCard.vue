@@ -19,7 +19,7 @@ const nextStatus = computed(() => {
     return { status: 'acknowledged', label: 'Подтвердить' }
   }
   if (props.currentStatus === 'acknowledged') {
-    return { status: 'resolved', label: 'Закрыть' }
+    return { status: 'resolved', label: 'Разрешить' }
   }
   return null
 })
@@ -56,7 +56,7 @@ const getDisplayAnnotations = (alert: EventResponseAlert) =>
 
 <template>
   <div
-    class="bg-base-200/50 hover:bg-base-200 border border-base-content/10 border-l-4 border-t-4 rounded-lg cursor-pointer transition-all hover:shadow-md overflow-hidden"
+    class="bg-base-200/50 hover:bg-base-200 border border-base-content/10 border-l-4 rounded-lg cursor-pointer transition-all hover:shadow-md overflow-hidden"
     :class="getStatusBorderColor(currentStatus)"
     @click="emit('click')"
   >
@@ -71,7 +71,7 @@ const getDisplayAnnotations = (alert: EventResponseAlert) =>
         <template v-if="nextStatus">
           <span class="text-base-content/40 px-2">→</span>
           <span
-            class="text-sm link link-primary"
+            class="text-sm link link-hover text-base-content/60 hover:text-base-content"
             @click="handleStatusChange"
           >
             {{ formatStatus(nextStatus.status) }}
@@ -109,7 +109,7 @@ const getDisplayAnnotations = (alert: EventResponseAlert) =>
         <span
           v-for="label in getActiveLabels(alert)"
           :key="label.key"
-          class="badge badge-sm badge-success"
+          class="badge badge-sm bg-info/8 text-info border-info/25"
         >
           {{ label.key }}: {{ label.value }}
         </span>
@@ -122,7 +122,7 @@ const getDisplayAnnotations = (alert: EventResponseAlert) =>
         <span
           v-for="annotation in getDisplayAnnotations(alert)"
           :key="annotation.key"
-          class="badge badge-sm badge-warning"
+          class="badge badge-sm bg-secondary/5 text-secondary/70 border-secondary/20"
         >
           {{ annotation.key }}: {{ annotation.value }}
         </span>

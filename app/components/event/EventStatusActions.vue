@@ -55,7 +55,7 @@ const handleResolve = () => {
         name="lucide:check-check"
         class="w-4 h-4 mr-2"
       />
-      Закрыть
+      Разрешить
     </UiButton>
 
     <div
@@ -66,7 +66,7 @@ const handleResolve = () => {
         name="lucide:check-circle"
         class="w-5 h-5"
       />
-      <span>Закрыт</span>
+      <span>Разрешён</span>
     </div>
   </div>
 </template>

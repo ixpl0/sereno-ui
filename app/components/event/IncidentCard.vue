@@ -19,7 +19,7 @@ const nextStatus = computed(() => {
     return { status: 'acknowledged', label: 'Подтвердить' }
   }
   if (props.currentStatus === 'acknowledged') {
-    return { status: 'resolved', label: 'Закрыть' }
+    return { status: 'resolved', label: 'Разрешить' }
   }
   return null
 })
@@ -37,7 +37,7 @@ const getActiveLabels = (incident: EventResponseIncident) =>
 
 <template>
   <div
-    class="bg-base-200/50 hover:bg-base-200 border border-base-content/10 border-l-4 border-t-4 rounded-lg cursor-pointer transition-all hover:shadow-md overflow-hidden"
+    class="bg-base-200/50 hover:bg-base-200 border border-base-content/10 border-l-4 rounded-lg cursor-pointer transition-all hover:shadow-md overflow-hidden"
     :class="getStatusBorderColor(currentStatus)"
     @click="emit('click')"
   >
@@ -52,7 +52,7 @@ const getActiveLabels = (incident: EventResponseIncident) =>
         <template v-if="nextStatus">
           <span class="text-base-content/40 px-2">→</span>
           <span
-            class="text-sm link link-primary"
+            class="text-sm link link-hover text-base-content/60 hover:text-base-content"
             @click="handleStatusChange"
           >
             {{ formatStatus(nextStatus.status) }}
@@ -90,7 +90,7 @@ const getActiveLabels = (incident: EventResponseIncident) =>
         <span
           v-for="label in getActiveLabels(incident)"
           :key="label.key"
-          class="badge badge-sm badge-success"
+          class="badge badge-sm bg-info/8 text-info border-info/25"
         >
           {{ label.key }}: {{ label.value }}
         </span>

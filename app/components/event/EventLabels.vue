@@ -128,7 +128,7 @@ const activeLabels = computed(() => props.labels.filter(l => !l.deleted))
         <div
           v-for="label in activeLabels"
           :key="label.key"
-          class="badge badge-lg gap-1 pr-1"
+          class="badge badge-lg bg-info/8 text-info border-info/25 gap-1 pr-1"
         >
           <span class="font-medium">{{ label.key }}</span>
           <span class="text-base-content/60">=</span>

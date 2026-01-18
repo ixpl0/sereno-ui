@@ -58,15 +58,15 @@ export const formatStatus = (status: string | undefined): string => {
   const statusMap: Record<string, string> = {
     created: 'Создан',
     acknowledged: 'Подтверждён',
-    resolved: 'Закрыт',
+    resolved: 'Разрешён',
   }
   return statusMap[status ?? ''] ?? status ?? ''
 }
 
 export const getStatusColor = (status: string | undefined): string => {
   const colorMap: Record<string, string> = {
-    created: 'badge-warning',
-    acknowledged: 'badge-info',
+    created: 'badge-error',
+    acknowledged: 'badge-warning',
     resolved: 'badge-success',
   }
   return colorMap[status ?? ''] ?? 'badge-ghost'
@@ -74,9 +74,9 @@ export const getStatusColor = (status: string | undefined): string => {
 
 export const getStatusBorderColor = (status: string | undefined): string => {
   const colorMap: Record<string, string> = {
-    created: 'border-l-warning border-t-warning',
-    acknowledged: 'border-l-info border-t-info',
-    resolved: 'border-l-success border-t-success',
+    created: 'border-l-error',
+    acknowledged: 'border-l-warning',
+    resolved: 'border-l-success',
   }
-  return colorMap[status ?? ''] ?? 'border-l-base-content/20 border-t-base-content/20'
+  return colorMap[status ?? ''] ?? 'border-l-base-content/20'
 }

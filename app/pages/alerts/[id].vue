@@ -149,7 +149,7 @@ const handleSetStatus = async (newStatus: 'acknowledged' | 'resolved') => {
       </div>
 
       <template v-else>
-        <UiCard class="animate-slide-up mb-6">
+        <UiCard class="animate-slide-up mb-3">
           <div class="flex items-start justify-between mb-4">
             <div>
               <h1 class="text-xl font-semibold mb-2">
@@ -178,7 +178,7 @@ const handleSetStatus = async (newStatus: 'acknowledged' | 'resolved') => {
 
         <UiCard
           v-if="activeAnnotations.length > 0"
-          class="animate-slide-up mb-6"
+          class="animate-slide-up mb-3"
         >
           <h3 class="text-lg font-medium mb-4">
             Аннотации
@@ -199,7 +199,7 @@ const handleSetStatus = async (newStatus: 'acknowledged' | 'resolved') => {
           </div>
         </UiCard>
 
-        <UiCard class="animate-slide-up mb-6">
+        <UiCard class="animate-slide-up mb-3">
           <EventLabels
             :labels="alert.labels"
             :loading="actionLoading"
@@ -208,7 +208,7 @@ const handleSetStatus = async (newStatus: 'acknowledged' | 'resolved') => {
           />
         </UiCard>
 
-        <UiCard class="animate-slide-up mb-6">
+        <UiCard class="animate-slide-up mb-3">
           <EventStatusTimeline :statuses="alert.statuses" />
         </UiCard>
 

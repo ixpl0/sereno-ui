@@ -210,7 +210,7 @@ const handleSetStatus = async (newStatus: 'acknowledged' | 'resolved') => {
       </div>
 
       <template v-else>
-        <UiCard class="animate-slide-up mb-6">
+        <UiCard class="animate-slide-up mb-3">
           <div class="flex items-start justify-between mb-4">
             <div>
               <h1 class="text-xl font-semibold mb-2">
@@ -243,7 +243,7 @@ const handleSetStatus = async (newStatus: 'acknowledged' | 'resolved') => {
           />
         </UiCard>
 
-        <UiCard class="animate-slide-up mb-6">
+        <UiCard class="animate-slide-up mb-3">
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-medium">
               Связанные алерты
@@ -355,7 +355,7 @@ const handleSetStatus = async (newStatus: 'acknowledged' | 'resolved') => {
           </div>
         </UiCard>
 
-        <UiCard class="animate-slide-up mb-6">
+        <UiCard class="animate-slide-up mb-3">
           <EventLabels
             :labels="incident.labels"
             :loading="actionLoading"
@@ -364,7 +364,7 @@ const handleSetStatus = async (newStatus: 'acknowledged' | 'resolved') => {
           />
         </UiCard>
 
-        <UiCard class="animate-slide-up mb-6">
+        <UiCard class="animate-slide-up mb-3">
           <EventStatusTimeline :statuses="incident.statuses" />
         </UiCard>
 

@@ -48,7 +48,9 @@ const handleDelete = (id: string) => {
   emit('delete', id)
 }
 
-const activeComments = computed(() => props.comments.filter(c => !c.deleted))
+const activeComments = computed(() =>
+  [...props.comments].filter(c => !c.deleted).sort((a, b) => b.since - a.since),
+)
 </script>
 
 <template>
