@@ -1,4 +1,8 @@
 export default defineNuxtRouteMiddleware(() => {
+  if (import.meta.prerender) {
+    return
+  }
+
   const event = useRequestEvent()
 
   let token: string | undefined
