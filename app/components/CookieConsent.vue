@@ -75,26 +75,19 @@ onMounted(() => {
             >Прочитать Политику конфиденциальности</a>.
           </p>
 
-          <Transition
-            enter-active-class="transition duration-200 ease-out"
-            enter-from-class="opacity-0 max-h-0"
-            enter-to-class="opacity-100 max-h-96"
-            leave-active-class="transition duration-150 ease-in"
-            leave-from-class="opacity-100 max-h-96"
-            leave-to-class="opacity-0 max-h-0"
+          <div
+            id="cookie-details"
+            class="grid transition-[grid-template-rows] duration-200 ease-out"
+            :class="isExpanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'"
           >
-            <div
-              v-if="isExpanded"
-              id="cookie-details"
-              class="overflow-hidden"
-            >
+            <div class="overflow-hidden">
               <p class="mt-3 pt-3 border-t border-base-content/10 text-sm text-base-content/70">
                 Мы используем файлы cookie для обеспечения работы сайта,
                 анализа трафика и персонализации контента. Обязательные cookie
                 необходимы для корректной работы сервиса и не могут быть отключены.
               </p>
             </div>
-          </Transition>
+          </div>
 
           <div class="mt-4 flex items-center justify-between">
             <UiButton
