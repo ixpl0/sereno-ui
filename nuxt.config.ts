@@ -46,6 +46,14 @@ export default defineNuxtConfig({
     prerender: {
       routes: ['/', '/about', '/pricing', '/blog', '/docs'],
       crawlLinks: true,
+      ignore: [
+        (route: string) => {
+          const allowed = ['/', '/about', '/pricing', '/blog', '/docs']
+          return !allowed.some(prefix =>
+            route === prefix || route.startsWith(`${prefix}/`),
+          )
+        },
+      ],
     },
   },
 

@@ -1,8 +1,6 @@
-export default defineNuxtRouteMiddleware(() => {
-  if (import.meta.prerender) {
-    return
-  }
+import { parseCookies } from 'h3'
 
+export default defineNuxtRouteMiddleware(() => {
   const event = useRequestEvent()
 
   let token: string | undefined
