@@ -7,6 +7,7 @@
   },
   "scripts": {
     "build": "nuxt build",
+    "build:mock": "NUXT_PUBLIC_MOCK_API=true nuxt build",
     "dev": "nuxt dev",
     "dev:mock": "cross-env NUXT_PUBLIC_MOCK_API=true NUXT_TYPE_CHECK=false nuxt dev",
     "generate": "nuxt generate",
