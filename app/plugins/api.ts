@@ -3,9 +3,9 @@ import { client } from '~/api/client.gen'
 export default defineNuxtPlugin(() => {
   const config = useRuntimeConfig()
 
-  if (config.public.mockApi) {
-    client.setConfig({
-      baseUrl: '/api/v1',
-    })
-  }
+  const baseUrl = config.public.mockApi
+    ? '/api/v1'
+    : config.public.apiBaseUrl
+
+  client.setConfig({ baseUrl })
 })

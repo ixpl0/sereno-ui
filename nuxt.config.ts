@@ -18,13 +18,11 @@ export default defineNuxtConfig({
       type: 'sqlite',
       filename: ':memory:',
     },
-    experimental: {
-      sqliteConnector: 'native',
-    },
   },
   runtimeConfig: {
     public: {
       mockApi: false,
+      apiBaseUrl: 'http://localhost:8080/api/v1',
     },
   },
   routeRules: {
