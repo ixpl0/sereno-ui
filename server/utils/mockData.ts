@@ -92,6 +92,30 @@ export interface TenantToken {
   value: string
 }
 
+export interface MockEscalationStep {
+  delay: number
+  member?: string
+  description?: string
+  schedule?: {
+    id: string
+    position: 'current' | 'next' | 'previous' | 'all'
+  }
+}
+
+export interface MockEscalationRule {
+  event?: 'alert' | 'incident'
+  labels?: Record<string, string>
+  description?: string
+}
+
+export interface MockEscalation {
+  id: string
+  name: string
+  enabled: boolean
+  steps: MockEscalationStep[]
+  rules: MockEscalationRule[]
+}
+
 interface MockState {
   user: User
   sessions: Session[]
@@ -99,6 +123,7 @@ interface MockState {
   tenants: Tenant[]
   tenantMembers: Map<string, TenantMember[]>
   tenantTokens: Map<string, TenantToken[]>
+  tenantEscalations: Map<string, MockEscalation[]>
   alerts: MockAlert[]
   incidents: MockIncident[]
 }
@@ -183,6 +208,56 @@ const defaultState: MockState = {
       { id: 'token-2', name: 'Grafana', since: Math.floor(Date.now() / 1000) - 43200, value: 'tok_hidden' },
     ]],
     ['tenant-2', []],
+  ]),
+  tenantEscalations: new Map([
+    ['tenant-1', [
+      {
+        id: 'escalation-1',
+        name: 'Критические алерты',
+        enabled: true,
+        steps: [
+          { delay: 0, member: 'user-1', description: 'Первичное уведомление' },
+          { delay: 300, member: 'user-3', description: 'Эскалация на дежурного' },
+          { delay: 900, description: 'Эскалация на всю команду' },
+        ],
+        rules: [
+          { event: 'alert', labels: { severity: 'critical' } },
+        ],
+      },
+      {
+        id: 'escalation-2',
+        name: 'Инциденты',
+        enabled: true,
+        steps: [
+          { delay: 0, description: 'Уведомить текущего дежурного' },
+          { delay: 600, description: 'Уведомить следующего дежурного' },
+        ],
+        rules: [
+          { event: 'incident' },
+        ],
+      },
+      {
+        id: 'escalation-3',
+        name: 'Тестовая (отключена)',
+        enabled: false,
+        steps: [
+          { delay: 0, member: 'user-1' },
+        ],
+        rules: [],
+      },
+    ]],
+    ['tenant-2', [
+      {
+        id: 'escalation-4',
+        name: 'Стандартная эскалация',
+        enabled: true,
+        steps: [
+          { delay: 0, member: 'user-2' },
+          { delay: 600, member: 'user-1' },
+        ],
+        rules: [],
+      },
+    ]],
   ]),
   alerts: [
     {
@@ -290,6 +365,7 @@ const state: MockState = {
   tenants: [...defaultState.tenants],
   tenantMembers: new Map(defaultState.tenantMembers),
   tenantTokens: new Map(defaultState.tenantTokens),
+  tenantEscalations: new Map(defaultState.tenantEscalations),
   alerts: [...defaultState.alerts],
   incidents: [...defaultState.incidents],
 }
@@ -827,4 +903,52 @@ export const removeMockIncidentAlert = (incidentId: string, alertId: string): Re
   }
   state.incidents = state.incidents.map(i => i.id === incidentId ? updatedIncident : i)
   return incidentToResponse(updatedIncident)
+}
+
+export const getMockEscalations = (tenantId: string): ReadonlyArray<MockEscalation> => {
+  return state.tenantEscalations.get(tenantId) ?? []
+}
+
+export const createMockEscalation = (
+  tenantId: string,
+  data: { name: string, enabled: boolean, steps: MockEscalationStep[], rules?: MockEscalationRule[] },
+): MockEscalation => {
+  const escalation: MockEscalation = {
+    id: generateId('escalation'),
+    name: data.name,
+    enabled: data.enabled,
+    steps: data.steps,
+    rules: data.rules ?? [],
+  }
+  const escalations = state.tenantEscalations.get(tenantId) ?? []
+  state.tenantEscalations.set(tenantId, [...escalations, escalation])
+  return escalation
+}
+
+export const updateMockEscalation = (
+  tenantId: string,
+  escalationId: string,
+  data: { name: string, enabled: boolean, steps: MockEscalationStep[], rules?: MockEscalationRule[] },
+): MockEscalation | null => {
+  const escalations = state.tenantEscalations.get(tenantId) ?? []
+  const existing = escalations.find(e => e.id === escalationId)
+  if (!existing) {
+    return null
+  }
+  const updated: MockEscalation = {
+    ...existing,
+    name: data.name,
+    enabled: data.enabled,
+    steps: data.steps,
+    rules: data.rules ?? existing.rules,
+  }
+  state.tenantEscalations.set(tenantId, escalations.map(e => e.id === escalationId ? updated : e))
+  return updated
+}
+
+export const deleteMockEscalation = (tenantId: string, escalationId: string): boolean => {
+  const escalations = state.tenantEscalations.get(tenantId) ?? []
+  const initialLength = escalations.length
+  state.tenantEscalations.set(tenantId, escalations.filter(e => e.id !== escalationId))
+  return (state.tenantEscalations.get(tenantId)?.length ?? 0) < initialLength
 }
