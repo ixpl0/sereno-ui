@@ -34,6 +34,7 @@ export type EventRequestStatus = {
 export type EventResponseAlert = {
   annotations: Array<EventResponseAnnotation>;
   comments: Array<EventResponseComment>;
+  description?: string;
   id: string;
   labels: Array<EventResponseLabel>;
   source: string;
@@ -48,16 +49,20 @@ export type EventResponseAlertList = {
 };
 
 export type EventResponseAnnotation = {
-  deleted: boolean;
+  created: number;
+  creator: string;
+  deleted?: number;
+  deleter?: string;
   key: string;
-  since: number;
   value: string;
 };
 
 export type EventResponseComment = {
-  deleted: boolean;
+  created: number;
+  creator: string;
+  deleted?: number;
+  deleter?: string;
   id: string;
-  since: number;
   text: string;
 };
 
@@ -79,9 +84,11 @@ export type EventResponseIncidentList = {
 };
 
 export type EventResponseLabel = {
-  deleted: boolean;
+  created: number;
+  creator: string;
+  deleted?: number;
+  deleter?: string;
   key: string;
-  since: number;
   value: string;
 };
 
@@ -94,7 +101,8 @@ export type EventResponseSingleIncident = {
 };
 
 export type EventResponseStatus = {
-  since: number;
+  created: number;
+  creator?: string;
   status: string;
 };
 
@@ -107,27 +115,107 @@ export type ServerResponseError = {
   request_id?: string;
 };
 
+export type TenantRequestEscalation = {
+  enabled: boolean;
+  name: string;
+  rules?: Array<TenantRequestEscalationRule>;
+  steps: Array<TenantRequestEscalationStep>;
+};
+
+export type TenantRequestEscalationRule = {
+  description?: string;
+  event?: "alert" | "incident";
+  labels?: {
+    [key: string]: string;
+  };
+};
+
+export type TenantRequestEscalationStep = {
+  delay: number;
+  description?: string;
+  member?: string;
+  schedule?: TenantRequestEscalationStepSchedule;
+};
+
+export type TenantRequestEscalationStepSchedule = {
+  id: string;
+  position: "current" | "next" | "previous" | "all";
+};
+
 export type TenantRequestId = {
   id: string;
 };
 
 export type TenantRequestMember = {
-  /**
-   * TODO Как валидировать ?
-   */
-  admin?: boolean;
   id: string;
+  role: "watcher" | "member" | "admin";
 };
 
 export type TenantRequestName = {
   name: string;
 };
 
-export type TenantResponseMember = {
-  admin: boolean;
-  email?: string;
+export type TenantRequestNumber = {
+  number: number;
+};
+
+export type TenantRequestOverride = {
+  description: string;
+  duration: number;
+  member: string;
+  since: number;
+};
+
+export type TenantRequestRotation = {
+  days: Array<number>;
+  description: string;
+  duration: number;
+  members: Array<string>;
+  since: number;
+};
+
+export type TenantRequestSchedule = {
+  enabled: boolean;
+  name: string;
+  since: number;
+  until?: number;
+};
+
+export type TenantResponseEscalation = {
+  enabled: boolean;
   id: string;
-  name?: string;
+  name: string;
+  rules: Array<TenantResponseEscalationRule>;
+  steps: Array<TenantResponseEscalationStep>;
+};
+
+export type TenantResponseEscalationList = {
+  escalations: Array<TenantResponseEscalation>;
+};
+
+export type TenantResponseEscalationRule = {
+  description?: string;
+  event?: string;
+  labels?: {
+    [key: string]: string;
+  };
+};
+
+export type TenantResponseEscalationStep = {
+  delay: number;
+  description?: string;
+  member?: string;
+  schedule?: TenantResponseEscalationStepSchedule;
+};
+
+export type TenantResponseEscalationStepSchedule = {
+  id: string;
+  position: "current" | "next" | "previous" | "all";
+};
+
+export type TenantResponseMember = {
+  id: string;
+  role: string;
   since: number;
 };
 
@@ -135,8 +223,53 @@ export type TenantResponseMemberList = {
   members: Array<TenantResponseMember>;
 };
 
+export type TenantResponseOverride = {
+  description: string;
+  duration: number;
+  member: string;
+  since: number;
+};
+
+export type TenantResponseRotation = {
+  days: Array<number>;
+  description: string;
+  duration: number;
+  members: Array<string>;
+  since: number;
+};
+
+export type TenantResponseSchedule = {
+  enabled: boolean;
+  id: string;
+  name: string;
+  overrides: Array<TenantResponseOverride>;
+  rotations: Array<TenantResponseRotation>;
+  since: number;
+  until?: number;
+};
+
+export type TenantResponseScheduleList = {
+  schedules: Array<TenantResponseSchedule>;
+};
+
+export type TenantResponseSingleEscalation = {
+  escalation: TenantResponseEscalation;
+};
+
 export type TenantResponseSingleMember = {
   member: TenantResponseMember;
+};
+
+export type TenantResponseSingleOverride = {
+  rotation: TenantResponseOverride;
+};
+
+export type TenantResponseSingleRotation = {
+  rotation: TenantResponseRotation;
+};
+
+export type TenantResponseSingleSchedule = {
+  schedule: TenantResponseSchedule;
 };
 
 export type TenantResponseSingleTenant = {
@@ -148,10 +281,10 @@ export type TenantResponseSingleToken = {
 };
 
 export type TenantResponseTenant = {
-  admin?: boolean;
   id: string;
   name: string;
-  since?: number;
+  role: string;
+  since: number;
 };
 
 export type TenantResponseTenantList = {
@@ -161,8 +294,8 @@ export type TenantResponseTenantList = {
 export type TenantResponseToken = {
   id: string;
   name: string;
-  secret?: string;
   since: number;
+  value?: string;
 };
 
 export type TenantResponseTokenList = {
@@ -274,7 +407,12 @@ export type GetAlertsResponse = GetAlertsResponses[keyof GetAlertsResponses];
 
 export type GetAlertsByIdData = {
   body?: never;
-  path?: never;
+  path: {
+    /**
+     * Alert ID
+     */
+    id: string;
+  };
   query?: never;
   url: "/alerts/{id}";
 };
@@ -311,7 +449,12 @@ export type PostAlertsByIdAnnotationsAddData = {
    * Request JSON
    */
   body: EventRequestKeyValue;
-  path?: never;
+  path: {
+    /**
+     * Alert ID
+     */
+    id: string;
+  };
   query?: never;
   url: "/alerts/{id}/annotations/add";
 };
@@ -349,7 +492,12 @@ export type PostAlertsByIdAnnotationsDeleteData = {
    * Request JSON
    */
   body: EventRequestKey;
-  path?: never;
+  path: {
+    /**
+     * Alert ID
+     */
+    id: string;
+  };
   query?: never;
   url: "/alerts/{id}/annotations/delete";
 };
@@ -387,7 +535,12 @@ export type PostAlertsByIdCommentsAddData = {
    * Request JSON
    */
   body: EventRequestComment;
-  path?: never;
+  path: {
+    /**
+     * Alert ID
+     */
+    id: string;
+  };
   query?: never;
   url: "/alerts/{id}/comments/add";
 };
@@ -425,7 +578,12 @@ export type PostAlertsByIdCommentsDeleteData = {
    * Request JSON
    */
   body: EventRequestId;
-  path?: never;
+  path: {
+    /**
+     * Alert ID
+     */
+    id: string;
+  };
   query?: never;
   url: "/alerts/{id}/comments/delete";
 };
@@ -463,7 +621,12 @@ export type PostAlertsByIdLabelsAddData = {
    * Request JSON
    */
   body: EventRequestKeyValue;
-  path?: never;
+  path: {
+    /**
+     * Alert ID
+     */
+    id: string;
+  };
   query?: never;
   url: "/alerts/{id}/labels/add";
 };
@@ -501,7 +664,12 @@ export type PostAlertsByIdLabelsDeleteData = {
    * Request JSON
    */
   body: EventRequestKey;
-  path?: never;
+  path: {
+    /**
+     * Alert ID
+     */
+    id: string;
+  };
   query?: never;
   url: "/alerts/{id}/labels/delete";
 };
@@ -539,7 +707,12 @@ export type PostAlertsByIdStatusSetData = {
    * Request JSON
    */
   body: EventRequestStatus;
-  path?: never;
+  path: {
+    /**
+     * Alert ID
+     */
+    id: string;
+  };
   query?: never;
   url: "/alerts/{id}/status/set";
 };
@@ -803,7 +976,12 @@ export type GetIncidentsResponse =
 
 export type GetIncidentsByIdData = {
   body?: never;
-  path?: never;
+  path: {
+    /**
+     * Incident ID
+     */
+    id: string;
+  };
   query?: never;
   url: "/incidents/{id}";
 };
@@ -841,7 +1019,12 @@ export type PostIncidentsByIdAlertsAddData = {
    * Request JSON
    */
   body: EventRequestId;
-  path?: never;
+  path: {
+    /**
+     * Incident ID
+     */
+    id: string;
+  };
   query?: never;
   url: "/incidents/{id}/alerts/add";
 };
@@ -879,7 +1062,12 @@ export type PostIncidentsByIdAlertsDeleteData = {
    * Request JSON
    */
   body: EventRequestId;
-  path?: never;
+  path: {
+    /**
+     * Incident ID
+     */
+    id: string;
+  };
   query?: never;
   url: "/incidents/{id}/alerts/delete";
 };
@@ -917,7 +1105,12 @@ export type PostIncidentsByIdCommentsAddData = {
    * Request JSON
    */
   body: EventRequestComment;
-  path?: never;
+  path: {
+    /**
+     * Incident ID
+     */
+    id: string;
+  };
   query?: never;
   url: "/incidents/{id}/comments/add";
 };
@@ -955,7 +1148,12 @@ export type PostIncidentsByIdCommentsDeleteData = {
    * Request JSON
    */
   body: EventRequestId;
-  path?: never;
+  path: {
+    /**
+     * Incident ID
+     */
+    id: string;
+  };
   query?: never;
   url: "/incidents/{id}/comments/delete";
 };
@@ -993,7 +1191,12 @@ export type PostIncidentsByIdLabelsAddData = {
    * Request JSON
    */
   body: EventRequestKeyValue;
-  path?: never;
+  path: {
+    /**
+     * Incident ID
+     */
+    id: string;
+  };
   query?: never;
   url: "/incidents/{id}/labels/add";
 };
@@ -1031,7 +1234,12 @@ export type PostIncidentsByIdLabelsDeleteData = {
    * Request JSON
    */
   body: EventRequestKey;
-  path?: never;
+  path: {
+    /**
+     * Incident ID
+     */
+    id: string;
+  };
   query?: never;
   url: "/incidents/{id}/labels/delete";
 };
@@ -1069,7 +1277,12 @@ export type PostIncidentsByIdStatusSetData = {
    * Request JSON
    */
   body: EventRequestStatus;
-  path?: never;
+  path: {
+    /**
+     * Incident ID
+     */
+    id: string;
+  };
   query?: never;
   url: "/incidents/{id}/status/set";
 };
@@ -1140,6 +1353,172 @@ export type PostIncidentsCreateResponses = {
 export type PostIncidentsCreateResponse =
   PostIncidentsCreateResponses[keyof PostIncidentsCreateResponses];
 
+export type PostSchedulesByIdOverrideCreateData = {
+  /**
+   * Request JSON
+   */
+  body: TenantRequestOverride;
+  path: {
+    /**
+     * Schedule ID
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/schedules/{id}/override/create";
+};
+
+export type PostSchedulesByIdOverrideCreateErrors = {
+  /**
+   * Bad Request
+   */
+  400: ServerResponseError;
+  /**
+   * Unauthorized
+   */
+  401: ServerResponseError;
+  /**
+   * Internal Server Error
+   */
+  500: ServerResponseError;
+};
+
+export type PostSchedulesByIdOverrideCreateError =
+  PostSchedulesByIdOverrideCreateErrors[keyof PostSchedulesByIdOverrideCreateErrors];
+
+export type PostSchedulesByIdOverrideCreateResponses = {
+  /**
+   * OK
+   */
+  200: TenantResponseSingleOverride;
+};
+
+export type PostSchedulesByIdOverrideCreateResponse =
+  PostSchedulesByIdOverrideCreateResponses[keyof PostSchedulesByIdOverrideCreateResponses];
+
+export type PostSchedulesByIdOverrideDeleteData = {
+  /**
+   * Request JSON
+   */
+  body: TenantRequestNumber;
+  path: {
+    /**
+     * Schedule ID
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/schedules/{id}/override/delete";
+};
+
+export type PostSchedulesByIdOverrideDeleteErrors = {
+  /**
+   * Bad Request
+   */
+  400: ServerResponseError;
+  /**
+   * Unauthorized
+   */
+  401: ServerResponseError;
+  /**
+   * Internal Server Error
+   */
+  500: ServerResponseError;
+};
+
+export type PostSchedulesByIdOverrideDeleteError =
+  PostSchedulesByIdOverrideDeleteErrors[keyof PostSchedulesByIdOverrideDeleteErrors];
+
+export type PostSchedulesByIdOverrideDeleteResponses = {
+  /**
+   * No Content
+   */
+  204: unknown;
+};
+
+export type PostSchedulesByIdRotationCreateData = {
+  /**
+   * Request JSON
+   */
+  body: TenantRequestRotation;
+  path: {
+    /**
+     * Schedule ID
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/schedules/{id}/rotation/create";
+};
+
+export type PostSchedulesByIdRotationCreateErrors = {
+  /**
+   * Bad Request
+   */
+  400: ServerResponseError;
+  /**
+   * Unauthorized
+   */
+  401: ServerResponseError;
+  /**
+   * Internal Server Error
+   */
+  500: ServerResponseError;
+};
+
+export type PostSchedulesByIdRotationCreateError =
+  PostSchedulesByIdRotationCreateErrors[keyof PostSchedulesByIdRotationCreateErrors];
+
+export type PostSchedulesByIdRotationCreateResponses = {
+  /**
+   * OK
+   */
+  200: TenantResponseSingleRotation;
+};
+
+export type PostSchedulesByIdRotationCreateResponse =
+  PostSchedulesByIdRotationCreateResponses[keyof PostSchedulesByIdRotationCreateResponses];
+
+export type PostSchedulesByIdRotationDeleteData = {
+  /**
+   * Request JSON
+   */
+  body: TenantRequestNumber;
+  path: {
+    /**
+     * Schedule ID
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/schedules/{id}/rotation/delete";
+};
+
+export type PostSchedulesByIdRotationDeleteErrors = {
+  /**
+   * Bad Request
+   */
+  400: ServerResponseError;
+  /**
+   * Unauthorized
+   */
+  401: ServerResponseError;
+  /**
+   * Internal Server Error
+   */
+  500: ServerResponseError;
+};
+
+export type PostSchedulesByIdRotationDeleteError =
+  PostSchedulesByIdRotationDeleteErrors[keyof PostSchedulesByIdRotationDeleteErrors];
+
+export type PostSchedulesByIdRotationDeleteResponses = {
+  /**
+   * No Content
+   */
+  204: unknown;
+};
+
 export type GetTenantsData = {
   body?: never;
   path?: never;
@@ -1169,9 +1548,180 @@ export type GetTenantsResponses = {
 
 export type GetTenantsResponse = GetTenantsResponses[keyof GetTenantsResponses];
 
+export type PostTenantsByIdEscalationCreateData = {
+  /**
+   * Request JSON
+   */
+  body: TenantRequestEscalation;
+  path: {
+    /**
+     * Tenant ID
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/tenants/{id}/escalation/create";
+};
+
+export type PostTenantsByIdEscalationCreateErrors = {
+  /**
+   * Bad Request
+   */
+  400: ServerResponseError;
+  /**
+   * Unauthorized
+   */
+  401: ServerResponseError;
+  /**
+   * Internal Server Error
+   */
+  500: ServerResponseError;
+};
+
+export type PostTenantsByIdEscalationCreateError =
+  PostTenantsByIdEscalationCreateErrors[keyof PostTenantsByIdEscalationCreateErrors];
+
+export type PostTenantsByIdEscalationCreateResponses = {
+  /**
+   * OK
+   */
+  200: TenantResponseSingleEscalation;
+};
+
+export type PostTenantsByIdEscalationCreateResponse =
+  PostTenantsByIdEscalationCreateResponses[keyof PostTenantsByIdEscalationCreateResponses];
+
+export type PostTenantsByIdEscalationDeleteData = {
+  /**
+   * Request JSON
+   */
+  body: TenantRequestId;
+  path: {
+    /**
+     * Tenant ID
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/tenants/{id}/escalation/delete";
+};
+
+export type PostTenantsByIdEscalationDeleteErrors = {
+  /**
+   * Bad Request
+   */
+  400: ServerResponseError;
+  /**
+   * Unauthorized
+   */
+  401: ServerResponseError;
+  /**
+   * Internal Server Error
+   */
+  500: ServerResponseError;
+};
+
+export type PostTenantsByIdEscalationDeleteError =
+  PostTenantsByIdEscalationDeleteErrors[keyof PostTenantsByIdEscalationDeleteErrors];
+
+export type PostTenantsByIdEscalationDeleteResponses = {
+  /**
+   * No Content
+   */
+  204: unknown;
+};
+
+export type PostTenantsByIdEscalationUpdateData = {
+  /**
+   * Request JSON
+   */
+  body: TenantRequestEscalation;
+  path: {
+    /**
+     * Tenant ID
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/tenants/{id}/escalation/update";
+};
+
+export type PostTenantsByIdEscalationUpdateErrors = {
+  /**
+   * Bad Request
+   */
+  400: ServerResponseError;
+  /**
+   * Unauthorized
+   */
+  401: ServerResponseError;
+  /**
+   * Internal Server Error
+   */
+  500: ServerResponseError;
+};
+
+export type PostTenantsByIdEscalationUpdateError =
+  PostTenantsByIdEscalationUpdateErrors[keyof PostTenantsByIdEscalationUpdateErrors];
+
+export type PostTenantsByIdEscalationUpdateResponses = {
+  /**
+   * OK
+   */
+  200: TenantResponseSingleEscalation;
+};
+
+export type PostTenantsByIdEscalationUpdateResponse =
+  PostTenantsByIdEscalationUpdateResponses[keyof PostTenantsByIdEscalationUpdateResponses];
+
+export type GetTenantsByIdEscalationsData = {
+  body?: never;
+  path: {
+    /**
+     * Tenant ID
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/tenants/{id}/escalations";
+};
+
+export type GetTenantsByIdEscalationsErrors = {
+  /**
+   * Bad Request
+   */
+  400: ServerResponseError;
+  /**
+   * Unauthorized
+   */
+  401: ServerResponseError;
+  /**
+   * Internal Server Error
+   */
+  500: ServerResponseError;
+};
+
+export type GetTenantsByIdEscalationsError =
+  GetTenantsByIdEscalationsErrors[keyof GetTenantsByIdEscalationsErrors];
+
+export type GetTenantsByIdEscalationsResponses = {
+  /**
+   * OK
+   */
+  200: TenantResponseEscalationList;
+};
+
+export type GetTenantsByIdEscalationsResponse =
+  GetTenantsByIdEscalationsResponses[keyof GetTenantsByIdEscalationsResponses];
+
 export type GetTenantsByIdMembersData = {
   body?: never;
-  path?: never;
+  path: {
+    /**
+     * Tenant ID
+     */
+    id: string;
+  };
   query?: never;
   url: "/tenants/{id}/members";
 };
@@ -1287,9 +1837,137 @@ export type PostTenantsByIdMembersUpdateResponses = {
 export type PostTenantsByIdMembersUpdateResponse =
   PostTenantsByIdMembersUpdateResponses[keyof PostTenantsByIdMembersUpdateResponses];
 
+export type GetTenantsByIdSchedulesData = {
+  body?: never;
+  path: {
+    /**
+     * Tenant ID
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/tenants/{id}/schedules";
+};
+
+export type GetTenantsByIdSchedulesErrors = {
+  /**
+   * Bad Request
+   */
+  400: ServerResponseError;
+  /**
+   * Unauthorized
+   */
+  401: ServerResponseError;
+  /**
+   * Internal Server Error
+   */
+  500: ServerResponseError;
+};
+
+export type GetTenantsByIdSchedulesError =
+  GetTenantsByIdSchedulesErrors[keyof GetTenantsByIdSchedulesErrors];
+
+export type GetTenantsByIdSchedulesResponses = {
+  /**
+   * OK
+   */
+  200: TenantResponseScheduleList;
+};
+
+export type GetTenantsByIdSchedulesResponse =
+  GetTenantsByIdSchedulesResponses[keyof GetTenantsByIdSchedulesResponses];
+
+export type PostTenantsByIdSchedulesCreateData = {
+  /**
+   * Request JSON
+   */
+  body: TenantRequestSchedule;
+  path: {
+    /**
+     * Tenant ID
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/tenants/{id}/schedules/create";
+};
+
+export type PostTenantsByIdSchedulesCreateErrors = {
+  /**
+   * Bad Request
+   */
+  400: ServerResponseError;
+  /**
+   * Unauthorized
+   */
+  401: ServerResponseError;
+  /**
+   * Internal Server Error
+   */
+  500: ServerResponseError;
+};
+
+export type PostTenantsByIdSchedulesCreateError =
+  PostTenantsByIdSchedulesCreateErrors[keyof PostTenantsByIdSchedulesCreateErrors];
+
+export type PostTenantsByIdSchedulesCreateResponses = {
+  /**
+   * OK
+   */
+  200: TenantResponseSingleSchedule;
+};
+
+export type PostTenantsByIdSchedulesCreateResponse =
+  PostTenantsByIdSchedulesCreateResponses[keyof PostTenantsByIdSchedulesCreateResponses];
+
+export type PostTenantsByIdSchedulesDeleteData = {
+  /**
+   * Request JSON
+   */
+  body: TenantRequestId;
+  path: {
+    /**
+     * Tenant ID
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/tenants/{id}/schedules/delete";
+};
+
+export type PostTenantsByIdSchedulesDeleteErrors = {
+  /**
+   * Bad Request
+   */
+  400: ServerResponseError;
+  /**
+   * Unauthorized
+   */
+  401: ServerResponseError;
+  /**
+   * Internal Server Error
+   */
+  500: ServerResponseError;
+};
+
+export type PostTenantsByIdSchedulesDeleteError =
+  PostTenantsByIdSchedulesDeleteErrors[keyof PostTenantsByIdSchedulesDeleteErrors];
+
+export type PostTenantsByIdSchedulesDeleteResponses = {
+  /**
+   * No Content
+   */
+  204: unknown;
+};
+
 export type GetTenantsByIdTokensData = {
   body?: never;
-  path?: never;
+  path: {
+    /**
+     * Tenant ID
+     */
+    id: string;
+  };
   query?: never;
   url: "/tenants/{id}/tokens";
 };
@@ -1389,6 +2067,10 @@ export type PostTenantsByIdTokensDeleteErrors = {
    * Unauthorized
    */
   401: ServerResponseError;
+  /**
+   * Internal Server Error
+   */
+  500: ServerResponseError;
 };
 
 export type PostTenantsByIdTokensDeleteError =
@@ -1406,7 +2088,12 @@ export type PostTenantsByIdUpdateData = {
    * Request JSON
    */
   body: TenantRequestName;
-  path?: never;
+  path: {
+    /**
+     * Tenant ID
+     */
+    id: string;
+  };
   query?: never;
   url: "/tenants/{id}/update";
 };
