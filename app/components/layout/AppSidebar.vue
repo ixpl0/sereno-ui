@@ -5,6 +5,10 @@ interface NavigationItem {
   icon: string
 }
 
+interface NavigationGroup {
+  items: ReadonlyArray<NavigationItem>
+}
+
 const props = defineProps<{
   collapsed: boolean
   mobileOpen: boolean
@@ -17,14 +21,28 @@ const emit = defineEmits<{
 
 const route = useRoute()
 
-const topNavigationItems: ReadonlyArray<NavigationItem> = [
-  { label: 'Дашборд', to: '/dashboard', icon: 'lucide:home' },
-  { label: 'Алерты', to: '/alerts', icon: 'lucide:bell' },
-  { label: 'Инциденты', to: '/incidents', icon: 'lucide:alert-triangle' },
+const navigationGroups: ReadonlyArray<NavigationGroup> = [
+  {
+    items: [
+      { label: 'Дашборд', to: '/dashboard', icon: 'lucide:home' },
+    ],
+  },
+  {
+    items: [
+      { label: 'Алерты', to: '/alerts', icon: 'lucide:bell' },
+      { label: 'Инциденты', to: '/incidents', icon: 'lucide:alert-triangle' },
+    ],
+  },
+  {
+    items: [
+      { label: 'Расписания', to: '/schedules', icon: 'lucide:calendar-clock' },
+      { label: 'Эскалации', to: '/escalations', icon: 'lucide:git-branch' },
+      { label: 'Команды', to: '/teams', icon: 'lucide:users' },
+    ],
+  },
 ]
 
 const bottomNavigationItems: ReadonlyArray<NavigationItem> = [
-  { label: 'Команды', to: '/teams', icon: 'lucide:users' },
   { label: 'Профиль', to: '/profile', icon: 'lucide:user' },
 ]
 
@@ -48,35 +66,44 @@ const isActive = (path: string) => route.path === path || route.path.startsWith(
     ]"
   >
     <nav class="flex-1 flex flex-col overflow-y-auto py-4 px-2">
-      <ul class="space-y-1">
-        <li
-          v-for="item in topNavigationItems"
-          :key="item.to"
-        >
-          <NuxtLink
-            :to="item.to"
-            class="flex items-center h-10 transition-colors gap-3 px-3 rounded-sm"
-            :class="[
-              collapsed ? 'lg:justify-center lg:w-10 lg:mx-auto lg:gap-0 lg:px-0' : '',
-              isActive(item.to)
-                ? 'bg-primary/10 text-primary'
-                : 'hover:bg-base-content/5 text-base-content/70 hover:text-base-content',
-            ]"
-            @click="closeMobileMenu"
+      <template
+        v-for="(group, groupIndex) in navigationGroups"
+        :key="groupIndex"
+      >
+        <div
+          v-if="groupIndex > 0"
+          class="hidden lg:block h-4"
+        />
+        <ul class="space-y-1">
+          <li
+            v-for="item in group.items"
+            :key="item.to"
           >
-            <Icon
-              :name="item.icon"
-              class="w-5 h-5 shrink-0"
-            />
-            <span
-              class="whitespace-nowrap"
-              :class="{ 'lg:hidden': collapsed }"
+            <NuxtLink
+              :to="item.to"
+              class="flex items-center h-10 transition-colors gap-3 px-3 rounded-sm"
+              :class="[
+                collapsed ? 'lg:justify-center lg:w-10 lg:mx-auto lg:gap-0 lg:px-0' : '',
+                isActive(item.to)
+                  ? 'bg-primary/10 text-primary'
+                  : 'hover:bg-base-content/5 text-base-content/70 hover:text-base-content',
+              ]"
+              @click="closeMobileMenu"
             >
-              {{ item.label }}
-            </span>
-          </NuxtLink>
-        </li>
-      </ul>
+              <Icon
+                :name="item.icon"
+                class="w-5 h-5 shrink-0"
+              />
+              <span
+                class="whitespace-nowrap"
+                :class="{ 'lg:hidden': collapsed }"
+              >
+                {{ item.label }}
+              </span>
+            </NuxtLink>
+          </li>
+        </ul>
+      </template>
 
       <div class="flex-1" />
 
