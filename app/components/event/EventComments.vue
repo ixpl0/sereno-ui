@@ -49,7 +49,7 @@ const handleDelete = (id: string) => {
 }
 
 const activeComments = computed(() =>
-  [...props.comments].filter(c => !c.deleted).sort((a, b) => b.since - a.since),
+  [...props.comments].filter(c => !c.deleted).sort((a, b) => b.created - a.created),
 )
 </script>
 
@@ -126,7 +126,7 @@ const activeComments = computed(() =>
               {{ comment.text }}
             </p>
             <p class="text-xs text-base-content/50 mt-1">
-              {{ formatDateTime(comment.since) }}
+              {{ formatDateTime(comment.created) }}
             </p>
           </div>
           <UiButton

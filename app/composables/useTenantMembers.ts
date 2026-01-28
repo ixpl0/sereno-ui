@@ -15,11 +15,11 @@ export const useTenantMembers = (tenantId: Ref<string>) => {
   const error = ref<string | null>(null)
 
   const adminMembers = computed(() =>
-    members.value.filter(m => m.admin === true),
+    members.value.filter(m => m.role === 'admin'),
   )
 
   const regularMembers = computed(() =>
-    members.value.filter(m => m.admin !== true),
+    members.value.filter(m => m.role !== 'admin'),
   )
 
   const fetchMembers = async (): Promise<ApiResponse<TenantResponseMemberList> | null> => {
@@ -44,11 +44,11 @@ export const useTenantMembers = (tenantId: Ref<string>) => {
     return response as ApiResponse<TenantResponseMemberList>
   }
 
-  const updateMember = async (memberId: string, admin: boolean): Promise<ApiResponse<TenantResponseSingleMember>> => {
+  const updateMember = async (memberId: string, role: 'watcher' | 'member' | 'admin'): Promise<ApiResponse<TenantResponseSingleMember>> => {
     loading.value = true
     error.value = null
 
-    const body: TenantRequestMember = { id: memberId, admin }
+    const body: TenantRequestMember = { id: memberId, role }
     const response = await client.post({
       url: '/tenants/{id}/members/update',
       path: { id: tenantId.value },

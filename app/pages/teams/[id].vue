@@ -29,7 +29,7 @@ const { data: tokensData, status: tokensStatus, refresh: refreshTokens } = await
 )
 
 const tenant = computed(() => tenantsData.value?.tenants?.find((t: { id: string }) => t.id === tenantId.value))
-const isAdmin = computed(() => tenant.value?.admin === true)
+const isAdmin = computed(() => tenant.value?.role === 'admin')
 const membersLoading = computed(() => membersStatus.value === 'pending' && !membersData.value)
 const tokensLoading = computed(() => tokensStatus.value === 'pending' && !tokensData.value)
 
@@ -80,13 +80,13 @@ const saveEditName = async () => {
 
 const isAddingMember = ref(false)
 const newMemberId = ref('')
-const newMemberAdmin = ref(false)
+const newMemberRole = ref<'watcher' | 'member' | 'admin'>('member')
 const newMemberInputRef = ref<{ focus: () => void } | null>(null)
 
 const startAddMember = () => {
   isAddingMember.value = true
   newMemberId.value = ''
-  newMemberAdmin.value = false
+  newMemberRole.value = 'member'
   nextTick(() => {
     newMemberInputRef.value?.focus()
   })
@@ -95,7 +95,7 @@ const startAddMember = () => {
 const cancelAddMember = () => {
   isAddingMember.value = false
   newMemberId.value = ''
-  newMemberAdmin.value = false
+  newMemberRole.value = 'member'
 }
 
 const handleAddMember = async () => {
@@ -104,7 +104,7 @@ const handleAddMember = async () => {
     return
   }
 
-  const response = await updateMember(memberId, newMemberAdmin.value)
+  const response = await updateMember(memberId, newMemberRole.value)
 
   if ('error' in response && response.error) {
     toast.error('Не удалось добавить участника')
@@ -116,8 +116,9 @@ const handleAddMember = async () => {
   cancelAddMember()
 }
 
-const handleToggleMemberAdmin = async (memberId: string, currentAdmin: boolean) => {
-  const response = await updateMember(memberId, !currentAdmin)
+const handleToggleMemberRole = async (memberId: string, currentRole: string) => {
+  const newRole = currentRole === 'admin' ? 'member' : 'admin'
+  const response = await updateMember(memberId, newRole)
 
   if ('error' in response && response.error) {
     toast.error('Не удалось изменить права')
@@ -173,7 +174,7 @@ const handleCreateToken = async () => {
     return
   }
 
-  const tokenValue = 'data' in response && response.data?.token?.secret
+  const tokenValue = 'data' in response && response.data?.token?.value
   if (tokenValue) {
     createdTokenValue.value = tokenValue
     toast.success('Токен создан. Скопируйте его сейчас — он больше не будет показан.')
@@ -339,14 +340,14 @@ const handleDeleteToken = async (tokenId: string) => {
                   @keyup.enter="handleAddMember"
                   @keyup.escape="cancelAddMember"
                 />
-                <label class="flex items-center gap-2 cursor-pointer">
-                  <input
-                    v-model="newMemberAdmin"
-                    type="checkbox"
-                    class="checkbox checkbox-sm"
-                  >
-                  <span class="text-sm">Администратор</span>
-                </label>
+                <UiSelect
+                  v-model="newMemberRole"
+                  :options="[
+                    { value: 'watcher', label: 'Наблюдатель' },
+                    { value: 'member', label: 'Участник' },
+                    { value: 'admin', label: 'Администратор' },
+                  ]"
+                />
                 <div class="flex gap-2 justify-end">
                   <UiButton
                     variant="primary"
@@ -379,7 +380,7 @@ const handleDeleteToken = async (tokenId: string) => {
                   </div>
                   <div class="min-w-0">
                     <div class="font-medium break-all">
-                      {{ member.name || member.id }}
+                      {{ member.id }}
                     </div>
                     <div class="text-sm text-base-content/60">
                       {{ formatDate(member.since) }}
@@ -388,7 +389,7 @@ const handleDeleteToken = async (tokenId: string) => {
                 </div>
                 <div class="flex items-center gap-2 shrink-0">
                   <div
-                    v-if="member.admin"
+                    v-if="member.role === 'admin'"
                     class="badge badge-primary badge-sm"
                   >
                     Админ
@@ -397,10 +398,10 @@ const handleDeleteToken = async (tokenId: string) => {
                     <UiButton
                       variant="ghost"
                       size="sm"
-                      @click="handleToggleMemberAdmin(member.id, member.admin)"
+                      @click="handleToggleMemberRole(member.id, member.role)"
                     >
                       <Icon
-                        :name="member.admin ? 'lucide:shield-off' : 'lucide:shield'"
+                        :name="member.role === 'admin' ? 'lucide:shield-off' : 'lucide:shield'"
                         class="w-4 h-4"
                       />
                     </UiButton>

@@ -1,12 +1,8 @@
 <script setup lang="ts">
 import type { EventResponseLabel } from '~/api/types.gen'
 
-interface LabelWithCreator extends EventResponseLabel {
-  creator?: string
-}
-
 interface Props {
-  labels: ReadonlyArray<LabelWithCreator>
+  labels: ReadonlyArray<EventResponseLabel>
   loading?: boolean
   readonly?: boolean
 }

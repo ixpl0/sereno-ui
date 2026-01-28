@@ -9,7 +9,7 @@ interface Props {
 const props = defineProps<Props>()
 
 const sortedStatuses = computed(() =>
-  [...props.statuses].sort((a, b) => b.since - a.since),
+  [...props.statuses].sort((a, b) => b.created - a.created),
 )
 </script>
 
@@ -34,7 +34,7 @@ const sortedStatuses = computed(() =>
 
       <div
         v-for="(status, index) in sortedStatuses"
-        :key="`${status.status}-${status.since}`"
+        :key="`${status.status}-${status.created}`"
         class="relative pb-4 last:pb-0"
       >
         <div
@@ -50,7 +50,7 @@ const sortedStatuses = computed(() =>
             {{ formatStatus(status.status) }}
           </span>
           <span class="text-sm text-base-content/60">
-            {{ formatDateTime(status.since) }}
+            {{ formatDateTime(status.created) }}
           </span>
         </div>
       </div>

@@ -161,7 +161,7 @@ const handleCreate = async () => {
             </div>
             <div class="flex items-center gap-2">
               <div
-                v-if="tenant.admin"
+                v-if="tenant.role === 'admin'"
                 class="badge badge-primary badge-sm"
               >
                 Админ

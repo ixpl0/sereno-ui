@@ -236,7 +236,7 @@ export const useAlerts = () => {
     if (alert.statuses.length === 0) {
       return 'created'
     }
-    const sorted = [...alert.statuses].sort((a, b) => b.since - a.since)
+    const sorted = [...alert.statuses].sort((a, b) => b.created - a.created)
     return sorted[0]?.status ?? 'created'
   }
 

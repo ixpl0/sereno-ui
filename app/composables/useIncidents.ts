@@ -265,7 +265,7 @@ export const useIncidents = () => {
     if (incident.statuses.length === 0) {
       return 'created'
     }
-    const sorted = [...incident.statuses].sort((a, b) => b.since - a.since)
+    const sorted = [...incident.statuses].sort((a, b) => b.created - a.created)
     return sorted[0]?.status ?? 'created'
   }
 

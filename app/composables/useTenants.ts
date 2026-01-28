@@ -14,7 +14,7 @@ export const useTenants = () => {
   const error = ref<string | null>(null)
 
   const adminTenants = computed(() =>
-    tenants.value.filter(t => t.admin === true),
+    tenants.value.filter(t => t.role === 'admin'),
   )
 
   const fetchTenants = async (): Promise<ApiResponse<TenantResponseTenantList> | null> => {
