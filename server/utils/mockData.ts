@@ -18,6 +18,7 @@ export interface MockLabel {
   value: string
   since: number
   deleted: boolean
+  creator?: string
 }
 
 export interface MockStatus {
@@ -497,7 +498,13 @@ const alertToResponse = (alert: MockAlert) => ({
   time: alert.time,
   tenant: { id: alert.tenantId },
   annotations: alert.annotations.filter(a => !a.deleted),
-  labels: alert.labels.filter(l => !l.deleted),
+  labels: alert.labels.filter(l => !l.deleted).map(l => ({
+    key: l.key,
+    value: l.value,
+    since: l.since,
+    deleted: l.deleted,
+    ...(l.creator ? { creator: l.creator } : {}),
+  })),
   comments: alert.comments.filter(c => !c.deleted),
   statuses: alert.statuses,
 })
@@ -575,7 +582,7 @@ export const addMockAlertLabel = (alertId: string, key: string, value: string): 
   if (existingLabel) {
     const updatedAlert: MockAlert = {
       ...alert,
-      labels: alert.labels.map(l => l.key === key && !l.deleted ? { ...l, value, since: Math.floor(Date.now() / 1000) } : l),
+      labels: alert.labels.map(l => l.key === key && !l.deleted ? { ...l, value, since: Math.floor(Date.now() / 1000), creator: currentUserId } : l),
     }
     state.alerts = state.alerts.map(a => a.id === alertId ? updatedAlert : a)
     return alertToResponse(updatedAlert)
@@ -585,6 +592,7 @@ export const addMockAlertLabel = (alertId: string, key: string, value: string): 
     value,
     since: Math.floor(Date.now() / 1000),
     deleted: false,
+    creator: currentUserId,
   }
   const updatedAlert: MockAlert = {
     ...alert,
@@ -619,6 +627,47 @@ export const setMockAlertStatus = (alertId: string, status: string): ReturnType<
   const updatedAlert: MockAlert = {
     ...alert,
     statuses: [...alert.statuses, newStatus],
+  }
+  state.alerts = state.alerts.map(a => a.id === alertId ? updatedAlert : a)
+  return alertToResponse(updatedAlert)
+}
+
+export const addMockAlertAnnotation = (alertId: string, key: string, value: string): ReturnType<typeof alertToResponse> | null => {
+  const alert = state.alerts.find(a => a.id === alertId)
+  if (!alert) {
+    return null
+  }
+  const existingAnnotation = alert.annotations.find(a => a.key === key && !a.deleted)
+  if (existingAnnotation) {
+    const updatedAlert: MockAlert = {
+      ...alert,
+      annotations: alert.annotations.map(a => a.key === key && !a.deleted ? { ...a, value, since: Math.floor(Date.now() / 1000) } : a),
+    }
+    state.alerts = state.alerts.map(a => a.id === alertId ? updatedAlert : a)
+    return alertToResponse(updatedAlert)
+  }
+  const annotation: MockAnnotation = {
+    key,
+    value,
+    since: Math.floor(Date.now() / 1000),
+    deleted: false,
+  }
+  const updatedAlert: MockAlert = {
+    ...alert,
+    annotations: [...alert.annotations, annotation],
+  }
+  state.alerts = state.alerts.map(a => a.id === alertId ? updatedAlert : a)
+  return alertToResponse(updatedAlert)
+}
+
+export const deleteMockAlertAnnotation = (alertId: string, key: string): ReturnType<typeof alertToResponse> | null => {
+  const alert = state.alerts.find(a => a.id === alertId)
+  if (!alert) {
+    return null
+  }
+  const updatedAlert: MockAlert = {
+    ...alert,
+    annotations: alert.annotations.map(a => a.key === key ? { ...a, deleted: true } : a),
   }
   state.alerts = state.alerts.map(a => a.id === alertId ? updatedAlert : a)
   return alertToResponse(updatedAlert)

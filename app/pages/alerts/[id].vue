@@ -10,7 +10,7 @@ definePageMeta({
   title: 'Алерт',
 })
 
-const { currentStatus, addComment, deleteComment, addLabel, deleteLabel, setStatus } = useAlerts()
+const { currentStatus, addComment, deleteComment, addLabel, deleteLabel, addAnnotation, deleteAnnotation, setStatus } = useAlerts()
 const toast = useToast()
 
 const { data, status, refresh } = await useFetch<EventResponseSingleAlert>(
@@ -21,10 +21,6 @@ const { data, status, refresh } = await useFetch<EventResponseSingleAlert>(
 const alert = computed(() => data.value?.alert)
 const isLoading = computed(() => status.value === 'pending' && !data.value)
 const actionLoading = ref(false)
-
-const activeAnnotations = computed(() =>
-  alert.value?.annotations.filter(a => !a.deleted) ?? [],
-)
 
 const handleAddComment = async (text: string) => {
   if (!alert.value) {
@@ -92,6 +88,40 @@ const handleDeleteLabel = async (key: string) => {
 
   await refresh()
   toast.success('Метка удалена')
+}
+
+const handleAddAnnotation = async (key: string, value: string) => {
+  if (!alert.value) {
+    return
+  }
+  actionLoading.value = true
+  const response = await addAnnotation(alert.value.id, key, value)
+  actionLoading.value = false
+
+  if ('error' in response && response.error) {
+    toast.error('Не удалось добавить аннотацию')
+    return
+  }
+
+  await refresh()
+  toast.success('Аннотация добавлена')
+}
+
+const handleDeleteAnnotation = async (key: string) => {
+  if (!alert.value) {
+    return
+  }
+  actionLoading.value = true
+  const response = await deleteAnnotation(alert.value.id, key)
+  actionLoading.value = false
+
+  if ('error' in response && response.error) {
+    toast.error('Не удалось удалить аннотацию')
+    return
+  }
+
+  await refresh()
+  toast.success('Аннотация удалена')
 }
 
 const handleSetStatus = async (newStatus: 'acknowledged' | 'resolved') => {
@@ -176,27 +206,13 @@ const handleSetStatus = async (newStatus: 'acknowledged' | 'resolved') => {
           />
         </UiCard>
 
-        <UiCard
-          v-if="activeAnnotations.length > 0"
-          class="animate-slide-up mb-3"
-        >
-          <h3 class="text-lg font-medium mb-4">
-            Аннотации
-          </h3>
-          <div class="space-y-3">
-            <div
-              v-for="annotation in activeAnnotations"
-              :key="annotation.key"
-              class="p-3 bg-base-200/50 rounded"
-            >
-              <div class="font-medium text-sm text-base-content/70 mb-1">
-                {{ annotation.key }}
-              </div>
-              <div class="text-sm">
-                {{ annotation.value }}
-              </div>
-            </div>
-          </div>
+        <UiCard class="animate-slide-up mb-3">
+          <EventAnnotations
+            :annotations="alert.annotations"
+            :loading="actionLoading"
+            @add="handleAddAnnotation"
+            @delete="handleDeleteAnnotation"
+          />
         </UiCard>
 
         <UiCard class="animate-slide-up mb-3">

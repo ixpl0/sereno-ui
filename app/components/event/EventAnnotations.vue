@@ -1,12 +1,8 @@
 <script setup lang="ts">
-import type { EventResponseLabel } from '~/api/types.gen'
-
-interface LabelWithCreator extends EventResponseLabel {
-  creator?: string
-}
+import type { EventResponseAnnotation } from '~/api/types.gen'
 
 interface Props {
-  labels: ReadonlyArray<LabelWithCreator>
+  annotations: ReadonlyArray<EventResponseAnnotation>
   loading?: boolean
   readonly?: boolean
 }
@@ -22,14 +18,14 @@ const emit = defineEmits<{
 }>()
 
 const isAdding = ref(false)
-const newLabelKey = ref('')
-const newLabelValue = ref('')
+const newAnnotationKey = ref('')
+const newAnnotationValue = ref('')
 const keyInputRef = ref<{ focus: () => void } | null>(null)
 
 const startAdding = () => {
   isAdding.value = true
-  newLabelKey.value = ''
-  newLabelValue.value = ''
+  newAnnotationKey.value = ''
+  newAnnotationValue.value = ''
   nextTick(() => {
     keyInputRef.value?.focus()
   })
@@ -37,13 +33,13 @@ const startAdding = () => {
 
 const cancelAdding = () => {
   isAdding.value = false
-  newLabelKey.value = ''
-  newLabelValue.value = ''
+  newAnnotationKey.value = ''
+  newAnnotationValue.value = ''
 }
 
 const handleAdd = () => {
-  const key = newLabelKey.value.trim()
-  const value = newLabelValue.value.trim()
+  const key = newAnnotationKey.value.trim()
+  const value = newAnnotationValue.value.trim()
   if (!key || !value) {
     return
   }
@@ -55,14 +51,14 @@ const handleDelete = (key: string) => {
   emit('delete', key)
 }
 
-const activeLabels = computed(() => props.labels.filter(l => !l.deleted))
+const activeAnnotations = computed(() => props.annotations.filter(a => !a.deleted))
 </script>
 
 <template>
   <div class="space-y-4">
     <div class="flex items-center justify-between">
       <h3 class="text-lg font-medium">
-        Лейблы
+        Аннотации
       </h3>
       <UiButton
         v-if="!readonly && !isAdding"
@@ -96,14 +92,14 @@ const activeLabels = computed(() => props.labels.filter(l => !l.deleted))
         <div class="flex gap-2">
           <UiInput
             ref="keyInputRef"
-            v-model="newLabelKey"
+            v-model="newAnnotationKey"
             placeholder="Ключ"
             class="flex-1"
             @keyup.enter="handleAdd"
             @keyup.escape="cancelAdding"
           />
           <UiInput
-            v-model="newLabelValue"
+            v-model="newAnnotationValue"
             placeholder="Значение"
             class="flex-1"
             @keyup.enter="handleAdd"
@@ -128,33 +124,38 @@ const activeLabels = computed(() => props.labels.filter(l => !l.deleted))
         </div>
       </div>
 
-      <div class="flex flex-wrap gap-2">
-        <div
-          v-for="label in activeLabels"
-          :key="label.key"
-          class="badge badge-lg bg-base-content/8 text-base-content/70 border-base-content/15 gap-1 pr-1"
-        >
-          <span class="font-medium">{{ label.key }}</span>
-          <span class="text-base-content/60">=</span>
-          <span>{{ label.value }}</span>
+      <div
+        v-for="annotation in activeAnnotations"
+        :key="annotation.key"
+        class="p-3 bg-base-200/50 rounded group"
+      >
+        <div class="flex items-start justify-between gap-2">
+          <div class="flex-1 min-w-0">
+            <div class="font-medium text-sm text-base-content/70 mb-1">
+              {{ annotation.key }}
+            </div>
+            <div class="text-sm">
+              {{ annotation.value }}
+            </div>
+          </div>
           <button
-            v-if="!readonly && label.creator"
-            class="btn btn-ghost btn-xs btn-circle ml-1"
-            @click="handleDelete(label.key)"
+            v-if="!readonly"
+            class="btn btn-ghost btn-xs btn-circle opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+            @click="handleDelete(annotation.key)"
           >
             <Icon
               name="lucide:x"
-              class="w-3 h-3"
+              class="w-4 h-4"
             />
           </button>
         </div>
       </div>
 
       <div
-        v-if="activeLabels.length === 0 && !isAdding"
+        v-if="activeAnnotations.length === 0 && !isAdding"
         class="text-center py-6 text-base-content/50"
       >
-        Нет меток
+        Нет аннотаций
       </div>
     </div>
   </div>

@@ -156,6 +156,54 @@ export const useAlerts = () => {
     return response as ApiResponse<EventResponseSingleAlert>
   }
 
+  const addAnnotation = async (alertId: string, key: string, value: string): Promise<ApiResponse<EventResponseSingleAlert>> => {
+    loading.value = true
+    error.value = null
+
+    const body: EventRequestKeyValue = { key, value }
+    const response = await client.post({
+      url: '/alerts/{id}/annotations/add',
+      path: { id: alertId },
+      body,
+    })
+
+    loading.value = false
+
+    const data = getApiData(response as ApiResponse<EventResponseSingleAlert>)
+    if (data?.alert) {
+      alerts.value = alerts.value.map(a => a.id === alertId ? data.alert : a)
+    }
+    else {
+      error.value = 'Failed to add annotation'
+    }
+
+    return response as ApiResponse<EventResponseSingleAlert>
+  }
+
+  const deleteAnnotation = async (alertId: string, key: string): Promise<ApiResponse<EventResponseSingleAlert>> => {
+    loading.value = true
+    error.value = null
+
+    const body: EventRequestKey = { key }
+    const response = await client.post({
+      url: '/alerts/{id}/annotations/delete',
+      path: { id: alertId },
+      body,
+    })
+
+    loading.value = false
+
+    const data = getApiData(response as ApiResponse<EventResponseSingleAlert>)
+    if (data?.alert) {
+      alerts.value = alerts.value.map(a => a.id === alertId ? data.alert : a)
+    }
+    else {
+      error.value = 'Failed to delete annotation'
+    }
+
+    return response as ApiResponse<EventResponseSingleAlert>
+  }
+
   const setStatus = async (alertId: string, status: 'acknowledged' | 'resolved'): Promise<ApiResponse<EventResponseSingleAlert>> => {
     loading.value = true
     error.value = null
@@ -203,6 +251,8 @@ export const useAlerts = () => {
     deleteComment,
     addLabel,
     deleteLabel,
+    addAnnotation,
+    deleteAnnotation,
     setStatus,
     getAlertById,
     currentStatus,
