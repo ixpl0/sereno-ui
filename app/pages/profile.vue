@@ -221,7 +221,7 @@ const handleCloseAllSessions = async () => {
 
 <template>
   <div class="p-4 lg:p-6">
-    <div class="max-w-3xl mx-auto">
+    <div class="max-w-5xl mx-auto">
       <UiCard class="animate-slide-up mb-3">
         <h2 class="text-lg font-medium mb-4">
           Личные данные

@@ -13,7 +13,7 @@ withDefaults(defineProps<Props>(), {
 
 <template>
   <div class="p-4 lg:p-6">
-    <div class="max-w-3xl mx-auto">
+    <div class="max-w-5xl mx-auto">
       <UiCard padding="lg">
         <div class="text-center py-12">
           <Icon

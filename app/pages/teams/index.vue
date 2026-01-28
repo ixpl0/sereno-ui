@@ -58,7 +58,7 @@ const handleCreate = async () => {
 
 <template>
   <div class="p-4 lg:p-6">
-    <div class="max-w-3xl mx-auto">
+    <div class="max-w-5xl mx-auto">
       <UiCard class="animate-slide-up">
         <div class="flex items-center justify-between mb-6">
           <h1 class="text-xl font-semibold">
