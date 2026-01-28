@@ -22,6 +22,11 @@ const titleParts = computed(() => {
 
 <template>
   <section class="min-h-[70vh] flex flex-col items-center justify-center text-center py-16 px-4">
+    <img
+      src="/logo.png"
+      alt="Sereno"
+      class="w-24 h-24 lg:w-32 lg:h-32 mb-4"
+    >
     <h1 class="inline-block text-5xl lg:text-7xl mb-4 bg-gradient-to-r from-primary via-primary/80 to-[oklch(0.73_0.14_349.95)] bg-clip-text text-transparent leading-normal">
       <span class="font-bold">{{ titleParts.first }}</span>{{ ' ' }}<span
         v-if="titleParts.rest"

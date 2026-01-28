@@ -39,9 +39,11 @@ const emit = defineEmits<{
         :to="props.logoLink"
         class="flex items-center gap-3"
       >
-        <div class="w-10 h-10 bg-primary flex items-center justify-center shrink-0 rounded-sm">
-          <span class="text-primary-content font-bold text-sm">S</span>
-        </div>
+        <img
+          src="/logo.png"
+          alt="Sereno"
+          class="w-8 h-8 shrink-0"
+        >
         <span class="font-bold text-lg whitespace-nowrap hidden sm:block">
           Sereno Systems
         </span>

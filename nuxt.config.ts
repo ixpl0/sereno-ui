@@ -10,6 +10,13 @@ export default defineNuxtConfig({
   ],
 
   devtools: { enabled: true },
+  app: {
+    head: {
+      link: [
+        { rel: 'icon', type: 'image/png', href: '/logo.png' },
+      ],
+    },
+  },
 
   css: ['~/assets/css/main.css'],
 
