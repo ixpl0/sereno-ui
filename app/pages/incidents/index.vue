@@ -57,7 +57,7 @@ const handleStatusChange = async (incidentId: string, newStatus: string) => {
 
 <template>
   <div class="p-4 lg:p-6">
-    <div>
+    <div class="max-w-5xl mx-auto">
       <div class="flex items-center justify-between mb-6">
         <h1 class="text-2xl font-semibold">
           Инциденты
@@ -130,7 +130,7 @@ const handleStatusChange = async (incidentId: string, newStatus: string) => {
 
       <div
         v-else-if="viewMode === 'cards'"
-        class="flex flex-col gap-3 max-w-4xl mx-auto"
+        class="flex flex-col gap-3"
       >
         <EventIncidentCard
           v-for="incident in filteredIncidents"
