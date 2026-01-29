@@ -46,6 +46,10 @@ const editSteps = ref<Array<{
   description: string
 }>>([])
 
+const sortedSteps = computed(() =>
+  [...props.escalation.steps].sort((a, b) => a.delay - b.delay),
+)
+
 const initEditSteps = () => {
   editSteps.value = props.escalation.steps.map(step => ({
     delay: step.delay,
@@ -185,31 +189,39 @@ const handleSave = async () => {
 
     <div
       v-if="!editing"
-      class="mt-6 pl-5 border-l-2 border-base-300 space-y-4"
+      class="mt-6"
     >
       <div
-        v-for="(step, index) in escalation.steps"
+        v-for="(step, index) in sortedSteps"
         :key="index"
-        class="relative"
+        class="flex gap-3"
       >
-        <div class="absolute -left-[21px] w-3 h-3 rounded-full bg-base-100 border-2 border-primary" />
-        <div class="flex items-center gap-2 text-sm">
-          <span class="font-medium text-primary">
-            {{ formatDelay(step.delay) }}
-          </span>
-          <Icon
-            name="lucide:arrow-right"
-            class="w-4 h-4 text-base-content/40"
+        <div class="relative flex flex-col items-center w-3">
+          <div class="w-3 h-3 rounded-full bg-base-100 border-2 border-primary shrink-0 z-10" />
+          <div
+            v-if="index < sortedSteps.length - 1"
+            class="absolute top-3 bottom-0 left-1/2 w-0.5 -translate-x-1/2 bg-base-content/15"
           />
-          <span class="text-base-content/70">
-            {{ getStepTarget(step) }}
-          </span>
         </div>
-        <div
-          v-if="step.description"
-          class="text-xs text-base-content/50 mt-1"
-        >
-          {{ step.description }}
+        <div class="pb-6 -mt-0.5">
+          <div class="flex items-center gap-2 text-sm">
+            <span class="font-medium text-primary">
+              {{ formatDelay(step.delay) }}
+            </span>
+            <Icon
+              name="lucide:arrow-right"
+              class="w-4 h-4 text-base-content/40"
+            />
+            <span class="text-base-content/70">
+              {{ getStepTarget(step) }}
+            </span>
+          </div>
+          <div
+            v-if="step.description"
+            class="text-xs text-base-content/50 mt-1"
+          >
+            {{ step.description }}
+          </div>
         </div>
       </div>
     </div>
