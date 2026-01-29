@@ -51,12 +51,14 @@ const sortedSteps = computed(() =>
 )
 
 const initEditSteps = () => {
-  editSteps.value = props.escalation.steps.map(step => ({
-    delay: step.delay,
-    delayMinutes: Math.floor(step.delay / 60),
-    member: step.member ?? '',
-    description: step.description ?? '',
-  }))
+  editSteps.value = [...props.escalation.steps]
+    .sort((a, b) => a.delay - b.delay)
+    .map(step => ({
+      delay: step.delay,
+      delayMinutes: Math.floor(step.delay / 60),
+      member: step.member ?? '',
+      description: step.description ?? '',
+    }))
 }
 
 watch(() => props.editing, (value) => {
