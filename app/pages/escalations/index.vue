@@ -159,7 +159,7 @@ onMounted(() => {
           <select
             v-if="tenants.length > 1"
             v-model="selectedTenantId"
-            class="select select-bordered select-sm"
+            class="select select-bordered select-sm max-w-64"
             @change="fetchEscalations"
           >
             <option
