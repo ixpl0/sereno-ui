@@ -25,7 +25,7 @@ const paddingClasses: Record<CardPadding, string> = {
 
 <template>
   <div
-    class="card-glass backdrop-blur-xl shadow-2xl ring-1 ring-white/5 transition-all duration-200 rounded"
+    class="card-glass backdrop-blur-xl shadow-2xl ring-1 transition-all duration-200 rounded"
     :class="{
       'border border-base-300': bordered,
       'hover:shadow-primary/20 hover:scale-[1.01]': hoverable,

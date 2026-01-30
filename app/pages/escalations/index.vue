@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { TenantResponseTenantList, TenantRequestEscalation } from '~/api/types.gen'
+import type { TenantResponseTenantList, TenantResponseEscalationList, TenantRequestEscalation } from '~/api/types.gen'
 
 definePageMeta({
   middleware: 'auth',
@@ -26,10 +26,14 @@ watch(tenants, (value) => {
   }
 }, { immediate: true })
 
+const { data: escalationsData, status: escalationsStatus, refresh: refreshEscalations } = await useFetch<TenantResponseEscalationList>(
+  () => `/api/v1/tenants/${selectedTenantId.value}/escalations`,
+  { watch: [selectedTenantId] },
+)
+const escalations = computed(() => escalationsData.value?.escalations ?? [])
+const loading = computed(() => escalationsStatus.value === 'pending')
+
 const {
-  escalations,
-  loading,
-  fetchEscalations,
   createEscalation,
   deleteEscalation,
   toggleEscalation,
@@ -75,6 +79,7 @@ const handleCreate = async () => {
 
   toast.success('Эскалация создана')
   cancelCreate()
+  await refreshEscalations()
 
   const created = 'data' in response ? response.data?.escalation : null
   if (created) {
@@ -91,6 +96,7 @@ const handleDelete = async (id: string) => {
   }
 
   toast.success('Эскалация удалена')
+  await refreshEscalations()
 }
 
 const handleToggle = async (escalation: typeof escalations.value[number]) => {
@@ -107,6 +113,7 @@ const handleToggle = async (escalation: typeof escalations.value[number]) => {
   }
 
   toast.success(escalation.enabled ? 'Эскалация отключена' : 'Эскалация включена')
+  await refreshEscalations()
 }
 
 const formatDelay = (seconds: number): string => {
@@ -140,12 +147,6 @@ const getStepTarget = (step: typeof escalations.value[0]['steps'][0]): string =>
   }
   return 'Не указан'
 }
-
-onMounted(() => {
-  if (selectedTenantId.value) {
-    fetchEscalations()
-  }
-})
 </script>
 
 <template>
@@ -160,7 +161,6 @@ onMounted(() => {
             v-if="tenants.length > 1"
             v-model="selectedTenantId"
             class="select select-bordered select-sm max-w-64"
-            @change="fetchEscalations"
           >
             <option
               v-for="tenant in tenants"
@@ -276,7 +276,7 @@ onMounted(() => {
             @delete="handleDelete(escalation.id)"
             @edit="editingId = escalation.id"
             @close="editingId = null"
-            @updated="fetchEscalations"
+            @updated="refreshEscalations"
           />
         </div>
       </template>

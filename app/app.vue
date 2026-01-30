@@ -3,7 +3,10 @@ const { resolvedTheme } = useTheme()
 </script>
 
 <template>
-  <div :data-theme="resolvedTheme">
+  <div
+    id="app-root"
+    :data-theme="resolvedTheme"
+  >
     <NuxtRouteAnnouncer />
     <NuxtLayout>
       <NuxtPage />

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { TenantResponseTenantList, TenantResponseScheduleList, TenantRequestSchedule, TenantRequestRotation, TenantRequestOverride } from '~/api/types.gen'
+
 definePageMeta({
   middleware: 'auth',
   layout: 'default',
@@ -9,31 +11,324 @@ useSeoMeta({
   title: 'Расписания',
   description: 'Управление расписаниями дежурств',
 })
+
+const toast = useToast()
+
+const { data: tenantsData } = await useFetch<TenantResponseTenantList>('/api/v1/tenants')
+const tenants = computed(() => tenantsData.value?.tenants ?? [])
+const firstTenant = tenants.value[0]
+const selectedTenantId = ref(firstTenant?.id ?? '')
+
+watch(tenants, (value) => {
+  const first = value[0]
+  if (value.length > 0 && !selectedTenantId.value && first) {
+    selectedTenantId.value = first.id
+  }
+}, { immediate: true })
+
+const { data: schedulesData, status: schedulesStatus, refresh: refreshSchedules } = await useFetch<TenantResponseScheduleList>(
+  () => `/api/v1/tenants/${selectedTenantId.value}/schedules`,
+  { watch: [selectedTenantId] },
+)
+const schedules = computed(() => schedulesData.value?.schedules ?? [])
+const loading = computed(() => schedulesStatus.value === 'pending')
+
+const {
+  createSchedule,
+  deleteSchedule,
+  createRotation,
+  deleteRotation,
+  createOverride,
+  deleteOverride,
+} = useSchedules(selectedTenantId)
+
+const { members, fetchMembers } = useTenantMembers(selectedTenantId)
+
+const isCreating = ref(false)
+const expandedId = ref<string | null>(null)
+
+const newScheduleName = ref('')
+const newScheduleInputRef = ref<{ focus: () => void } | null>(null)
+
+const startCreate = () => {
+  isCreating.value = true
+  newScheduleName.value = ''
+  nextTick(() => {
+    newScheduleInputRef.value?.focus()
+  })
+}
+
+const cancelCreate = () => {
+  isCreating.value = false
+  newScheduleName.value = ''
+}
+
+const handleCreate = async () => {
+  const name = newScheduleName.value.trim()
+  if (!name) {
+    return
+  }
+
+  const schedule: TenantRequestSchedule = {
+    name,
+    enabled: true,
+    since: Math.floor(Date.now() / 1000),
+  }
+
+  const response = await createSchedule(schedule)
+
+  if ('error' in response && response.error) {
+    toast.error('Не удалось создать расписание')
+    return
+  }
+
+  toast.success('Расписание создано')
+  cancelCreate()
+  await refreshSchedules()
+
+  const created = 'data' in response ? response.data?.schedule : null
+  if (created) {
+    expandedId.value = created.id
+  }
+}
+
+const handleDelete = async (id: string) => {
+  const response = await deleteSchedule(id)
+
+  if ('error' in response && response.error) {
+    toast.error('Не удалось удалить расписание')
+    return
+  }
+
+  toast.success('Расписание удалено')
+  await refreshSchedules()
+  if (expandedId.value === id) {
+    expandedId.value = null
+  }
+}
+
+const handleToggle = async (schedule: typeof schedules.value[number]) => {
+  toast.info(schedule.enabled ? 'Расписание отключено' : 'Расписание включено')
+}
+
+const handleAddRotation = async (scheduleId: string, data: {
+  description: string
+  duration: number
+  since: number
+  members: string[]
+  days: number[]
+}) => {
+  const rotation: TenantRequestRotation = {
+    description: data.description,
+    duration: data.duration,
+    since: data.since,
+    members: data.members,
+    days: data.days,
+  }
+
+  const response = await createRotation(scheduleId, rotation)
+
+  if ('error' in response && response.error) {
+    toast.error('Не удалось добавить ротацию')
+    return
+  }
+
+  toast.success('Ротация добавлена')
+  await refreshSchedules()
+}
+
+const handleDeleteRotation = async (scheduleId: string, index: number) => {
+  const response = await deleteRotation(scheduleId, index)
+
+  if ('error' in response && response.error) {
+    toast.error('Не удалось удалить ротацию')
+    return
+  }
+
+  await refreshSchedules()
+}
+
+const handleAddOverride = async (scheduleId: string, data: {
+  description: string
+  duration: number
+  since: number
+  member: string
+}) => {
+  const override: TenantRequestOverride = {
+    description: data.description,
+    duration: data.duration,
+    since: data.since,
+    member: data.member,
+  }
+
+  const response = await createOverride(scheduleId, override)
+
+  if ('error' in response && response.error) {
+    toast.error('Не удалось добавить замену')
+    return
+  }
+
+  toast.success('Замена добавлена')
+  await refreshSchedules()
+}
+
+const handleDeleteOverride = async (scheduleId: string, index: number) => {
+  const response = await deleteOverride(scheduleId, index)
+
+  if ('error' in response && response.error) {
+    toast.error('Не удалось удалить замену')
+    return
+  }
+
+  await refreshSchedules()
+}
+
+onMounted(() => {
+  if (selectedTenantId.value) {
+    fetchMembers()
+  }
+})
+
+watch(selectedTenantId, () => {
+  if (selectedTenantId.value) {
+    fetchMembers()
+  }
+})
 </script>
 
 <template>
   <div class="p-4 lg:p-6">
     <div class="max-w-5xl mx-auto">
-      <UiCard class="animate-slide-up">
-        <div class="flex items-center justify-between mb-6">
-          <h1 class="text-xl font-semibold">
-            Расписания
-          </h1>
+      <div class="flex items-center justify-between mb-6">
+        <h1 class="text-2xl font-semibold">
+          Расписания
+        </h1>
+        <div class="flex items-center gap-3">
+          <select
+            v-if="tenants.length > 1"
+            v-model="selectedTenantId"
+            class="select select-bordered select-sm max-w-64"
+          >
+            <option
+              v-for="tenant in tenants"
+              :key="tenant.id"
+              :value="tenant.id"
+            >
+              {{ tenant.name }}
+            </option>
+          </select>
+          <UiButton
+            v-if="!isCreating && selectedTenantId"
+            variant="primary"
+            size="sm"
+            @click="startCreate"
+          >
+            <Icon
+              name="lucide:plus"
+              class="w-4 h-4 mr-1"
+            />
+            Создать
+          </UiButton>
+        </div>
+      </div>
+
+      <div
+        v-if="!selectedTenantId"
+        class="text-center py-12"
+      >
+        <Icon
+          name="lucide:building-2"
+          class="w-16 h-16 mx-auto text-base-content/20 mb-4"
+        />
+        <p class="text-base-content/60 mb-4">
+          Сначала создайте команду
+        </p>
+        <UiButton
+          variant="primary"
+          @click="navigateTo('/teams')"
+        >
+          Перейти к командам
+        </UiButton>
+      </div>
+
+      <template v-else>
+        <div
+          v-if="loading && schedules.length === 0"
+          class="flex justify-center py-12"
+        >
+          <span class="loading loading-spinner loading-lg" />
         </div>
 
-        <div class="text-center py-12">
-          <Icon
-            name="lucide:calendar-clock"
-            class="w-16 h-16 mx-auto text-base-content/20 mb-4"
+        <div
+          v-else
+          class="space-y-4"
+        >
+          <div
+            v-if="isCreating"
+            class="p-4 bg-base-200 rounded-lg space-y-3"
+          >
+            <UiInput
+              ref="newScheduleInputRef"
+              v-model="newScheduleName"
+              placeholder="Название расписания"
+              @keyup.enter="handleCreate"
+              @keyup.escape="cancelCreate"
+            />
+            <div class="flex gap-2 justify-end">
+              <UiButton
+                variant="primary"
+                size="sm"
+                @click="handleCreate"
+              >
+                Создать
+              </UiButton>
+              <UiButton
+                variant="ghost"
+                size="sm"
+                @click="cancelCreate"
+              >
+                Отмена
+              </UiButton>
+            </div>
+          </div>
+
+          <div
+            v-if="schedules.length === 0 && !isCreating"
+            class="text-center py-12"
+          >
+            <Icon
+              name="lucide:calendar-clock"
+              class="w-16 h-16 mx-auto text-base-content/20 mb-4"
+            />
+            <p class="text-base-content/60 mb-4">
+              Нет расписаний
+            </p>
+            <UiButton
+              variant="primary"
+              @click="startCreate"
+            >
+              Создать первое расписание
+            </UiButton>
+          </div>
+
+          <ScheduleCard
+            v-for="schedule in schedules"
+            :key="schedule.id"
+            :schedule="schedule"
+            :expanded="expandedId === schedule.id"
+            :tenant-id="selectedTenantId"
+            :members="members"
+            @toggle="handleToggle(schedule)"
+            @delete="handleDelete(schedule.id)"
+            @expand="expandedId = schedule.id"
+            @collapse="expandedId = null"
+            @add-rotation="handleAddRotation(schedule.id, $event)"
+            @delete-rotation="handleDeleteRotation(schedule.id, $event)"
+            @add-override="handleAddOverride(schedule.id, $event)"
+            @delete-override="handleDeleteOverride(schedule.id, $event)"
           />
-          <p class="text-base-content/60 mb-2">
-            Раздел в разработке
-          </p>
-          <p class="text-sm text-base-content/40">
-            Здесь будет управление расписаниями дежурств
-          </p>
         </div>
-      </UiCard>
+      </template>
     </div>
   </div>
 </template>

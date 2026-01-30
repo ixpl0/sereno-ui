@@ -26,6 +26,7 @@
 }
 
 .card-glass {
+  --tw-ring-color: rgb(255 255 255 / 0.05);
   background: oklch(0.3 0.02 260 / 0.6);
 }
 

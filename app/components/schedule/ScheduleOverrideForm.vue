@@ -1,0 +1,156 @@
+<script setup lang="ts">
+import type { TenantResponseMember } from '~/api/types.gen'
+
+interface Props {
+  members: ReadonlyArray<TenantResponseMember>
+  prefill?: { since: Date, duration: number } | null
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  prefill: null,
+})
+
+const emit = defineEmits<{
+  submit: [data: {
+    description: string
+    duration: number
+    since: number
+    member: string
+  }]
+  cancel: []
+}>()
+
+const formatDateTimeLocal = (date: Date): string => {
+  const year = date.getFullYear()
+  const month = (date.getMonth() + 1).toString().padStart(2, '0')
+  const day = date.getDate().toString().padStart(2, '0')
+  const hours = date.getHours().toString().padStart(2, '0')
+  const minutes = date.getMinutes().toString().padStart(2, '0')
+  return `${year}-${month}-${day}T${hours}:${minutes}`
+}
+
+const getInitialDuration = (): { value: number, unit: 'hours' | 'days' } => {
+  if (!props.prefill) {
+    return { value: 24, unit: 'hours' }
+  }
+  const hours = props.prefill.duration / 3600
+  if (hours >= 24 && hours % 24 === 0) {
+    return { value: hours / 24, unit: 'days' }
+  }
+  return { value: hours, unit: 'hours' }
+}
+
+const initialDuration = getInitialDuration()
+
+const description = ref('')
+const durationValue = ref(initialDuration.value)
+const durationUnit = ref<'hours' | 'days'>(initialDuration.unit)
+const since = ref(props.prefill ? formatDateTimeLocal(props.prefill.since) : new Date().toISOString().slice(0, 16))
+const selectedMember = ref('')
+
+const isValid = computed(() => {
+  return description.value.trim() !== ''
+    && durationValue.value > 0
+    && selectedMember.value !== ''
+})
+
+const handleSubmit = () => {
+  if (!isValid.value) {
+    return
+  }
+
+  const durationSeconds = durationUnit.value === 'days'
+    ? durationValue.value * 86400
+    : durationValue.value * 3600
+
+  const sinceTimestamp = Math.floor(new Date(since.value).getTime() / 1000)
+
+  emit('submit', {
+    description: description.value.trim(),
+    duration: durationSeconds,
+    since: sinceTimestamp,
+    member: selectedMember.value,
+  })
+}
+</script>
+
+<template>
+  <div class="space-y-4">
+    <div>
+      <UiLabel>Описание</UiLabel>
+      <UiInput
+        v-model="description"
+        placeholder="Например: Отпуск Ивана"
+      />
+    </div>
+
+    <div>
+      <UiLabel>Дежурный</UiLabel>
+      <select
+        v-model="selectedMember"
+        class="select select-bordered w-full"
+      >
+        <option value="">
+          Выберите участника
+        </option>
+        <option
+          v-for="member in members"
+          :key="member.id"
+          :value="member.id"
+        >
+          {{ member.id }}
+        </option>
+      </select>
+    </div>
+
+    <div>
+      <UiLabel>Начало</UiLabel>
+      <input
+        v-model="since"
+        type="datetime-local"
+        class="input input-bordered w-full"
+      >
+    </div>
+
+    <div>
+      <UiLabel>Длительность</UiLabel>
+      <div class="flex gap-2">
+        <input
+          v-model.number="durationValue"
+          type="number"
+          min="1"
+          class="input input-bordered w-24"
+        >
+        <select
+          v-model="durationUnit"
+          class="select select-bordered"
+        >
+          <option value="hours">
+            часов
+          </option>
+          <option value="days">
+            дней
+          </option>
+        </select>
+      </div>
+    </div>
+
+    <div class="flex gap-2 justify-end pt-2">
+      <UiButton
+        variant="primary"
+        size="sm"
+        :disabled="!isValid"
+        @click="handleSubmit"
+      >
+        Добавить
+      </UiButton>
+      <UiButton
+        variant="ghost"
+        size="sm"
+        @click="emit('cancel')"
+      >
+        Отмена
+      </UiButton>
+    </div>
+  </div>
+</template>

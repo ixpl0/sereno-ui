@@ -116,6 +116,31 @@ export interface MockEscalation {
   rules: MockEscalationRule[]
 }
 
+export interface MockRotation {
+  description: string
+  duration: number
+  since: number
+  members: string[]
+  days: number[]
+}
+
+export interface MockOverride {
+  description: string
+  duration: number
+  since: number
+  member: string
+}
+
+export interface MockSchedule {
+  id: string
+  name: string
+  enabled: boolean
+  since: number
+  until?: number
+  rotations: MockRotation[]
+  overrides: MockOverride[]
+}
+
 interface MockState {
   user: User
   sessions: Session[]
@@ -124,6 +149,7 @@ interface MockState {
   tenantMembers: Map<string, TenantMember[]>
   tenantTokens: Map<string, TenantToken[]>
   tenantEscalations: Map<string, MockEscalation[]>
+  tenantSchedules: Map<string, MockSchedule[]>
   alerts: MockAlert[]
   incidents: MockIncident[]
 }
@@ -259,6 +285,74 @@ const defaultState: MockState = {
       },
     ]],
   ]),
+  tenantSchedules: new Map([
+    ['tenant-1', [
+      {
+        id: 'schedule-1',
+        name: 'Основное дежурство',
+        enabled: true,
+        since: Math.floor(Date.now() / 1000) - 86400 * 30,
+        rotations: [
+          {
+            description: 'Дневная смена',
+            duration: 43200,
+            since: Math.floor(Date.now() / 1000) - 86400 * 30,
+            members: ['user-1', 'user-3'],
+            days: [1, 2, 3, 4, 5],
+          },
+          {
+            description: 'Ночная смена',
+            duration: 43200,
+            since: Math.floor(Date.now() / 1000) - 86400 * 30 + 43200,
+            members: ['user-3', 'user-1'],
+            days: [1, 2, 3, 4, 5],
+          },
+        ],
+        overrides: [
+          {
+            description: 'Отпуск Василия',
+            duration: 86400 * 3,
+            since: Math.floor(Date.now() / 1000) + 86400 * 2,
+            member: 'user-3',
+          },
+        ],
+      },
+      {
+        id: 'schedule-2',
+        name: 'Выходные',
+        enabled: true,
+        since: Math.floor(Date.now() / 1000) - 86400 * 30,
+        rotations: [
+          {
+            description: 'Круглосуточно',
+            duration: 86400,
+            since: Math.floor(Date.now() / 1000) - 86400 * 30,
+            members: ['user-1', 'user-3'],
+            days: [6, 7],
+          },
+        ],
+        overrides: [],
+      },
+    ]],
+    ['tenant-2', [
+      {
+        id: 'schedule-3',
+        name: '24/7 дежурство',
+        enabled: true,
+        since: Math.floor(Date.now() / 1000) - 86400 * 14,
+        rotations: [
+          {
+            description: 'Основная ротация',
+            duration: 86400,
+            since: Math.floor(Date.now() / 1000) - 86400 * 14,
+            members: ['user-2', 'user-1'],
+            days: [1, 2, 3, 4, 5, 6, 7],
+          },
+        ],
+        overrides: [],
+      },
+    ]],
+  ]),
   alerts: [
     {
       id: 'alert-1',
@@ -366,6 +460,7 @@ const state: MockState = {
   tenantMembers: new Map(defaultState.tenantMembers),
   tenantTokens: new Map(defaultState.tenantTokens),
   tenantEscalations: new Map(defaultState.tenantEscalations),
+  tenantSchedules: new Map(defaultState.tenantSchedules),
   alerts: [...defaultState.alerts],
   incidents: [...defaultState.incidents],
 }
@@ -951,4 +1046,125 @@ export const deleteMockEscalation = (tenantId: string, escalationId: string): bo
   const initialLength = escalations.length
   state.tenantEscalations.set(tenantId, escalations.filter(e => e.id !== escalationId))
   return (state.tenantEscalations.get(tenantId)?.length ?? 0) < initialLength
+}
+
+export const getMockSchedules = (tenantId: string): ReadonlyArray<MockSchedule> => {
+  return state.tenantSchedules.get(tenantId) ?? []
+}
+
+export const getMockSchedule = (scheduleId: string): MockSchedule | null => {
+  for (const schedules of state.tenantSchedules.values()) {
+    const schedule = schedules.find(s => s.id === scheduleId)
+    if (schedule) {
+      return schedule
+    }
+  }
+  return null
+}
+
+export const createMockSchedule = (
+  tenantId: string,
+  data: { name: string, enabled: boolean, since: number, until?: number },
+): MockSchedule => {
+  const schedule: MockSchedule = {
+    id: generateId('schedule'),
+    name: data.name,
+    enabled: data.enabled,
+    since: data.since,
+    until: data.until,
+    rotations: [],
+    overrides: [],
+  }
+  const schedules = state.tenantSchedules.get(tenantId) ?? []
+  state.tenantSchedules.set(tenantId, [...schedules, schedule])
+  return schedule
+}
+
+export const deleteMockSchedule = (tenantId: string, scheduleId: string): boolean => {
+  const schedules = state.tenantSchedules.get(tenantId) ?? []
+  const initialLength = schedules.length
+  state.tenantSchedules.set(tenantId, schedules.filter(s => s.id !== scheduleId))
+  return (state.tenantSchedules.get(tenantId)?.length ?? 0) < initialLength
+}
+
+export const createMockRotation = (
+  scheduleId: string,
+  data: MockRotation,
+): MockSchedule | null => {
+  for (const [tenantId, schedules] of state.tenantSchedules.entries()) {
+    const scheduleIndex = schedules.findIndex(s => s.id === scheduleId)
+    if (scheduleIndex !== -1) {
+      const schedule = schedules[scheduleIndex]
+      if (!schedule) {
+        return null
+      }
+      const updatedSchedule: MockSchedule = {
+        ...schedule,
+        rotations: [...schedule.rotations, data],
+      }
+      state.tenantSchedules.set(tenantId, schedules.map(s => s.id === scheduleId ? updatedSchedule : s))
+      return updatedSchedule
+    }
+  }
+  return null
+}
+
+export const deleteMockRotation = (scheduleId: string, rotationIndex: number): MockSchedule | null => {
+  for (const [tenantId, schedules] of state.tenantSchedules.entries()) {
+    const scheduleIdx = schedules.findIndex(s => s.id === scheduleId)
+    if (scheduleIdx !== -1) {
+      const schedule = schedules[scheduleIdx]
+      if (!schedule || rotationIndex < 0 || rotationIndex >= schedule.rotations.length) {
+        return null
+      }
+      const updatedSchedule: MockSchedule = {
+        ...schedule,
+        rotations: schedule.rotations.filter((_, i) => i !== rotationIndex),
+      }
+      state.tenantSchedules.set(tenantId, schedules.map(s => s.id === scheduleId ? updatedSchedule : s))
+      return updatedSchedule
+    }
+  }
+  return null
+}
+
+export const createMockOverride = (
+  scheduleId: string,
+  data: MockOverride,
+): MockSchedule | null => {
+  for (const [tenantId, schedules] of state.tenantSchedules.entries()) {
+    const scheduleIndex = schedules.findIndex(s => s.id === scheduleId)
+    if (scheduleIndex !== -1) {
+      const schedule = schedules[scheduleIndex]
+      if (!schedule) {
+        return null
+      }
+      const updatedSchedule: MockSchedule = {
+        ...schedule,
+        overrides: [...schedule.overrides, data],
+      }
+      state.tenantSchedules.set(tenantId, schedules.map(s => s.id === scheduleId ? updatedSchedule : s))
+      return updatedSchedule
+    }
+  }
+  return null
+}
+
+export const deleteMockOverride = (scheduleId: string, overrideIndex: number): MockSchedule | null => {
+  for (const [tenantId, schedules] of state.tenantSchedules.entries()) {
+    const scheduleIdx = schedules.findIndex(s => s.id === scheduleId)
+    if (scheduleIdx !== -1) {
+      const schedule = schedules[scheduleIdx]
+      if (!schedule || overrideIndex < 0 || overrideIndex >= schedule.overrides.length) {
+        return null
+      }
+      const updatedSchedule: MockSchedule = {
+        ...schedule,
+        overrides: schedule.overrides.filter((_, i) => i !== overrideIndex),
+      }
+      state.tenantSchedules.set(tenantId, schedules.map(s => s.id === scheduleId ? updatedSchedule : s))
+      return updatedSchedule
+    }
+  }
+  return null
 }
