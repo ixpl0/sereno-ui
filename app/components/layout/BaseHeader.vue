@@ -42,7 +42,7 @@ const emit = defineEmits<{
         <img
           src="/logo.png"
           alt="Sereno"
-          class="w-8 h-8 shrink-0"
+          class="h-8 shrink-0"
         >
         <span class="font-bold text-lg whitespace-nowrap hidden sm:block">
           Sereno Systems
