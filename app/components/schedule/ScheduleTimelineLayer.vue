@@ -46,7 +46,7 @@ const nowPosition = computed(() => getCurrentTimePosition(props.range))
   <div class="flex border-b border-base-content/10 last:border-b-0">
     <div class="w-32 shrink-0 px-2 py-2 flex items-center justify-between border-r border-base-content/10 bg-base-200/30">
       <div class="min-w-0">
-        <div class="text-sm font-medium truncate">
+        <div class="text-xs font-medium">
           {{ label }}
           <span
             v-if="membersCount !== undefined"
