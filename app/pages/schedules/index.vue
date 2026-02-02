@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { TenantResponseTenantList, TenantResponseScheduleList, TenantRequestSchedule, TenantRequestRotation, TenantRequestOverride } from '~/api/types.gen'
+import type { TenantResponseTenantList, TenantResponseScheduleList, TenantRequestNewSchedule, TenantRequestRotation, TenantRequestOverride } from '~/api/types.gen'
 
 definePageMeta({
   middleware: 'auth',
@@ -48,11 +48,22 @@ const isCreating = ref(false)
 const expandedId = ref<string | null>(null)
 
 const newScheduleName = ref('')
+const newScheduleSince = ref('')
 const newScheduleInputRef = ref<{ focus: () => void } | null>(null)
+
+const getLocalDatetimeString = (date: Date): string => {
+  const year = date.getFullYear()
+  const month = (date.getMonth() + 1).toString().padStart(2, '0')
+  const day = date.getDate().toString().padStart(2, '0')
+  const hours = date.getHours().toString().padStart(2, '0')
+  const minutes = date.getMinutes().toString().padStart(2, '0')
+  return `${year}-${month}-${day}T${hours}:${minutes}`
+}
 
 const startCreate = () => {
   isCreating.value = true
   newScheduleName.value = ''
+  newScheduleSince.value = getLocalDatetimeString(new Date())
   nextTick(() => {
     newScheduleInputRef.value?.focus()
   })
@@ -61,6 +72,7 @@ const startCreate = () => {
 const cancelCreate = () => {
   isCreating.value = false
   newScheduleName.value = ''
+  newScheduleSince.value = ''
 }
 
 const handleCreate = async () => {
@@ -69,10 +81,12 @@ const handleCreate = async () => {
     return
   }
 
-  const schedule: TenantRequestSchedule = {
+  const sinceDate = newScheduleSince.value ? new Date(newScheduleSince.value) : new Date()
+  const sinceTimestamp = Math.floor(sinceDate.getTime() / 1000)
+
+  const schedule: TenantRequestNewSchedule = {
     name,
-    enabled: true,
-    since: Math.floor(Date.now() / 1000),
+    since: sinceTimestamp,
   }
 
   const response = await createSchedule(schedule)
@@ -105,10 +119,6 @@ const handleDelete = async (id: string) => {
   if (expandedId.value === id) {
     expandedId.value = null
   }
-}
-
-const handleToggle = async (schedule: typeof schedules.value[number]) => {
-  toast.info(schedule.enabled ? 'Расписание отключено' : 'Расписание включено')
 }
 
 const handleAddRotation = async (scheduleId: string, data: {
@@ -274,6 +284,15 @@ watch(selectedTenantId, () => {
               @keyup.enter="handleCreate"
               @keyup.escape="cancelCreate"
             />
+            <div>
+              <UiLabel>Дата начала</UiLabel>
+              <input
+                v-model="newScheduleSince"
+                type="datetime-local"
+                step="600"
+                class="input input-bordered w-full"
+              >
+            </div>
             <div class="flex gap-2 justify-end">
               <UiButton
                 variant="primary"
@@ -318,7 +337,6 @@ watch(selectedTenantId, () => {
             :expanded="expandedId === schedule.id"
             :tenant-id="selectedTenantId"
             :members="members"
-            @toggle="handleToggle(schedule)"
             @delete="handleDelete(schedule.id)"
             @expand="expandedId = schedule.id"
             @collapse="expandedId = null"

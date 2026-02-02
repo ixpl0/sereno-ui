@@ -537,7 +537,7 @@ const handleDeleteToken = async (tokenId: string) => {
                       {{ token.name }}
                     </div>
                     <div class="text-sm text-base-content/60">
-                      {{ formatDate(token.since) }}
+                      {{ formatDate(token.created) }}
                     </div>
                   </div>
                 </div>

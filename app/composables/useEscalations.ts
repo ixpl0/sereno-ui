@@ -114,7 +114,7 @@ export const useEscalations = (tenantId: Ref<string>) => {
     id: string
     name: string
     enabled: boolean
-    steps: ReadonlyArray<{ delay: number, description?: string, member?: string, schedule?: { id: string, position: string } }>
+    steps: ReadonlyArray<{ delay: number, description?: string, member?: string, position?: string, schedule?: string }>
     rules: ReadonlyArray<{ description?: string, event?: string, labels?: Record<string, string> }>
   }): Promise<ApiResponse<TenantResponseSingleEscalation>> => {
     const updated: TenantRequestEscalation = {
@@ -124,7 +124,8 @@ export const useEscalations = (tenantId: Ref<string>) => {
         delay: step.delay,
         description: step.description,
         member: step.member,
-        schedule: step.schedule ? { id: step.schedule.id, position: step.schedule.position as 'current' | 'next' | 'previous' | 'all' } : undefined,
+        position: step.position as 'current' | 'next' | 'previous' | 'all' | undefined,
+        schedule: step.schedule,
       })),
       rules: escalation.rules.map(rule => ({
         description: rule.description,

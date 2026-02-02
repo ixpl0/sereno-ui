@@ -136,14 +136,14 @@ const getStepTarget = (step: typeof escalations.value[0]['steps'][0]): string =>
   if (step.member) {
     return step.member
   }
-  if (step.schedule) {
+  if (step.schedule && step.position) {
     const positions: Record<string, string> = {
       current: 'текущий дежурный',
       next: 'следующий дежурный',
       previous: 'предыдущий дежурный',
       all: 'все дежурные',
     }
-    return positions[step.schedule.position] ?? step.schedule.position
+    return positions[step.position] ?? step.position
   }
   return 'Не указан'
 }

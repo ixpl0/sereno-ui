@@ -1,18 +1,9 @@
 export type TimelineView = 'day' | 'week' | 'month'
 
-interface RotationData {
-  days: ReadonlyArray<number>
-  description: string
-  duration: number
-  members: ReadonlyArray<string>
-  since: number
-}
-
-interface OverrideData {
-  description: string
-  duration: number
+export interface ShiftData {
   member: string
   since: number
+  until: number
 }
 
 export interface TimelineRange {
@@ -28,6 +19,7 @@ export interface RotationSlot {
   rotationIndex: number
   isOverride: boolean
   description: string
+  colorIndex?: number
 }
 
 const USER_COLORS = [
@@ -69,6 +61,15 @@ export const getTimelineRange = (view: TimelineView, baseDate: Date): TimelineRa
   return { start, end }
 }
 
+export const getWeekStart = (date: Date): Date => {
+  const start = new Date(date)
+  start.setHours(0, 0, 0, 0)
+  const dayOfWeek = start.getDay()
+  const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek
+  start.setDate(start.getDate() + diffToMonday)
+  return start
+}
+
 export const getTimelineDays = (range: TimelineRange): Date[] => {
   const days: Date[] = []
   const current = new Date(range.start)
@@ -93,89 +94,36 @@ export const getTimelineHours = (range: TimelineRange): Date[] => {
   return hours
 }
 
-const isDayActive = (date: Date, days: ReadonlyArray<number>): boolean => {
-  const dayOfWeek = date.getDay()
-  const normalizedDay = dayOfWeek === 0 ? 7 : dayOfWeek
-  return days.includes(normalizedDay)
-}
-
-export const calculateRotationSlots = (
-  rotation: RotationData,
-  range: TimelineRange,
+export const convertShiftsToSlots = (
+  shifts: ReadonlyArray<ShiftData>,
+  description: string,
   rotationIndex: number,
+  isOverride: boolean,
   memberNames: Map<string, string>,
-): RotationSlot[] => {
-  const slots: RotationSlot[] = []
-  const rotationStart = new Date(rotation.since * 1000)
-  const durationMs = rotation.duration * 1000
-
-  if (rotation.members.length === 0) {
-    return slots
-  }
-
-  let currentTime = new Date(rotationStart)
-  let memberIndex = 0
-
-  const totalDurationSinceStart = range.start.getTime() - rotationStart.getTime()
-  if (totalDurationSinceStart > 0) {
-    const totalSlots = Math.floor(totalDurationSinceStart / durationMs)
-    memberIndex = totalSlots % rotation.members.length
-    currentTime = new Date(rotationStart.getTime() + totalSlots * durationMs)
-  }
-
-  while (currentTime < range.end) {
-    const slotEnd = new Date(currentTime.getTime() + durationMs)
-    const memberId = rotation.members[memberIndex]
-
-    if (memberId && isDayActive(currentTime, rotation.days)) {
-      const effectiveStart = currentTime < range.start ? range.start : currentTime
-      const effectiveEnd = slotEnd > range.end ? range.end : slotEnd
-
-      if (effectiveStart < effectiveEnd) {
-        slots.push({
-          memberId,
-          memberName: memberNames.get(memberId) ?? memberId,
-          start: effectiveStart,
-          end: effectiveEnd,
-          rotationIndex,
-          isOverride: false,
-          description: rotation.description,
-        })
-      }
-    }
-
-    currentTime = slotEnd
-    memberIndex = (memberIndex + 1) % rotation.members.length
-  }
-
-  return slots
-}
-
-export const calculateOverrideSlots = (
-  override: OverrideData,
   range: TimelineRange,
-  overrideIndex: number,
-  memberNames: Map<string, string>,
 ): RotationSlot[] => {
-  const overrideStart = new Date(override.since * 1000)
-  const overrideEnd = new Date(overrideStart.getTime() + override.duration * 1000)
+  return shifts
+    .filter((shift) => {
+      const shiftStart = new Date(shift.since * 1000)
+      const shiftEnd = new Date(shift.until * 1000)
+      return shiftEnd > range.start && shiftStart < range.end
+    })
+    .map((shift) => {
+      const shiftStart = new Date(shift.since * 1000)
+      const shiftEnd = new Date(shift.until * 1000)
+      const effectiveStart = shiftStart < range.start ? range.start : shiftStart
+      const effectiveEnd = shiftEnd > range.end ? range.end : shiftEnd
 
-  if (overrideEnd <= range.start || overrideStart >= range.end) {
-    return []
-  }
-
-  const effectiveStart = overrideStart < range.start ? range.start : overrideStart
-  const effectiveEnd = overrideEnd > range.end ? range.end : overrideEnd
-
-  return [{
-    memberId: override.member,
-    memberName: memberNames.get(override.member) ?? override.member,
-    start: effectiveStart,
-    end: effectiveEnd,
-    rotationIndex: overrideIndex,
-    isOverride: true,
-    description: override.description,
-  }]
+      return {
+        memberId: shift.member,
+        memberName: memberNames.get(shift.member) ?? shift.member,
+        start: effectiveStart,
+        end: effectiveEnd,
+        rotationIndex,
+        isOverride,
+        description,
+      }
+    })
 }
 
 export const formatTimeRange = (start: Date, end: Date): string => {
@@ -204,7 +152,7 @@ export const formatDuration = (seconds: number): string => {
   const hours = Math.floor(seconds / 3600)
   const minutes = Math.floor((seconds % 3600) / 60)
 
-  if (hours >= 24 && hours % 24 === 0) {
+  if (hours >= 24 && hours % 24 === 0 && minutes === 0) {
     const days = hours / 24
     return `${days} ${days === 1 ? 'день' : days < 5 ? 'дня' : 'дней'}`
   }
@@ -246,4 +194,107 @@ export const getSlotPosition = (slot: RotationSlot, range: TimelineRange): { lef
   const width = (duration / totalMs) * 100
 
   return { left, width }
+}
+
+export const getCurrentTimePosition = (range: TimelineRange): number | null => {
+  const now = new Date()
+  if (now < range.start || now > range.end) {
+    return null
+  }
+  const totalMs = range.end.getTime() - range.start.getTime()
+  const currentOffset = now.getTime() - range.start.getTime()
+  return (currentOffset / totalMs) * 100
+}
+
+const MONTH_NAMES_FULL = [
+  'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+  'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь',
+]
+
+const MONTH_NAMES_GENITIVE = [
+  'января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
+  'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря',
+]
+
+const MONTH_NAMES_SHORT = [
+  'янв', 'фев', 'мар', 'апр', 'мая', 'июн',
+  'июл', 'авг', 'сен', 'окт', 'ноя', 'дек',
+]
+
+export const formatWeekRange = (start: Date, end: Date): string => {
+  const startDay = start.getDate()
+  const endDay = end.getDate()
+  const startMonth = start.getMonth()
+  const endMonth = end.getMonth()
+  const startYear = start.getFullYear()
+  const endYear = end.getFullYear()
+
+  if (startMonth === endMonth && startYear === endYear) {
+    return `${startDay}-${endDay} ${MONTH_NAMES_GENITIVE[startMonth]} ${startYear}`
+  }
+
+  if (startYear === endYear) {
+    return `${startDay} ${MONTH_NAMES_SHORT[startMonth]} - ${endDay} ${MONTH_NAMES_SHORT[endMonth]} ${startYear}`
+  }
+
+  return `${startDay} ${MONTH_NAMES_SHORT[startMonth]} ${startYear} - ${endDay} ${MONTH_NAMES_SHORT[endMonth]} ${endYear}`
+}
+
+export const formatMonthYear = (date: Date): string => {
+  return `${MONTH_NAMES_FULL[date.getMonth()]} ${date.getFullYear()}`
+}
+
+export const formatDayFull = (date: Date): string => {
+  return `${date.getDate()} ${MONTH_NAMES_GENITIVE[date.getMonth()]} ${date.getFullYear()}`
+}
+
+export interface CalendarCell {
+  date: Date
+  isCurrentMonth: boolean
+  slots: RotationSlot[]
+}
+
+export const getCalendarCells = (
+  monthDate: Date,
+  allSlots: RotationSlot[],
+): CalendarCell[] => {
+  const year = monthDate.getFullYear()
+  const month = monthDate.getMonth()
+
+  const firstDayOfMonth = new Date(year, month, 1)
+
+  let startDayOfWeek = firstDayOfMonth.getDay()
+  if (startDayOfWeek === 0) {
+    startDayOfWeek = 7
+  }
+
+  const calendarStart = new Date(firstDayOfMonth)
+  calendarStart.setDate(calendarStart.getDate() - (startDayOfWeek - 1))
+
+  const cells: CalendarCell[] = []
+  const current = new Date(calendarStart)
+
+  const totalCells = 42
+
+  for (let i = 0; i < totalCells; i++) {
+    const cellDate = new Date(current)
+    const dayStart = new Date(cellDate)
+    dayStart.setHours(0, 0, 0, 0)
+    const dayEnd = new Date(dayStart)
+    dayEnd.setDate(dayEnd.getDate() + 1)
+
+    const daySlots = allSlots.filter((slot) => {
+      return slot.start < dayEnd && slot.end > dayStart
+    })
+
+    cells.push({
+      date: cellDate,
+      isCurrentMonth: cellDate.getMonth() === month,
+      slots: daySlots,
+    })
+
+    current.setDate(current.getDate() + 1)
+  }
+
+  return cells
 }

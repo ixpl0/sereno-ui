@@ -1,30 +1,15 @@
 <script setup lang="ts">
+import type { TenantResponseRotation, TenantResponseOverride } from '~/api/types.gen'
 import type { TimelineView, TimelineRange, RotationSlot } from '~/utils/schedule'
-import { getTimelineRange, calculateRotationSlots, calculateOverrideSlots } from '~/utils/schedule'
-
-interface RotationData {
-  days: ReadonlyArray<number>
-  description: string
-  duration: number
-  members: ReadonlyArray<string>
-  since: number
-}
-
-interface OverrideData {
-  description: string
-  duration: number
-  member: string
-  since: number
-}
+import { getTimelineRange, convertShiftsToSlots } from '~/utils/schedule'
 
 interface ScheduleData {
   id: string
   name: string
-  enabled: boolean
   since: number
   until?: number
-  rotations: ReadonlyArray<RotationData>
-  overrides: ReadonlyArray<OverrideData>
+  rotations?: ReadonlyArray<TenantResponseRotation>
+  overrides?: ReadonlyArray<TenantResponseOverride>
 }
 
 interface Props {
@@ -38,6 +23,7 @@ const emit = defineEmits<{
   deleteRotation: [index: number]
   deleteOverride: [index: number]
   createOverrideFromSlot: [slot: RotationSlot]
+  selectDay: [date: Date]
 }>()
 
 const view = ref<TimelineView>('week')
@@ -56,11 +42,14 @@ const range = computed<TimelineRange | null>(() => {
   return getTimelineRange(view.value, currentDate.value)
 })
 
+const rotations = computed(() => props.schedule.rotations ?? [])
+const overrides = computed(() => props.schedule.overrides ?? [])
+
 const memberColorMap = computed(() => {
   const map = new Map<string, number>()
   let colorIndex = 0
 
-  props.schedule.rotations.forEach((rotation) => {
+  rotations.value.forEach((rotation) => {
     rotation.members.forEach((memberId) => {
       if (!map.has(memberId)) {
         map.set(memberId, colorIndex++)
@@ -68,10 +57,12 @@ const memberColorMap = computed(() => {
     })
   })
 
-  props.schedule.overrides.forEach((override) => {
-    if (!map.has(override.member)) {
-      map.set(override.member, colorIndex++)
-    }
+  overrides.value.forEach((override) => {
+    override.shifts.forEach((shift) => {
+      if (!map.has(shift.member)) {
+        map.set(shift.member, colorIndex++)
+      }
+    })
   })
 
   return map
@@ -82,9 +73,17 @@ const rotationLayers = computed(() => {
   if (!currentRange) {
     return []
   }
-  return props.schedule.rotations.map((rotation, index) => ({
+  return rotations.value.map((rotation, index) => ({
     label: rotation.description,
-    slots: calculateRotationSlots(rotation, currentRange, index, props.memberNames),
+    membersCount: rotation.members.length,
+    slots: convertShiftsToSlots(
+      rotation.shifts,
+      rotation.description,
+      index,
+      false,
+      props.memberNames,
+      currentRange,
+    ),
     index,
   }))
 })
@@ -94,9 +93,36 @@ const overrideSlots = computed<RotationSlot[]>(() => {
   if (!currentRange) {
     return []
   }
-  return props.schedule.overrides.flatMap((override, index) =>
-    calculateOverrideSlots(override, currentRange, index, props.memberNames),
+  return overrides.value.flatMap((override, index) =>
+    convertShiftsToSlots(
+      override.shifts,
+      override.description,
+      index,
+      true,
+      props.memberNames,
+      currentRange,
+    ),
   )
+})
+
+const allSlots = computed<RotationSlot[]>(() => {
+  const currentRange = range.value
+  if (!currentRange) {
+    return []
+  }
+
+  const rotationSlots = rotations.value.flatMap((rotation, index) =>
+    convertShiftsToSlots(
+      rotation.shifts,
+      rotation.description,
+      index,
+      false,
+      props.memberNames,
+      currentRange,
+    ),
+  )
+
+  return [...rotationSlots, ...overrideSlots.value]
 })
 
 const hasOverrides = computed(() => overrideSlots.value.length > 0)
@@ -107,6 +133,12 @@ const handleDeleteOverrideFromSlot = (slot: RotationSlot) => {
 
 const handleCreateOverrideFromSlot = (slot: RotationSlot) => {
   emit('createOverrideFromSlot', slot)
+}
+
+const handleSelectDay = (date: Date) => {
+  currentDate.value = date
+  view.value = 'day'
+  emit('selectDay', date)
 }
 </script>
 
@@ -125,51 +157,66 @@ const handleCreateOverrideFromSlot = (slot: RotationSlot) => {
         v-model:current-date="currentDate"
       />
 
-      <div class="overflow-x-auto">
-        <div class="min-w-[600px]">
-          <div class="flex border-b border-base-content/10">
-            <div class="w-32 shrink-0" />
-            <div class="flex-1">
-              <ScheduleTimelineHeader
+      <div
+        v-if="view === 'month'"
+        class="p-2"
+      >
+        <ScheduleTimelineCalendar
+          :current-date="currentDate"
+          :slots="allSlots"
+          :member-color-map="memberColorMap"
+          @select-day="handleSelectDay"
+        />
+      </div>
+
+      <template v-else>
+        <div class="overflow-x-auto">
+          <div class="min-w-[600px]">
+            <div class="flex border-b border-base-content/10">
+              <div class="w-32 shrink-0" />
+              <div class="flex-1">
+                <ScheduleTimelineHeader
+                  :view="view"
+                  :range="range"
+                />
+              </div>
+            </div>
+
+            <div class="group">
+              <ScheduleTimelineLayer
+                v-for="layer in rotationLayers"
+                :key="layer.index"
+                :label="layer.label"
+                :members-count="layer.membersCount"
+                :slots="layer.slots"
                 :view="view"
                 :range="range"
+                :member-color-map="memberColorMap"
+                @delete="emit('deleteRotation', layer.index)"
+                @create-override="handleCreateOverrideFromSlot"
+              />
+
+              <ScheduleTimelineLayer
+                v-if="hasOverrides"
+                label="Замены"
+                :slots="overrideSlots"
+                :view="view"
+                :range="range"
+                :member-color-map="memberColorMap"
+                :is-override-layer="true"
+                @delete-override="handleDeleteOverrideFromSlot"
               />
             </div>
-          </div>
 
-          <div class="group">
-            <ScheduleTimelineLayer
-              v-if="hasOverrides"
-              label="Замены"
-              :slots="overrideSlots"
-              :view="view"
-              :range="range"
-              :member-color-map="memberColorMap"
-              :is-override-layer="true"
-              @delete-override="handleDeleteOverrideFromSlot"
-            />
-
-            <ScheduleTimelineLayer
-              v-for="layer in rotationLayers"
-              :key="layer.index"
-              :label="layer.label"
-              :slots="layer.slots"
-              :view="view"
-              :range="range"
-              :member-color-map="memberColorMap"
-              @delete="emit('deleteRotation', layer.index)"
-              @create-override="handleCreateOverrideFromSlot"
-            />
-          </div>
-
-          <div
-            v-if="rotationLayers.length === 0 && !hasOverrides"
-            class="text-center py-8 text-base-content/50"
-          >
-            Нет ротаций
+            <div
+              v-if="rotationLayers.length === 0 && !hasOverrides"
+              class="text-center py-8 text-base-content/50"
+            >
+              Нет ротаций
+            </div>
           </div>
         </div>
-      </div>
+      </template>
     </template>
   </div>
 </template>

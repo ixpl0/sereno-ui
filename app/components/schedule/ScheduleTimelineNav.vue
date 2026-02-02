@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { TimelineView } from '~/utils/schedule'
+import { getWeekStart, formatWeekRange, formatMonthYear, formatDayFull } from '~/utils/schedule'
 
 interface Props {
   view: TimelineView
@@ -19,22 +20,21 @@ const viewLabels: Record<TimelineView, string> = {
   month: 'Месяц',
 }
 
-const monthNames = [
-  'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
-  'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь',
-]
-
 const currentLabel = computed(() => {
   const date = props.currentDate
-  const month = monthNames[date.getMonth()]
-  const year = date.getFullYear()
 
   if (props.view === 'day') {
-    const day = date.getDate()
-    return `${day} ${month} ${year}`
+    return formatDayFull(date)
   }
 
-  return `${month} ${year}`
+  if (props.view === 'week') {
+    const weekStart = getWeekStart(date)
+    const weekEnd = new Date(weekStart)
+    weekEnd.setDate(weekEnd.getDate() + 6)
+    return formatWeekRange(weekStart, weekEnd)
+  }
+
+  return formatMonthYear(date)
 })
 
 const goToToday = () => {
@@ -73,7 +73,7 @@ const goToNext = () => {
 </script>
 
 <template>
-  <div class="flex items-center justify-between gap-4 py-3">
+  <div class="flex items-center justify-between gap-4 py-3 px-2">
     <div class="flex items-center gap-2">
       <UiButton
         variant="ghost"
@@ -104,7 +104,7 @@ const goToNext = () => {
           />
         </UiButton>
       </div>
-      <span class="font-medium text-sm min-w-32">
+      <span class="font-medium text-sm min-w-40">
         {{ currentLabel }}
       </span>
     </div>

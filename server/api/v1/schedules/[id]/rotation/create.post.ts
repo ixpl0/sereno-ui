@@ -45,7 +45,22 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const rotation = schedule.rotations[schedule.rotations.length - 1]
+  const mockRotation = schedule.rotations[schedule.rotations.length - 1]
+  if (!mockRotation) {
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'Internal Server Error',
+      data: { error: { code: 'internal_error', message: 'failed to create rotation' } },
+    })
+  }
+
+  const rotation = {
+    description: mockRotation.description,
+    members: mockRotation.members,
+    created: mockRotation.created,
+    creator: mockRotation.creator,
+    shifts: mockRotation.shifts,
+  }
 
   return { rotation }
 })

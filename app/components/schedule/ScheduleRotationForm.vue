@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import type { TenantResponseMember } from '~/api/types.gen'
+import draggable from 'vuedraggable'
 
 interface Props {
   members: ReadonlyArray<TenantResponseMember>
 }
 
-defineProps<Props>()
+const props = defineProps<Props>()
 
 const emit = defineEmits<{
   submit: [data: {
@@ -19,10 +20,10 @@ const emit = defineEmits<{
 }>()
 
 const description = ref('')
-const durationValue = ref(24)
-const durationUnit = ref<'hours' | 'days'>('hours')
-const since = ref(new Date().toISOString().slice(0, 16))
-const selectedMembers = ref<string[]>([])
+const durationHours = ref(24)
+const durationMinutes = ref(0)
+const startTime = ref('09:00')
+const selectedMembers = ref<Array<{ id: string }>>([])
 const selectedDays = ref<number[]>([1, 2, 3, 4, 5])
 
 const dayLabels = [
@@ -35,6 +36,13 @@ const dayLabels = [
   { value: 7, label: 'Вс' },
 ]
 
+const minuteOptions = [0, 10, 20, 30, 40, 50]
+
+const availableMembers = computed(() => {
+  const selectedIds = selectedMembers.value.map(m => m.id)
+  return props.members.filter(m => !selectedIds.includes(m.id))
+})
+
 const toggleDay = (day: number) => {
   if (selectedDays.value.includes(day)) {
     selectedDays.value = selectedDays.value.filter(d => d !== day)
@@ -44,18 +52,22 @@ const toggleDay = (day: number) => {
   }
 }
 
-const toggleMember = (memberId: string) => {
-  if (selectedMembers.value.includes(memberId)) {
-    selectedMembers.value = selectedMembers.value.filter(m => m !== memberId)
+const addMember = (event: Event) => {
+  const target = event.target as HTMLSelectElement
+  const memberId = target.value
+  if (memberId) {
+    selectedMembers.value = [...selectedMembers.value, { id: memberId }]
+    target.value = ''
   }
-  else {
-    selectedMembers.value = [...selectedMembers.value, memberId]
-  }
+}
+
+const removeMember = (memberId: string) => {
+  selectedMembers.value = selectedMembers.value.filter(m => m.id !== memberId)
 }
 
 const isValid = computed(() => {
   return description.value.trim() !== ''
-    && durationValue.value > 0
+    && (durationHours.value > 0 || durationMinutes.value > 0)
     && selectedMembers.value.length > 0
     && selectedDays.value.length > 0
 })
@@ -65,17 +77,20 @@ const handleSubmit = () => {
     return
   }
 
-  const durationSeconds = durationUnit.value === 'days'
-    ? durationValue.value * 86400
-    : durationValue.value * 3600
+  const durationSeconds = (durationHours.value * 3600) + (durationMinutes.value * 60)
 
-  const sinceTimestamp = Math.floor(new Date(since.value).getTime() / 1000)
+  const now = new Date()
+  const timeParts = startTime.value.split(':')
+  const hours = parseInt(timeParts[0] ?? '0', 10)
+  const minutes = parseInt(timeParts[1] ?? '0', 10)
+  now.setHours(hours, minutes, 0, 0)
+  const sinceTimestamp = Math.floor(now.getTime() / 1000)
 
   emit('submit', {
     description: description.value.trim(),
     duration: durationSeconds,
     since: sinceTimestamp,
-    members: selectedMembers.value,
+    members: selectedMembers.value.map(m => m.id),
     days: selectedDays.value,
   })
 }
@@ -92,75 +107,112 @@ const handleSubmit = () => {
     </div>
 
     <div>
-      <UiLabel>Длительность смены</UiLabel>
-      <div class="flex gap-2">
-        <input
-          v-model.number="durationValue"
-          type="number"
-          min="1"
-          class="input input-bordered w-24"
-        >
-        <select
-          v-model="durationUnit"
-          class="select select-bordered"
-        >
-          <option value="hours">
-            часов
-          </option>
-          <option value="days">
-            дней
-          </option>
-        </select>
-      </div>
-    </div>
-
-    <div>
-      <UiLabel>Дата начала</UiLabel>
-      <input
-        v-model="since"
-        type="datetime-local"
-        class="input input-bordered w-full"
+      <UiLabel>Участники (порядок = порядок ротации)</UiLabel>
+      <div
+        v-if="selectedMembers.length > 0"
+        class="mb-2"
       >
-    </div>
-
-    <div>
-      <UiLabel>Дни недели</UiLabel>
-      <div class="flex gap-2 flex-wrap">
-        <button
-          v-for="day in dayLabels"
-          :key="day.value"
-          type="button"
-          class="btn btn-sm"
-          :class="selectedDays.includes(day.value) ? 'btn-primary' : 'btn-ghost'"
-          @click="toggleDay(day.value)"
+        <draggable
+          v-model="selectedMembers"
+          item-key="id"
+          handle=".drag-handle"
+          class="space-y-2"
         >
-          {{ day.label }}
-        </button>
+          <template #item="{ element }">
+            <div class="flex items-center gap-2 p-2 bg-base-200 rounded cursor-default">
+              <Icon
+                name="lucide:grip-vertical"
+                class="w-4 h-4 text-base-content/40 drag-handle cursor-move"
+              />
+              <span class="flex-1 text-sm">{{ element.id }}</span>
+              <button
+                type="button"
+                class="text-base-content/50 hover:text-error transition-colors"
+                @click="removeMember(element.id)"
+              >
+                <Icon
+                  name="lucide:x"
+                  class="w-4 h-4"
+                />
+              </button>
+            </div>
+          </template>
+        </draggable>
       </div>
-    </div>
-
-    <div>
-      <UiLabel>Участники</UiLabel>
-      <div class="space-y-2 max-h-40 overflow-y-auto">
-        <label
-          v-for="member in members"
+      <select
+        class="select select-bordered w-full"
+        @change="addMember"
+      >
+        <option value="">
+          Добавить участника...
+        </option>
+        <option
+          v-for="member in availableMembers"
           :key="member.id"
-          class="flex items-center gap-2 p-2 rounded hover:bg-base-200 cursor-pointer"
+          :value="member.id"
         >
-          <input
-            type="checkbox"
-            class="checkbox checkbox-sm"
-            :checked="selectedMembers.includes(member.id)"
-            @change="toggleMember(member.id)"
-          >
-          <span class="text-sm">{{ member.id }}</span>
-        </label>
-      </div>
+          {{ member.id }}
+        </option>
+      </select>
       <div
         v-if="members.length === 0"
         class="text-sm text-base-content/50 py-2"
       >
         Нет участников команды
+      </div>
+    </div>
+
+    <div class="flex items-end gap-4 flex-wrap">
+      <div>
+        <UiLabel>Дни недели</UiLabel>
+        <div class="flex gap-1">
+          <button
+            v-for="day in dayLabels"
+            :key="day.value"
+            type="button"
+            class="btn btn-sm btn-square"
+            :class="selectedDays.includes(day.value) ? 'btn-primary' : 'btn-ghost'"
+            @click="toggleDay(day.value)"
+          >
+            {{ day.label }}
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <UiLabel>Время начала</UiLabel>
+        <input
+          v-model="startTime"
+          type="time"
+          step="600"
+          class="input input-bordered w-28"
+        >
+      </div>
+
+      <div>
+        <UiLabel>Длительность</UiLabel>
+        <div class="flex items-center gap-1">
+          <input
+            v-model.number="durationHours"
+            type="number"
+            min="0"
+            class="input input-bordered w-16"
+          >
+          <span class="text-sm text-base-content/60">ч</span>
+          <select
+            v-model.number="durationMinutes"
+            class="select select-bordered w-20"
+          >
+            <option
+              v-for="min in minuteOptions"
+              :key="min"
+              :value="min"
+            >
+              {{ min }}
+            </option>
+          </select>
+          <span class="text-sm text-base-content/60">мин</span>
+        </div>
       </div>
     </div>
 

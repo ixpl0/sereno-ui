@@ -5,7 +5,7 @@ import type {
   TenantResponseSingleSchedule,
   TenantResponseSingleRotation,
   TenantResponseSingleOverride,
-  TenantRequestSchedule,
+  TenantRequestNewSchedule,
   TenantRequestRotation,
   TenantRequestOverride,
   TenantRequestId,
@@ -45,7 +45,7 @@ export const useSchedules = (tenantId: Ref<string>) => {
     return response as ApiResponse<TenantResponseScheduleList>
   }
 
-  const createSchedule = async (schedule: TenantRequestSchedule): Promise<ApiResponse<TenantResponseSingleSchedule>> => {
+  const createSchedule = async (schedule: TenantRequestNewSchedule): Promise<ApiResponse<TenantResponseSingleSchedule>> => {
     loading.value = true
     error.value = null
 
@@ -107,7 +107,7 @@ export const useSchedules = (tenantId: Ref<string>) => {
     if (data?.rotation) {
       schedules.value = schedules.value.map((s) => {
         if (s.id === scheduleId) {
-          return { ...s, rotations: [...s.rotations, data.rotation] }
+          return { ...s, rotations: [...(s.rotations ?? []), data.rotation] }
         }
         return s
       })
@@ -138,7 +138,7 @@ export const useSchedules = (tenantId: Ref<string>) => {
     else {
       schedules.value = schedules.value.map((s) => {
         if (s.id === scheduleId) {
-          return { ...s, rotations: s.rotations.filter((_, i) => i !== rotationIndex) }
+          return { ...s, rotations: (s.rotations ?? []).filter((_, i) => i !== rotationIndex) }
         }
         return s
       })
@@ -163,7 +163,7 @@ export const useSchedules = (tenantId: Ref<string>) => {
     if (data?.rotation) {
       schedules.value = schedules.value.map((s) => {
         if (s.id === scheduleId) {
-          return { ...s, overrides: [...s.overrides, data.rotation] }
+          return { ...s, overrides: [...(s.overrides ?? []), data.rotation] }
         }
         return s
       })
@@ -194,7 +194,7 @@ export const useSchedules = (tenantId: Ref<string>) => {
     else {
       schedules.value = schedules.value.map((s) => {
         if (s.id === scheduleId) {
-          return { ...s, overrides: s.overrides.filter((_, i) => i !== overrideIndex) }
+          return { ...s, overrides: (s.overrides ?? []).filter((_, i) => i !== overrideIndex) }
         }
         return s
       })

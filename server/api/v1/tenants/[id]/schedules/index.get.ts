@@ -1,4 +1,4 @@
-import { getMockSchedules, isValidToken } from '../../../../../utils/mockData'
+import { getMockSchedules, getMockTenant, isValidToken } from '../../../../../utils/mockData'
 
 export default defineEventHandler((event) => {
   const token = getCookie(event, 'auth_token')
@@ -20,7 +20,31 @@ export default defineEventHandler((event) => {
     })
   }
 
-  const schedules = getMockSchedules(tenantId)
+  const tenant = getMockTenant(tenantId)
+  const mockSchedules = getMockSchedules(tenantId)
+
+  const schedules = mockSchedules.map(s => ({
+    id: s.id,
+    name: s.name,
+    since: s.since,
+    until: s.until,
+    created: s.created,
+    creator: s.creator,
+    tenant: { id: tenantId, name: tenant?.name ?? '', role: tenant?.admin ? 'admin' : 'member', since: tenant?.since ?? 0 },
+    rotations: s.rotations.map(r => ({
+      description: r.description,
+      members: r.members,
+      created: r.created,
+      creator: r.creator,
+      shifts: r.shifts,
+    })),
+    overrides: s.overrides.map(o => ({
+      description: o.description,
+      created: o.created,
+      creator: o.creator,
+      shifts: o.shifts,
+    })),
+  }))
 
   return { schedules }
 })

@@ -44,7 +44,21 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const rotation = schedule.overrides[schedule.overrides.length - 1]
+  const mockOverride = schedule.overrides[schedule.overrides.length - 1]
+  if (!mockOverride) {
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'Internal Server Error',
+      data: { error: { code: 'internal_error', message: 'failed to create override' } },
+    })
+  }
+
+  const rotation = {
+    description: mockOverride.description,
+    created: mockOverride.created,
+    creator: mockOverride.creator,
+    shifts: mockOverride.shifts,
+  }
 
   return { rotation }
 })

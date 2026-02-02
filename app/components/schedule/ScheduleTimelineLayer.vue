@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import type { TimelineView, TimelineRange, RotationSlot } from '~/utils/schedule'
-import { getTimelineDays, getTimelineHours, isToday } from '~/utils/schedule'
+import { getTimelineDays, getTimelineHours, isToday, getCurrentTimePosition } from '~/utils/schedule'
 
 interface Props {
   label: string
+  membersCount?: number
   slots: RotationSlot[]
   view: TimelineView
   range: TimelineRange
@@ -13,6 +14,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   isOverrideLayer: false,
+  membersCount: undefined,
 })
 
 const emit = defineEmits<{
@@ -36,6 +38,8 @@ const gridStyle = computed(() => {
 const getColorIndex = (memberId: string): number => {
   return props.memberColorMap.get(memberId) ?? 0
 }
+
+const nowPosition = computed(() => getCurrentTimePosition(props.range))
 </script>
 
 <template>
@@ -44,6 +48,12 @@ const getColorIndex = (memberId: string): number => {
       <div class="min-w-0">
         <div class="text-sm font-medium truncate">
           {{ label }}
+          <span
+            v-if="membersCount !== undefined"
+            class="text-base-content/50 font-normal"
+          >
+            ({{ membersCount }})
+          </span>
         </div>
         <div
           v-if="isOverrideLayer"
@@ -75,6 +85,15 @@ const getColorIndex = (memberId: string): number => {
         class="border-l border-base-content/10 first:border-l-0"
         :class="isToday(item) ? 'bg-primary/5' : ''"
       />
+
+      <div
+        v-if="nowPosition !== null"
+        class="absolute top-0 bottom-0 w-0 border-l-2 border-dashed border-error z-10 pointer-events-none"
+        :style="{ left: `${nowPosition}%` }"
+      >
+        <div class="absolute -top-1 -left-1 w-2 h-2 rounded-full bg-error" />
+      </div>
+
       <ScheduleTimelineSlot
         v-for="(slotItem, index) in slots"
         :key="`${slotItem.memberId}-${slotItem.start.getTime()}-${index}`"
