@@ -44,29 +44,27 @@ const nowPosition = computed(() => getCurrentTimePosition(props.range))
 
 <template>
   <div class="flex border-b border-base-content/10 last:border-b-0">
-    <div class="w-32 shrink-0 px-2 py-2 flex items-center justify-between border-r border-base-content/10 bg-base-200/30">
-      <div class="min-w-0">
-        <div class="text-xs font-medium">
-          {{ label }}
-          <span
-            v-if="membersCount !== undefined"
-            class="text-base-content/50 font-normal"
-          >
-            ({{ membersCount }})
-          </span>
-        </div>
-        <div
-          v-if="isOverrideLayer"
-          class="text-xs text-warning"
+    <div class="w-32 shrink-0 px-2 py-2 relative group border-r border-base-content/10 bg-base-200/30">
+      <div class="text-xs font-medium">
+        {{ label }}
+        <span
+          v-if="membersCount !== undefined"
+          class="text-base-content/50 font-normal"
         >
-          Замена
-        </div>
+          ({{ membersCount }})
+        </span>
+      </div>
+      <div
+        v-if="isOverrideLayer"
+        class="text-xs text-warning"
+      >
+        Замена
       </div>
       <UiButton
         v-if="!isOverrideLayer"
         variant="ghost"
         size="sm"
-        class="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+        class="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
         @click="emit('delete')"
       >
         <Icon
