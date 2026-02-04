@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { TimelineView, TimelineRange, RotationSlot } from '~/utils/schedule'
-import { getTimelineDays, getTimelineHours, isToday, getCurrentTimePosition } from '~/utils/schedule'
+import { getTimelineDays, getTimelineHours, isToday } from '~/utils/schedule'
 
 interface Props {
   label: string
@@ -9,12 +9,14 @@ interface Props {
   view: TimelineView
   range: TimelineRange
   memberColorMap: Map<string, number>
+  nowPosition?: number | null
   isOverrideLayer?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   isOverrideLayer: false,
   membersCount: undefined,
+  nowPosition: null,
 })
 
 const emit = defineEmits<{
@@ -38,8 +40,6 @@ const gridStyle = computed(() => {
 const getColorIndex = (memberId: string): number => {
   return props.memberColorMap.get(memberId) ?? 0
 }
-
-const nowPosition = computed(() => getCurrentTimePosition(props.range))
 </script>
 
 <template>
@@ -64,7 +64,7 @@ const nowPosition = computed(() => getCurrentTimePosition(props.range))
         v-if="!isOverrideLayer"
         variant="ghost"
         size="sm"
-        class="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
+        class="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity bg-base-100 shadow-sm hover:bg-error/10 hover:text-error"
         @click="emit('delete')"
       >
         <Icon
@@ -89,7 +89,7 @@ const nowPosition = computed(() => getCurrentTimePosition(props.range))
         class="absolute top-0 bottom-0 w-0 border-l-2 border-dashed border-error z-10 pointer-events-none"
         :style="{ left: `${nowPosition}%` }"
       >
-        <div class="absolute -top-1 -left-1 w-2 h-2 rounded-full bg-error" />
+        <div class="absolute -top-1 -left-[5px] w-2 h-2 rounded-full bg-error" />
       </div>
 
       <ScheduleTimelineSlot

@@ -144,7 +144,6 @@ definitions:
         type: string
     required:
     - created
-    - creator
     - key
     - value
     type: object
@@ -251,7 +250,6 @@ definitions:
         type: string
     required:
     - created
-    - creator
     - key
     - value
     type: object
@@ -360,16 +358,6 @@ definitions:
       member:
         example: 00112233-4455-6677-8899-aabbccddeeff
         type: string
-      schedule:
-        $ref: '#/definitions/tenant.RequestEscalationStepSchedule'
-    required:
-    - delay
-    type: object
-  tenant.RequestEscalationStepSchedule:
-    properties:
-      id:
-        example: 00112233-4455-6677-8899-aabbccddeeff
-        type: string
       position:
         enum:
         - current
@@ -378,9 +366,11 @@ definitions:
         - all
         example: current
         type: string
+      schedule:
+        example: 00112233-4455-6677-8899-aabbccddeeff
+        type: string
     required:
-    - id
-    - position
+    - delay
     type: object
   tenant.RequestID:
     properties:
@@ -416,6 +406,23 @@ definitions:
     required:
     - name
     type: object
+  tenant.RequestNewSchedule:
+    properties:
+      name:
+        example: Schedule name
+        maxLength: 64
+        minLength: 1
+        type: string
+      since:
+        example: 1769904000
+        type: integer
+      until:
+        example: 1769990400
+        type: integer
+    required:
+    - name
+    - since
+    type: object
   tenant.RequestNumber:
     properties:
       number:
@@ -439,7 +446,7 @@ definitions:
         example: 00112233-4455-6677-8899-aabbccddeeff
         type: string
       since:
-        example: 1766412596
+        example: 1769904000
         type: integer
     required:
     - description
@@ -478,7 +485,7 @@ definitions:
         minItems: 1
         type: array
       since:
-        example: 1766412596
+        example: 1769904000
         type: integer
     required:
     - days
@@ -489,23 +496,16 @@ definitions:
     type: object
   tenant.RequestSchedule:
     properties:
-      enabled:
-        example: true
-        type: boolean
       name:
         example: Schedule name
         maxLength: 64
         minLength: 1
         type: string
-      since:
-        example: 1766412596
-        type: integer
       until:
+        example: 1769990400
         type: integer
     required:
-    - enabled
     - name
-    - since
     type: object
   tenant.ResponseEscalation:
     properties:
@@ -570,16 +570,6 @@ definitions:
       member:
         example: 00112233-4455-6677-8899-aabbccddeeff
         type: string
-      schedule:
-        $ref: '#/definitions/tenant.ResponseEscalationStepSchedule'
-    required:
-    - delay
-    type: object
-  tenant.ResponseEscalationStepSchedule:
-    properties:
-      id:
-        example: 00112233-4455-6677-8899-aabbccddeeff
-        type: string
       position:
         enum:
         - current
@@ -588,9 +578,11 @@ definitions:
         - all
         example: current
         type: string
+      schedule:
+        example: 00112233-4455-6677-8899-aabbccddeeff
+        type: string
     required:
-    - id
-    - position
+    - delay
     type: object
   tenant.ResponseMember:
     properties:
@@ -601,7 +593,7 @@ definitions:
         example: member
         type: string
       since:
-        example: 1766412596
+        example: 1769904000
         type: integer
     required:
     - id
@@ -619,65 +611,61 @@ definitions:
     type: object
   tenant.ResponseOverride:
     properties:
+      created:
+        example: 1766412596
+        type: integer
+      creator:
+        example: 00112233-4455-6677-8899-aabbccddeeff
+        type: string
       description:
         example: Override description
         type: string
-      duration:
-        example: 3600
-        type: integer
-      member:
-        example: 00112233-4455-6677-8899-aabbccddeeff
-        type: string
-      since:
-        example: 1766412596
-        type: integer
+      shifts:
+        items:
+          $ref: '#/definitions/tenant.ResponseShift'
+        type: array
     required:
+    - created
+    - creator
     - description
-    - duration
-    - member
-    - since
+    - shifts
     type: object
   tenant.ResponseRotation:
     properties:
-      days:
-        example:
-        - 1
-        - 2
-        - 3
-        - 4
-        - 5
-        items:
-          type: integer
-        maxItems: 7
-        minItems: 1
-        type: array
+      created:
+        example: 1766412596
+        type: integer
+      creator:
+        example: 00112233-4455-6677-8899-aabbccddeeff
+        type: string
       description:
         example: Rotation description
         type: string
-      duration:
-        example: 3600
-        type: integer
       members:
         example:
         - 00112233-4455-6677-8899-aabbccddeeff
         items:
           type: string
         type: array
-      since:
-        example: 1766412596
-        type: integer
+      shifts:
+        items:
+          $ref: '#/definitions/tenant.ResponseShift'
+        type: array
     required:
-    - days
+    - created
+    - creator
     - description
-    - duration
     - members
-    - since
+    - shifts
     type: object
   tenant.ResponseSchedule:
     properties:
-      enabled:
-        example: true
-        type: boolean
+      created:
+        example: 1766412596
+        type: integer
+      creator:
+        example: 00112233-4455-6677-8899-aabbccddeeff
+        type: string
       id:
         example: 00112233-4455-6677-8899-aabbccddeeff
         type: string
@@ -693,18 +681,26 @@ definitions:
           $ref: '#/definitions/tenant.ResponseRotation'
         type: array
       since:
-        example: 1766412596
+        example: 1769904000
         type: integer
+      tenant:
+        $ref: '#/definitions/tenant.ResponseTenant'
       until:
+        example: 1769990400
+        type: integer
+      updated:
         example: 1766412596
         type: integer
+      updater:
+        example: 00112233-4455-6677-8899-aabbccddeeff
+        type: string
     required:
-    - enabled
+    - created
+    - creator
     - id
     - name
-    - overrides
-    - rotations
     - since
+    - tenant
     type: object
   tenant.ResponseScheduleList:
     properties:
@@ -714,6 +710,22 @@ definitions:
         type: array
     required:
     - schedules
+    type: object
+  tenant.ResponseShift:
+    properties:
+      member:
+        example: 00112233-4455-6677-8899-aabbccddeeff
+        type: string
+      since:
+        example: 1769904000
+        type: integer
+      until:
+        example: 1769990400
+        type: integer
+    required:
+    - member
+    - since
+    - until
     type: object
   tenant.ResponseSingleEscalation:
     properties:
@@ -776,7 +788,7 @@ definitions:
         example: member
         type: string
       since:
-        example: 1766412596
+        example: 1769904000
         type: integer
     required:
     - id
@@ -795,22 +807,26 @@ definitions:
     type: object
   tenant.ResponseToken:
     properties:
+      created:
+        example: 1766412596
+        type: integer
+      creator:
+        example: 00112233-4455-6677-8899-aabbccddeeff
+        type: string
       id:
         example: 00112233-4455-6677-8899-aabbccddeeff
         type: string
       name:
         example: My first token
         type: string
-      since:
-        example: 1766412596
-        type: integer
       value:
         example: sat_1234567890abcdefghijkABCDEFGHIJK
         type: string
     required:
+    - created
+    - creator
     - id
     - name
-    - since
     type: object
   tenant.ResponseTokenList:
     properties:
@@ -1911,6 +1927,66 @@ paths:
       summary: Создание инцидента
       tags:
       - incidents
+  /schedules:
+    get:
+      description: Возвращает список Schedule во всех Tenant
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/tenant.ResponseScheduleList'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+      security:
+      - AccessJWT: []
+      summary: Расписания
+      tags:
+      - tenant/schedules
+  /schedules/{id}:
+    get:
+      description: Возвращает Schedule по его ID
+      parameters:
+      - description: Schedule ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/tenant.ResponseSingleSchedule'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+      security:
+      - AccessJWT: []
+      summary: Расписание по ID
+      tags:
+      - tenant/schedules
   /schedules/{id}/override/create:
     post:
       consumes:
@@ -2071,6 +2147,47 @@ paths:
       summary: Удаление ротации в расписании
       tags:
       - tenant/schedules
+  /schedules/{id}/update:
+    post:
+      consumes:
+      - application/json
+      description: Изменяет Schedule по его ID
+      parameters:
+      - description: Schedule ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Request JSON
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/tenant.RequestSchedule'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/tenant.ResponseSingleSchedule'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+      security:
+      - AccessJWT: []
+      summary: Изменение расписания
+      tags:
+      - tenant/schedules
   /tenants:
     get:
       description: Возвращает список тенантов текущего пользователя с указанием прав
@@ -2095,7 +2212,40 @@ paths:
       summary: Список тенантов пользователя
       tags:
       - tenants
-  /tenants/{id}/escalation/create:
+  /tenants/{id}/escalations:
+    get:
+      description: Возвращает список Escalation в Tenant
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/tenant.ResponseEscalationList'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ResponseError'
+      security:
+      - AccessJWT: []
+      summary: Политики эскалаций
+      tags:
+      - tenant/escalations
+  /tenants/{id}/escalations/create:
     post:
       consumes:
       - application/json
@@ -2136,7 +2286,7 @@ paths:
       summary: Создание политики эскалации
       tags:
       - tenant/escalations
-  /tenants/{id}/escalation/delete:
+  /tenants/{id}/escalations/delete:
     post:
       consumes:
       - application/json
@@ -2173,7 +2323,7 @@ paths:
       summary: Удаление политики эскалации
       tags:
       - tenant/escalations
-  /tenants/{id}/escalation/update:
+  /tenants/{id}/escalations/update:
     post:
       consumes:
       - application/json
@@ -2212,39 +2362,6 @@ paths:
       security:
       - AccessJWT: []
       summary: Изменение политики эскалации
-      tags:
-      - tenant/escalations
-  /tenants/{id}/escalations:
-    get:
-      description: Возвращает список Escalation в Tenant
-      parameters:
-      - description: Tenant ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/tenant.ResponseEscalationList'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/server.ResponseError'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/server.ResponseError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/server.ResponseError'
-      security:
-      - AccessJWT: []
-      summary: Политики эскалаций
       tags:
       - tenant/escalations
   /tenants/{id}/members:
@@ -2358,39 +2475,6 @@ paths:
       summary: Управление пользователями в тенанте
       tags:
       - tenant/members
-  /tenants/{id}/schedules:
-    get:
-      description: Возвращает список Schedule в Tenant
-      parameters:
-      - description: Tenant ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/tenant.ResponseScheduleList'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/server.ResponseError'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/server.ResponseError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/server.ResponseError'
-      security:
-      - AccessJWT: []
-      summary: Список расписаний
-      tags:
-      - tenant/schedules
   /tenants/{id}/schedules/create:
     post:
       consumes:
@@ -2407,7 +2491,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/tenant.RequestSchedule'
+          $ref: '#/definitions/tenant.RequestNewSchedule'
       produces:
       - application/json
       responses:
@@ -2579,7 +2663,7 @@ paths:
       - AccessJWT: []
       summary: Удаление статичного токена
       tags:
-      - tenant/tokens
+      - tenant/tokens`
   /tenants/{id}/update:
     post:
       consumes:
