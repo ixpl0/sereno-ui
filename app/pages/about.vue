@@ -15,6 +15,9 @@ useSeoMeta({
 
 <template>
   <div class="container mx-auto px-4 py-16">
+    <h1 class="text-5xl font-normal mb-8">
+      О компании
+    </h1>
     <ContentRenderer
       v-if="page"
       :value="page"
