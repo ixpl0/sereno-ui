@@ -39,7 +39,7 @@ const activeLabels = computed(() => props.labels.filter(label => !label.deleted)
 
 <template>
   <div
-    class="bg-base-200/50 hover:bg-base-200 border border-base-content/10 border-l-4 rounded-lg cursor-pointer transition-all hover:shadow-md overflow-hidden"
+    class="bg-base-200/60 backdrop-blur-xl hover:bg-base-200 border border-base-content/10 border-l-4 rounded-lg cursor-pointer transition-all hover:shadow-md overflow-hidden"
     :class="getStatusBorderColor(currentStatus)"
     @click="emit('click')"
   >
