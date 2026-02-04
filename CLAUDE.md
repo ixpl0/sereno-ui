@@ -203,8 +203,11 @@ All composables in `app/composables/`:
 | **useBreakpoints** | Responsive breakpoints helper (SSR-safe) |
 | **useViewMode** | Toggle between cards/table view, persisted in cookie |
 | **useEditableField** | Inline editable field state management |
-| **useApiMutation** | Wrapper for API mutations with toast notifications |
 | **useMobileMenus** | Mobile menu open/close state |
+| **useInlineAdd** | Inline add form state (isAdding, values, start/cancel) |
+| **useTenantSelector** | Tenant selection with auto-select first tenant |
+| **useTenantNames** | Get tenant name by ID |
+| **useEventDetailActions** | Common actions for alert/incident detail pages |
 
 ## Layout Components
 
@@ -230,7 +233,8 @@ All reusable UI elements in `app/components/ui/` with `Ui` prefix:
 - **UiTransition** - Transition wrapper with presets (fade, scale, slide)
 - **UiLabel** - Form labels with required indicator
 - **UiToast** - Toast notifications (success, error, warning, info)
-- **ViewModeToggle** - Cards/table view toggle button
+- **UiEmptyState** - Empty state placeholder with icon, title, description, action button
+- **UiViewModeToggle** - Cards/table view toggle button
 
 ## Schedule Components
 
@@ -250,13 +254,12 @@ Components in `app/components/schedule/` for on-call timeline visualization:
 
 Components in `app/components/event/` for alerts and incidents:
 
-- **AlertCard** - Alert card with status, labels, actions
-- **IncidentCard** - Incident card with linked alerts
+- **EventAlertCard** - Alert card with status, labels, actions
+- **EventIncidentCard** - Incident card with linked alerts
 - **EventStatusActions** - Status change buttons (acknowledge, resolve)
 - **EventStatusTimeline** - Status change history
 - **EventComments** - Comments section for events
-- **EventAnnotations** - Annotations display
-- **EventLabels** - Labels/tags display and management
+- **EventKeyValueList** - Universal key-value list (labels in badges mode, annotations in blocks mode)
 
 ## Escalation Components
 
@@ -288,7 +291,7 @@ Utility functions in `app/utils/`:
 | **api.ts** | `isApiError`, `extractApiError`, `getApiData` - API response handling |
 | **url.ts** | `isValidRedirectUrl`, `safeRedirect` - secure redirect validation |
 | **validation.ts** | `isValidEmail`, `isValidTelegram` - input validation |
-| **formatters.ts** | `formatDate`, `formatDateTime`, `formatStatus`, `getStatusColor` - display formatting |
+| **formatters.ts** | `formatDate`, `formatDateTime`, `formatDateTimeLocal`, `formatStatus`, `getStatusColor` - display formatting |
 | **schedule.ts** | Timeline utils: `getTimelineRange`, `convertShiftsToSlots`, `getCalendarCells`, etc. |
 
 ## Plugins
