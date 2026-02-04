@@ -41,19 +41,16 @@ const emit = defineEmits<{
   deleteOverride: [index: number]
 }>()
 
-const toast = useToast()
-
 const showRotationForm = ref(false)
 const showOverrideForm = ref(false)
 const prefillOverride = ref<{ since: Date, duration: number } | null>(null)
 
-const memberNames = computed(() => {
-  const map = new Map<string, string>()
-  props.members.forEach((member) => {
-    map.set(member.id, member.id)
-  })
-  return map
-})
+const memberNames = computed(() =>
+  props.members.reduce(
+    (map, member) => map.set(member.id, member.id),
+    new Map<string, string>(),
+  ),
+)
 
 const rotations = computed(() => props.schedule.rotations ?? [])
 
@@ -95,12 +92,10 @@ const handleAddOverride = (data: {
 
 const handleDeleteRotation = (index: number) => {
   emit('deleteRotation', index)
-  toast.success('Ротация удалена')
 }
 
 const handleDeleteOverride = (index: number) => {
   emit('deleteOverride', index)
-  toast.success('Замена удалена')
 }
 
 const handleCreateOverrideFromSlot = (slot: RotationSlot) => {
@@ -116,14 +111,17 @@ const handleCreateOverrideFromSlot = (slot: RotationSlot) => {
 <template>
   <UiCard class="animate-slide-up">
     <div class="flex items-start justify-between gap-4">
-      <div class="flex items-center gap-3 min-w-0">
+      <div
+        class="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
+        @click="expanded ? emit('collapse') : emit('expand')"
+      >
         <div class="w-10 h-10 flex items-center justify-center rounded-lg shrink-0 bg-primary/10">
           <Icon
             name="lucide:calendar-clock"
             class="w-5 h-5 text-primary"
           />
         </div>
-        <div class="min-w-0">
+        <div class="min-w-0 flex-1">
           <h3 class="font-semibold truncate">
             {{ schedule.name }}
           </h3>
@@ -131,19 +129,13 @@ const handleCreateOverrideFromSlot = (slot: RotationSlot) => {
             {{ rotationsSummary }}
           </div>
         </div>
+        <Icon
+          :name="expanded ? 'lucide:chevron-up' : 'lucide:chevron-down'"
+          class="w-4 h-4 text-base-content/40 shrink-0"
+        />
       </div>
 
-      <div class="flex items-center gap-1 shrink-0">
-        <UiButton
-          variant="ghost"
-          size="sm"
-          @click="expanded ? emit('collapse') : emit('expand')"
-        >
-          <Icon
-            :name="expanded ? 'lucide:chevron-up' : 'lucide:chevron-down'"
-            class="w-4 h-4"
-          />
-        </UiButton>
+      <div class="shrink-0 self-center">
         <UiButton
           variant="ghost"
           size="sm"

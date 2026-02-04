@@ -1,9 +1,19 @@
-import { useAuthStore } from '~/stores/auth'
+import { parseCookies } from 'h3'
 
 export default defineNuxtRouteMiddleware(() => {
-  const store = useAuthStore()
+  const event = useRequestEvent()
 
-  if (store.isAuthenticated) {
+  let token: string | undefined
+
+  if (import.meta.server && event) {
+    const cookies = parseCookies(event)
+    token = cookies.auth_token
+  }
+  else {
+    token = useCookie<string | undefined>('auth_token').value
+  }
+
+  if (token) {
     return navigateTo('/dashboard')
   }
 })

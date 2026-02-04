@@ -29,10 +29,22 @@ const emit = defineEmits<{
 const view = ref<TimelineView>('week')
 const currentDate = ref<Date | null>(null)
 const isMounted = ref(false)
+const currentTime = ref<Date>(new Date())
+
+let timeInterval: ReturnType<typeof setInterval> | null = null
 
 onMounted(() => {
   currentDate.value = new Date()
   isMounted.value = true
+  timeInterval = setInterval(() => {
+    currentTime.value = new Date()
+  }, 60000)
+})
+
+onUnmounted(() => {
+  if (timeInterval) {
+    clearInterval(timeInterval)
+  }
 })
 
 const range = computed<TimelineRange | null>(() => {
@@ -46,26 +58,19 @@ const rotations = computed(() => props.schedule.rotations ?? [])
 const overrides = computed(() => props.schedule.overrides ?? [])
 
 const memberColorMap = computed(() => {
-  const map = new Map<string, number>()
-  let colorIndex = 0
+  const rotationMembers = rotations.value.flatMap(rotation => rotation.members)
+  const overrideMembers = overrides.value.flatMap(override => override.shifts.map(shift => shift.member))
 
-  rotations.value.forEach((rotation) => {
-    rotation.members.forEach((memberId) => {
-      if (!map.has(memberId)) {
-        map.set(memberId, colorIndex++)
+  return [...rotationMembers, ...overrideMembers].reduce(
+    (acc, memberId) => {
+      if (!acc.map.has(memberId)) {
+        acc.map.set(memberId, acc.index)
+        return { map: acc.map, index: acc.index + 1 }
       }
-    })
-  })
-
-  overrides.value.forEach((override) => {
-    override.shifts.forEach((shift) => {
-      if (!map.has(shift.member)) {
-        map.set(shift.member, colorIndex++)
-      }
-    })
-  })
-
-  return map
+      return acc
+    },
+    { map: new Map<string, number>(), index: 0 },
+  ).map
 })
 
 const rotationLayers = computed(() => {
@@ -127,6 +132,20 @@ const allSlots = computed<RotationSlot[]>(() => {
 
 const hasOverrides = computed(() => overrideSlots.value.length > 0)
 
+const nowPosition = computed(() => {
+  const currentRange = range.value
+  if (!currentRange) {
+    return null
+  }
+  const now = currentTime.value
+  if (now < currentRange.start || now > currentRange.end) {
+    return null
+  }
+  const totalMs = currentRange.end.getTime() - currentRange.start.getTime()
+  const currentOffset = now.getTime() - currentRange.start.getTime()
+  return (currentOffset / totalMs) * 100
+})
+
 const handleDeleteOverrideFromSlot = (slot: RotationSlot) => {
   emit('deleteOverride', slot.rotationIndex)
 }
@@ -182,7 +201,7 @@ const handleSelectDay = (date: Date) => {
               </div>
             </div>
 
-            <div class="group">
+            <div>
               <ScheduleTimelineLayer
                 v-for="layer in rotationLayers"
                 :key="layer.index"
@@ -192,6 +211,7 @@ const handleSelectDay = (date: Date) => {
                 :view="view"
                 :range="range"
                 :member-color-map="memberColorMap"
+                :now-position="nowPosition"
                 @delete="emit('deleteRotation', layer.index)"
                 @create-override="handleCreateOverrideFromSlot"
               />
@@ -203,6 +223,7 @@ const handleSelectDay = (date: Date) => {
                 :view="view"
                 :range="range"
                 :member-color-map="memberColorMap"
+                :now-position="nowPosition"
                 :is-override-layer="true"
                 @delete-override="handleDeleteOverrideFromSlot"
               />

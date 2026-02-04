@@ -7,6 +7,7 @@ export const useTheme = () => {
   const preference = useCookie<ThemePreference>(COOKIE_KEY, {
     default: () => 'system',
     watch: true,
+    sameSite: 'lax',
   })
 
   const systemTheme = ref<ResolvedTheme>('dark')

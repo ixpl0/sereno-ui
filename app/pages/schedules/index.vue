@@ -155,6 +155,7 @@ const handleDeleteRotation = async (scheduleId: string, index: number) => {
     return
   }
 
+  toast.success('Ротация удалена')
   await refreshSchedules()
 }
 
@@ -190,6 +191,7 @@ const handleDeleteOverride = async (scheduleId: string, index: number) => {
     return
   }
 
+  toast.success('Замена удалена')
   await refreshSchedules()
 }
 

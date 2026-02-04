@@ -327,24 +327,14 @@ Issues identified during code review that should be addressed:
 
 ### Priority: High
 
-1. **Middleware `guest.ts` SSR bug** - Uses `useAuthStore()` without server-side cookie check. Should use `parseCookies` like `auth.ts`.
-
-2. **API token not sent in headers** - `plugins/api.ts` only sets `baseUrl`, doesn't pass Authorization header. Works only in mock mode.
-
-3. **Missing `sameSite` in cookies** - `useTheme.ts` and `useViewMode.ts` don't set `sameSite: 'lax'`, may cause SSR hydration issues.
+1. **API token not sent in headers** - `plugins/api.ts` only sets `baseUrl`, doesn't pass Authorization header. Works only in mock mode.
 
 ### Priority: Medium
 
-4. **`forEach` usage** - Several files use `forEach` instead of `map`/`reduce` (violates code style). Files: `ScheduleCard.vue`, `ScheduleTimeline.vue`, `ScheduleTimelineLayer.vue`.
-
-5. **No debounce on resize** - `useBreakpoints.ts` handles resize events without throttle/debounce.
-
-6. **Toast in UI component** - `ScheduleCard.vue` calls `toast.success()` directly instead of emitting event to parent.
-
-7. **E2E tests use text selectors** - Tests use Russian text for selectors, should use `data-testid`.
+2. **E2E tests use text selectors** - Tests use Russian text for selectors, should use `data-testid`.
 
 ### Priority: Low
 
-8. **Test coverage gaps** - Missing unit tests for: `useSchedules`, `useAlerts`, `useIncidents`, `useEscalations`. Missing E2E for schedules page.
+3. **Test coverage gaps** - Missing unit tests for: `useSchedules`, `useAlerts`, `useIncidents`, `useEscalations`. Missing E2E for schedules page.
 
-9. **Hardcoded Russian strings** - All UI text is hardcoded. Consider `@nuxtjs/i18n` for future localization.
+4. **Hardcoded Russian strings** - All UI text is hardcoded. Consider `@nuxtjs/i18n` for future localization.

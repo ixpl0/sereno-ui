@@ -5,6 +5,7 @@ export const useViewMode = (key: string) => {
   const cookie = useCookie<ViewMode>(cookieKey, {
     default: () => 'cards',
     maxAge: 60 * 60 * 24 * 365,
+    sameSite: 'lax',
   })
 
   const viewMode = ref<ViewMode>(cookie.value)
