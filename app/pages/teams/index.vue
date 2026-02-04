@@ -118,24 +118,13 @@ const handleCreate = async () => {
             </div>
           </div>
 
-          <div
+          <UiEmptyState
             v-if="!tenantsData?.tenants?.length && !isCreating"
-            class="text-center py-12"
-          >
-            <Icon
-              name="lucide:building-2"
-              class="w-16 h-16 mx-auto text-base-content/20 mb-4"
-            />
-            <p class="text-base-content/60 mb-4">
-              У вас пока нет команд
-            </p>
-            <UiButton
-              variant="primary"
-              @click="startCreate"
-            >
-              Создать первую команду
-            </UiButton>
-          </div>
+            icon="lucide:building-2"
+            title="У вас пока нет команд"
+            action-text="Создать первую команду"
+            @action="startCreate"
+          />
 
           <NuxtLink
             v-for="tenant in tenantsData?.tenants"

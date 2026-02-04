@@ -10,5 +10,5 @@ export const useTenantNames = () => {
     return tenants.find(t => t.id === tenantId)?.name ?? tenantId
   }
 
-  return { getTenantName, tenantsData }
+  return { getTenantName }
 }

@@ -103,18 +103,11 @@ const handleStatusChange = async (alertId: string, newStatus: string) => {
         <span class="loading loading-spinner loading-lg" />
       </div>
 
-      <div
+      <UiEmptyState
         v-else-if="filteredAlerts.length === 0"
-        class="text-center py-12"
-      >
-        <Icon
-          name="lucide:bell-off"
-          class="w-16 h-16 mx-auto text-base-content/20 mb-4"
-        />
-        <p class="text-base-content/60">
-          Нет алертов
-        </p>
-      </div>
+        icon="lucide:bell-off"
+        title="Нет алертов"
+      />
 
       <div
         v-else-if="viewMode === 'cards'"

@@ -20,15 +20,10 @@ export const useInlineAdd = <T extends Record<string, string>>(
     values.value = { ...initialValues }
   }
 
-  const resetValues = () => {
-    values.value = { ...initialValues }
-  }
-
   return {
     isAdding: readonly(isAdding),
     values,
     startAdding,
     cancelAdding,
-    resetValues,
   }
 }

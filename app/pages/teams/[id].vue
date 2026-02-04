@@ -419,12 +419,11 @@ const handleDeleteToken = async (tokenId: string) => {
                 </div>
               </div>
 
-              <div
+              <UiEmptyState
                 v-if="!membersData?.members?.length && !isAddingMember"
-                class="text-center py-8 text-base-content/60"
-              >
-                Нет участников
-              </div>
+                icon="lucide:users"
+                title="Нет участников"
+              />
             </div>
           </div>
 
@@ -558,12 +557,11 @@ const handleDeleteToken = async (tokenId: string) => {
                 </div>
               </div>
 
-              <div
+              <UiEmptyState
                 v-if="!tokensData?.tokens?.length && !isCreatingToken"
-                class="text-center py-8 text-base-content/60"
-              >
-                Нет токенов
-              </div>
+                icon="lucide:key"
+                title="Нет токенов"
+              />
             </div>
           </div>
         </template>

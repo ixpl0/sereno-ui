@@ -128,8 +128,11 @@ const handleDeleteAnnotation = async (key: string) => {
         </UiCard>
 
         <UiCard class="animate-slide-up mb-3">
-          <EventAnnotations
-            :annotations="alert.annotations"
+          <EventKeyValueList
+            :items="alert.annotations"
+            title="Аннотации"
+            empty-text="Нет аннотаций"
+            mode="blocks"
             :loading="actionLoading"
             @add="handleAddAnnotation"
             @delete="handleDeleteAnnotation"
@@ -137,9 +140,13 @@ const handleDeleteAnnotation = async (key: string) => {
         </UiCard>
 
         <UiCard class="animate-slide-up mb-3">
-          <EventLabels
-            :labels="alert.labels"
+          <EventKeyValueList
+            :items="alert.labels"
+            title="Лейблы"
+            empty-text="Нет меток"
+            mode="badges"
             :loading="actionLoading"
+            deletable-only-with-creator
             @add="handleAddLabel"
             @delete="handleDeleteLabel"
           />

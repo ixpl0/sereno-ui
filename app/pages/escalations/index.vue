@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { TenantResponseTenantList, TenantResponseEscalationList, TenantRequestEscalation } from '~/api/types.gen'
+import type { TenantResponseEscalationList, TenantRequestEscalation } from '~/api/types.gen'
 
 definePageMeta({
   middleware: 'auth',
@@ -14,17 +14,7 @@ useSeoMeta({
 
 const toast = useToast()
 
-const { data: tenantsData } = await useFetch<TenantResponseTenantList>('/api/v1/tenants')
-const tenants = computed(() => tenantsData.value?.tenants ?? [])
-const firstTenant = tenants.value[0]
-const selectedTenantId = ref(firstTenant?.id ?? '')
-
-watch(tenants, (value) => {
-  const first = value[0]
-  if (value.length > 0 && !selectedTenantId.value && first) {
-    selectedTenantId.value = first.id
-  }
-}, { immediate: true })
+const { tenants, selectedTenantId } = await useTenantSelector()
 
 const { data: escalationsData, status: escalationsStatus, refresh: refreshEscalations } = await useFetch<TenantResponseEscalationList>(
   () => `/api/v1/tenants/${selectedTenantId.value}/escalations`,
@@ -185,24 +175,13 @@ const getStepTarget = (step: typeof escalations.value[0]['steps'][0]): string =>
         </div>
       </div>
 
-      <div
+      <UiEmptyState
         v-if="!selectedTenantId"
-        class="text-center py-12"
-      >
-        <Icon
-          name="lucide:building-2"
-          class="w-16 h-16 mx-auto text-base-content/20 mb-4"
-        />
-        <p class="text-base-content/60 mb-4">
-          Сначала создайте команду
-        </p>
-        <UiButton
-          variant="primary"
-          @click="navigateTo('/teams')"
-        >
-          Перейти к командам
-        </UiButton>
-      </div>
+        icon="lucide:building-2"
+        title="Сначала создайте команду"
+        action-text="Перейти к командам"
+        @action="navigateTo('/teams')"
+      />
 
       <template v-else>
         <div
@@ -245,24 +224,13 @@ const getStepTarget = (step: typeof escalations.value[0]['steps'][0]): string =>
             </div>
           </div>
 
-          <div
+          <UiEmptyState
             v-if="escalations.length === 0 && !isCreating"
-            class="text-center py-12"
-          >
-            <Icon
-              name="lucide:git-branch"
-              class="w-16 h-16 mx-auto text-base-content/20 mb-4"
-            />
-            <p class="text-base-content/60 mb-4">
-              Нет эскалаций
-            </p>
-            <UiButton
-              variant="primary"
-              @click="startCreate"
-            >
-              Создать первую эскалацию
-            </UiButton>
-          </div>
+            icon="lucide:git-branch"
+            title="Нет эскалаций"
+            action-text="Создать первую эскалацию"
+            @action="startCreate"
+          />
 
           <EscalationCard
             v-for="escalation in escalations"

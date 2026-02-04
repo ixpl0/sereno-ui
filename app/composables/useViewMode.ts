@@ -15,13 +15,8 @@ export const useViewMode = (key: string) => {
     cookie.value = mode
   }
 
-  const isCards = computed(() => viewMode.value === 'cards')
-  const isTable = computed(() => viewMode.value === 'table')
-
   return {
     viewMode: readonly(viewMode),
     setViewMode,
-    isCards,
-    isTable,
   }
 }

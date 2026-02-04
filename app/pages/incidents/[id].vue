@@ -276,9 +276,13 @@ const handleRemoveAlert = async (alertId: string) => {
         </UiCard>
 
         <UiCard class="animate-slide-up mb-3">
-          <EventLabels
-            :labels="incident.labels"
+          <EventKeyValueList
+            :items="incident.labels"
+            title="Лейблы"
+            empty-text="Нет меток"
+            mode="badges"
             :loading="actionLoading"
+            deletable-only-with-creator
             @add="handleAddLabel"
             @delete="handleDeleteLabel"
           />

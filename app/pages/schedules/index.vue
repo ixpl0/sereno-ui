@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { TenantResponseTenantList, TenantResponseScheduleList, TenantRequestNewSchedule, TenantRequestRotation, TenantRequestOverride } from '~/api/types.gen'
+import type { TenantResponseScheduleList, TenantRequestNewSchedule, TenantRequestRotation, TenantRequestOverride } from '~/api/types.gen'
+import { formatDateTimeLocal } from '~/utils/formatters'
 
 definePageMeta({
   middleware: 'auth',
@@ -14,17 +15,7 @@ useSeoMeta({
 
 const toast = useToast()
 
-const { data: tenantsData } = await useFetch<TenantResponseTenantList>('/api/v1/tenants')
-const tenants = computed(() => tenantsData.value?.tenants ?? [])
-const firstTenant = tenants.value[0]
-const selectedTenantId = ref(firstTenant?.id ?? '')
-
-watch(tenants, (value) => {
-  const first = value[0]
-  if (value.length > 0 && !selectedTenantId.value && first) {
-    selectedTenantId.value = first.id
-  }
-}, { immediate: true })
+const { tenants, selectedTenantId } = await useTenantSelector()
 
 const { data: schedulesData, status: schedulesStatus, refresh: refreshSchedules } = await useFetch<TenantResponseScheduleList>(
   () => `/api/v1/tenants/${selectedTenantId.value}/schedules`,
@@ -51,19 +42,10 @@ const newScheduleName = ref('')
 const newScheduleSince = ref('')
 const newScheduleInputRef = ref<{ focus: () => void } | null>(null)
 
-const getLocalDatetimeString = (date: Date): string => {
-  const year = date.getFullYear()
-  const month = (date.getMonth() + 1).toString().padStart(2, '0')
-  const day = date.getDate().toString().padStart(2, '0')
-  const hours = date.getHours().toString().padStart(2, '0')
-  const minutes = date.getMinutes().toString().padStart(2, '0')
-  return `${year}-${month}-${day}T${hours}:${minutes}`
-}
-
 const startCreate = () => {
   isCreating.value = true
   newScheduleName.value = ''
-  newScheduleSince.value = getLocalDatetimeString(new Date())
+  newScheduleSince.value = formatDateTimeLocal(new Date())
   nextTick(() => {
     newScheduleInputRef.value?.focus()
   })
@@ -244,24 +226,13 @@ watch(selectedTenantId, () => {
         </div>
       </div>
 
-      <div
+      <UiEmptyState
         v-if="!selectedTenantId"
-        class="text-center py-12"
-      >
-        <Icon
-          name="lucide:building-2"
-          class="w-16 h-16 mx-auto text-base-content/20 mb-4"
-        />
-        <p class="text-base-content/60 mb-4">
-          Сначала создайте команду
-        </p>
-        <UiButton
-          variant="primary"
-          @click="navigateTo('/teams')"
-        >
-          Перейти к командам
-        </UiButton>
-      </div>
+        icon="lucide:building-2"
+        title="Сначала создайте команду"
+        action-text="Перейти к командам"
+        @action="navigateTo('/teams')"
+      />
 
       <template v-else>
         <div
@@ -313,24 +284,13 @@ watch(selectedTenantId, () => {
             </div>
           </div>
 
-          <div
+          <UiEmptyState
             v-if="schedules.length === 0 && !isCreating"
-            class="text-center py-12"
-          >
-            <Icon
-              name="lucide:calendar-clock"
-              class="w-16 h-16 mx-auto text-base-content/20 mb-4"
-            />
-            <p class="text-base-content/60 mb-4">
-              Нет расписаний
-            </p>
-            <UiButton
-              variant="primary"
-              @click="startCreate"
-            >
-              Создать первое расписание
-            </UiButton>
-          </div>
+            icon="lucide:calendar-clock"
+            title="Нет расписаний"
+            action-text="Создать первое расписание"
+            @action="startCreate"
+          />
 
           <ScheduleCard
             v-for="schedule in schedules"
