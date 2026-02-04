@@ -11,6 +11,7 @@ import type {
 import { client } from '~/api/client.gen'
 import type { ApiResponse } from '~/types/api'
 import { getApiData } from '~/utils/api'
+import { getCurrentEventStatus } from '~/utils/event'
 
 export const useAlerts = () => {
   const alerts = useState<ReadonlyArray<EventResponseAlert>>('alerts', () => [])
@@ -232,14 +233,6 @@ export const useAlerts = () => {
     return alerts.value.find(a => a.id === id)
   }
 
-  const currentStatus = (alert: EventResponseAlert): string => {
-    if (alert.statuses.length === 0) {
-      return 'created'
-    }
-    const sorted = [...alert.statuses].sort((a, b) => b.created - a.created)
-    return sorted[0]?.status ?? 'created'
-  }
-
   return {
     alerts: readonly(alerts),
     total: readonly(total),
@@ -255,6 +248,6 @@ export const useAlerts = () => {
     deleteAnnotation,
     setStatus,
     getAlertById,
-    currentStatus,
+    currentStatus: getCurrentEventStatus,
   }
 }

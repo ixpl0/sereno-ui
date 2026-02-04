@@ -17,29 +17,16 @@ const emit = defineEmits<{
   delete: [key: string]
 }>()
 
-const isAdding = ref(false)
-const newLabelKey = ref('')
-const newLabelValue = ref('')
 const keyInputRef = ref<{ focus: () => void } | null>(null)
 
-const startAdding = () => {
-  isAdding.value = true
-  newLabelKey.value = ''
-  newLabelValue.value = ''
-  nextTick(() => {
-    keyInputRef.value?.focus()
-  })
-}
-
-const cancelAdding = () => {
-  isAdding.value = false
-  newLabelKey.value = ''
-  newLabelValue.value = ''
-}
+const { isAdding, values, startAdding, cancelAdding } = useInlineAdd(
+  { key: '', value: '' },
+  () => keyInputRef.value,
+)
 
 const handleAdd = () => {
-  const key = newLabelKey.value.trim()
-  const value = newLabelValue.value.trim()
+  const key = values.value.key.trim()
+  const value = values.value.value.trim()
   if (!key || !value) {
     return
   }
@@ -92,14 +79,14 @@ const activeLabels = computed(() => props.labels.filter(l => !l.deleted))
         <div class="flex gap-2">
           <UiInput
             ref="keyInputRef"
-            v-model="newLabelKey"
+            v-model="values.key"
             placeholder="Ключ"
             class="flex-1"
             @keyup.enter="handleAdd"
             @keyup.escape="cancelAdding"
           />
           <UiInput
-            v-model="newLabelValue"
+            v-model="values.value"
             placeholder="Значение"
             class="flex-1"
             @keyup.enter="handleAdd"

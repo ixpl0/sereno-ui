@@ -18,25 +18,15 @@ const emit = defineEmits<{
   delete: [id: string]
 }>()
 
-const isAdding = ref(false)
-const newCommentText = ref('')
-const inputRef = ref<{ focus: () => void } | null>(null)
+const inputRef = ref<HTMLTextAreaElement | null>(null)
 
-const startAdding = () => {
-  isAdding.value = true
-  newCommentText.value = ''
-  nextTick(() => {
-    inputRef.value?.focus()
-  })
-}
-
-const cancelAdding = () => {
-  isAdding.value = false
-  newCommentText.value = ''
-}
+const { isAdding, values, startAdding, cancelAdding } = useInlineAdd(
+  { text: '' },
+  () => inputRef.value,
+)
 
 const handleAdd = () => {
-  const text = newCommentText.value.trim()
+  const text = values.value.text.trim()
   if (!text) {
     return
   }
@@ -90,7 +80,7 @@ const activeComments = computed(() =>
       >
         <textarea
           ref="inputRef"
-          v-model="newCommentText"
+          v-model="values.text"
           class="textarea textarea-bordered w-full"
           placeholder="Введите комментарий..."
           rows="3"

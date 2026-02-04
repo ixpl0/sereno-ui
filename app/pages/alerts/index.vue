@@ -12,13 +12,7 @@ definePageMeta({
 const { currentStatus } = useAlerts()
 const { viewMode, setViewMode } = useViewMode('alerts')
 const { error: showError, success: showSuccess } = useToast()
-const { data: tenantsData } = await useFetch('/api/v1/tenants')
-
-const getTenantName = (tenantId: string) => {
-  const tenants = (tenantsData.value as { tenants?: Array<{ id: string, name: string }> })?.tenants ?? []
-  const tenant = tenants.find(t => t.id === tenantId)
-  return tenant?.name ?? tenantId
-}
+const { getTenantName } = useTenantNames()
 
 const { data, status, refresh } = await useFetch<EventResponseAlertList>('/api/v1/alerts')
 

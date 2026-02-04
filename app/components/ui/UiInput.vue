@@ -1,7 +1,6 @@
 <script setup lang="ts">
-type InputVariant = 'bordered' | 'ghost'
-type InputSize = 'xs' | 'sm' | 'md' | 'lg'
-type InputState = 'default' | 'error' | 'success' | 'warning'
+import type { FormFieldVariant, FormFieldSize, FormFieldState } from '~/types/ui'
+import { createVariantClasses, createSizeClasses, createStateClasses, HINT_COLOR_CLASSES } from '~/types/ui'
 
 interface Props {
   modelValue?: string
@@ -9,9 +8,9 @@ interface Props {
   placeholder?: string
   label?: string
   hint?: string
-  variant?: InputVariant
-  size?: InputSize
-  state?: InputState
+  variant?: FormFieldVariant
+  size?: FormFieldSize
+  state?: FormFieldState
   disabled?: boolean
   required?: boolean
   autofocus?: boolean
@@ -50,31 +49,9 @@ const emit = defineEmits<{
 const inputId = computed(() => props.name || `input-${useId()}`)
 const hintId = computed(() => props.hint ? `${inputId.value}-hint` : undefined)
 
-const variantClasses: Record<InputVariant, string> = {
-  bordered: 'input-bordered',
-  ghost: 'input-ghost',
-}
-
-const sizeClasses: Record<InputSize, string> = {
-  xs: 'input-xs',
-  sm: 'input-sm',
-  md: '',
-  lg: 'input-lg',
-}
-
-const stateClasses: Record<InputState, string> = {
-  default: '',
-  error: 'input-error',
-  success: 'input-success',
-  warning: 'input-warning',
-}
-
-const hintColorClasses: Record<InputState, string> = {
-  default: 'text-base-content/60',
-  error: 'text-error',
-  success: 'text-success',
-  warning: 'text-warning',
-}
+const variantClasses = createVariantClasses('input')
+const sizeClasses = createSizeClasses('input')
+const stateClasses = createStateClasses('input')
 
 const inputClasses = computed(() => [
   'input',
@@ -164,7 +141,7 @@ defineExpose({ focus, select })
       v-if="hint"
       :id="hintId"
       class="label"
-      :class="hintColorClasses[state]"
+      :class="HINT_COLOR_CLASSES[state]"
     >
       {{ hint }}
     </p>

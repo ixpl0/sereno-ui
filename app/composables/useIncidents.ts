@@ -12,6 +12,7 @@ import type {
 import { client } from '~/api/client.gen'
 import type { ApiResponse } from '~/types/api'
 import { getApiData } from '~/utils/api'
+import { getCurrentEventStatus } from '~/utils/event'
 
 export const useIncidents = () => {
   const incidents = useState<ReadonlyArray<EventResponseIncident>>('incidents', () => [])
@@ -261,14 +262,6 @@ export const useIncidents = () => {
     return incidents.value.find(i => i.id === id)
   }
 
-  const currentStatus = (incident: EventResponseIncident): string => {
-    if (incident.statuses.length === 0) {
-      return 'created'
-    }
-    const sorted = [...incident.statuses].sort((a, b) => b.created - a.created)
-    return sorted[0]?.status ?? 'created'
-  }
-
   return {
     incidents: readonly(incidents),
     total: readonly(total),
@@ -285,6 +278,6 @@ export const useIncidents = () => {
     addAlert,
     removeAlert,
     getIncidentById,
-    currentStatus,
+    currentStatus: getCurrentEventStatus,
   }
 }

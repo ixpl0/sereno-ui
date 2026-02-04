@@ -10,6 +10,7 @@ definePageMeta({
   title: 'Инцидент',
 })
 
+const incidentsComposable = useIncidents()
 const {
   currentStatus,
   addComment,
@@ -19,7 +20,7 @@ const {
   setStatus,
   addAlert,
   removeAlert,
-} = useIncidents()
+} = incidentsComposable
 const { currentStatus: alertCurrentStatus } = useAlerts()
 const toast = useToast()
 
@@ -32,7 +33,19 @@ const { data: alertsData } = await useFetch<EventResponseAlertList>('/api/v1/ale
 
 const incident = computed(() => data.value?.incident)
 const isLoading = computed(() => status.value === 'pending' && !data.value)
-const actionLoading = ref(false)
+
+const {
+  actionLoading,
+  handleAddComment,
+  handleDeleteComment,
+  handleAddLabel,
+  handleDeleteLabel,
+  handleSetStatus,
+} = useEventDetailActions({
+  entityRef: incident,
+  actions: { addComment, deleteComment, addLabel, deleteLabel, setStatus },
+  refresh,
+})
 
 const availableAlerts = computed(() => {
   const linkedIds = new Set(incident.value?.alerts.map(a => a.id) ?? [])
@@ -56,15 +69,11 @@ const handleAddAlert = async () => {
   if (!incident.value || !selectedAlertId.value) {
     return
   }
-  actionLoading.value = true
   const response = await addAlert(incident.value.id, selectedAlertId.value)
-  actionLoading.value = false
-
   if ('error' in response && response.error) {
     toast.error('Не удалось добавить алерт')
     return
   }
-
   await refresh()
   toast.success('Алерт добавлен')
   cancelAddingAlert()
@@ -74,102 +83,13 @@ const handleRemoveAlert = async (alertId: string) => {
   if (!incident.value) {
     return
   }
-  actionLoading.value = true
   const response = await removeAlert(incident.value.id, alertId)
-  actionLoading.value = false
-
   if ('error' in response && response.error) {
     toast.error('Не удалось удалить алерт')
     return
   }
-
   await refresh()
   toast.success('Алерт удалён')
-}
-
-const handleAddComment = async (text: string) => {
-  if (!incident.value) {
-    return
-  }
-  actionLoading.value = true
-  const response = await addComment(incident.value.id, text)
-  actionLoading.value = false
-
-  if ('error' in response && response.error) {
-    toast.error('Не удалось добавить комментарий')
-    return
-  }
-
-  await refresh()
-  toast.success('Комментарий добавлен')
-}
-
-const handleDeleteComment = async (commentId: string) => {
-  if (!incident.value) {
-    return
-  }
-  actionLoading.value = true
-  const response = await deleteComment(incident.value.id, commentId)
-  actionLoading.value = false
-
-  if ('error' in response && response.error) {
-    toast.error('Не удалось удалить комментарий')
-    return
-  }
-
-  await refresh()
-  toast.success('Комментарий удалён')
-}
-
-const handleAddLabel = async (key: string, value: string) => {
-  if (!incident.value) {
-    return
-  }
-  actionLoading.value = true
-  const response = await addLabel(incident.value.id, key, value)
-  actionLoading.value = false
-
-  if ('error' in response && response.error) {
-    toast.error('Не удалось добавить метку')
-    return
-  }
-
-  await refresh()
-  toast.success('Метка добавлена')
-}
-
-const handleDeleteLabel = async (key: string) => {
-  if (!incident.value) {
-    return
-  }
-  actionLoading.value = true
-  const response = await deleteLabel(incident.value.id, key)
-  actionLoading.value = false
-
-  if ('error' in response && response.error) {
-    toast.error('Не удалось удалить метку')
-    return
-  }
-
-  await refresh()
-  toast.success('Метка удалена')
-}
-
-const handleSetStatus = async (newStatus: 'acknowledged' | 'resolved') => {
-  if (!incident.value) {
-    return
-  }
-  actionLoading.value = true
-  const response = await setStatus(incident.value.id, newStatus)
-  actionLoading.value = false
-
-  if ('error' in response && response.error) {
-    toast.error('Не удалось изменить статус')
-    return
-  }
-
-  await refresh()
-  toast.success('Статус изменён')
 }
 </script>
 

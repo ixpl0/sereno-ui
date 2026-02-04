@@ -17,29 +17,16 @@ const emit = defineEmits<{
   delete: [key: string]
 }>()
 
-const isAdding = ref(false)
-const newAnnotationKey = ref('')
-const newAnnotationValue = ref('')
 const keyInputRef = ref<{ focus: () => void } | null>(null)
 
-const startAdding = () => {
-  isAdding.value = true
-  newAnnotationKey.value = ''
-  newAnnotationValue.value = ''
-  nextTick(() => {
-    keyInputRef.value?.focus()
-  })
-}
-
-const cancelAdding = () => {
-  isAdding.value = false
-  newAnnotationKey.value = ''
-  newAnnotationValue.value = ''
-}
+const { isAdding, values, startAdding, cancelAdding } = useInlineAdd(
+  { key: '', value: '' },
+  () => keyInputRef.value,
+)
 
 const handleAdd = () => {
-  const key = newAnnotationKey.value.trim()
-  const value = newAnnotationValue.value.trim()
+  const key = values.value.key.trim()
+  const value = values.value.value.trim()
   if (!key || !value) {
     return
   }
@@ -92,14 +79,14 @@ const activeAnnotations = computed(() => props.annotations.filter(a => !a.delete
         <div class="flex gap-2">
           <UiInput
             ref="keyInputRef"
-            v-model="newAnnotationKey"
+            v-model="values.key"
             placeholder="Ключ"
             class="flex-1"
             @keyup.enter="handleAdd"
             @keyup.escape="cancelAdding"
           />
           <UiInput
-            v-model="newAnnotationValue"
+            v-model="values.value"
             placeholder="Значение"
             class="flex-1"
             @keyup.enter="handleAdd"

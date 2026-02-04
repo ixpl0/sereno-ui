@@ -1,7 +1,6 @@
 <script setup lang="ts">
-type SelectVariant = 'bordered' | 'ghost'
-type SelectSize = 'xs' | 'sm' | 'md' | 'lg'
-type SelectState = 'default' | 'error' | 'success' | 'warning'
+import type { FormFieldVariant, FormFieldSize, FormFieldState } from '~/types/ui'
+import { createVariantClasses, createSizeClasses, createStateClasses, HINT_COLOR_CLASSES } from '~/types/ui'
 
 interface SelectOption {
   value: string
@@ -14,9 +13,9 @@ interface Props {
   placeholder?: string
   label?: string
   hint?: string
-  variant?: SelectVariant
-  size?: SelectSize
-  state?: SelectState
+  variant?: FormFieldVariant
+  size?: FormFieldSize
+  state?: FormFieldState
   disabled?: boolean
   required?: boolean
   autofocus?: boolean
@@ -44,31 +43,9 @@ const emit = defineEmits<{
 const selectId = computed(() => props.name || `select-${useId()}`)
 const hintId = computed(() => props.hint ? `${selectId.value}-hint` : undefined)
 
-const variantClasses: Record<SelectVariant, string> = {
-  bordered: 'select-bordered',
-  ghost: 'select-ghost',
-}
-
-const sizeClasses: Record<SelectSize, string> = {
-  xs: 'select-xs',
-  sm: 'select-sm',
-  md: '',
-  lg: 'select-lg',
-}
-
-const stateClasses: Record<SelectState, string> = {
-  default: '',
-  error: 'select-error',
-  success: 'select-success',
-  warning: 'select-warning',
-}
-
-const hintColorClasses: Record<SelectState, string> = {
-  default: 'text-base-content/60',
-  error: 'text-error',
-  success: 'text-success',
-  warning: 'text-warning',
-}
+const variantClasses = createVariantClasses('select')
+const sizeClasses = createSizeClasses('select')
+const stateClasses = createStateClasses('select')
 
 const selectClasses = computed(() => [
   'select',
@@ -140,7 +117,7 @@ defineExpose({ focus })
       v-if="hint"
       :id="hintId"
       class="label"
-      :class="hintColorClasses[state]"
+      :class="HINT_COLOR_CLASSES[state]"
     >
       {{ hint }}
     </p>

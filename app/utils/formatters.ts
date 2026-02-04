@@ -63,38 +63,33 @@ export const formatStatus = (status: string | undefined): string => {
   return statusMap[status ?? ''] ?? status ?? ''
 }
 
-export const getStatusColor = (status: string | undefined): string => {
-  const colorMap: Record<string, string> = {
-    created: 'badge-error',
-    acknowledged: 'badge-warning',
-    resolved: 'badge-success',
-  }
-  return colorMap[status ?? ''] ?? 'badge-ghost'
+const STATUS_STYLES = {
+  created: { badge: 'badge-error', border: 'border-l-error', text: 'text-error', bg: 'bg-error/15' },
+  acknowledged: { badge: 'badge-warning', border: 'border-l-warning', text: 'text-warning', bg: 'bg-warning/15' },
+  resolved: { badge: 'badge-success', border: 'border-l-success', text: 'text-success', bg: 'bg-success/15' },
+} as const
+
+type StatusStyleKey = keyof typeof STATUS_STYLES
+type StatusStyleType = keyof (typeof STATUS_STYLES)[StatusStyleKey]
+
+const STATUS_STYLE_DEFAULTS: Record<StatusStyleType, string> = {
+  badge: 'badge-ghost',
+  border: 'border-l-base-content/20',
+  text: 'text-base-content/60',
+  bg: 'bg-base-content/10',
 }
 
-export const getStatusBorderColor = (status: string | undefined): string => {
-  const colorMap: Record<string, string> = {
-    created: 'border-l-error',
-    acknowledged: 'border-l-warning',
-    resolved: 'border-l-success',
-  }
-  return colorMap[status ?? ''] ?? 'border-l-base-content/20'
-}
+const getStatusStyle = (status: string | undefined, type: StatusStyleType): string =>
+  STATUS_STYLES[status as StatusStyleKey]?.[type] ?? STATUS_STYLE_DEFAULTS[type]
 
-export const getStatusTextColor = (status: string | undefined): string => {
-  const colorMap: Record<string, string> = {
-    created: 'text-error',
-    acknowledged: 'text-warning',
-    resolved: 'text-success',
-  }
-  return colorMap[status ?? ''] ?? 'text-base-content/60'
-}
+export const getStatusColor = (status: string | undefined): string =>
+  getStatusStyle(status, 'badge')
 
-export const getStatusBgLight = (status: string | undefined): string => {
-  const colorMap: Record<string, string> = {
-    created: 'bg-error/15',
-    acknowledged: 'bg-warning/15',
-    resolved: 'bg-success/15',
-  }
-  return colorMap[status ?? ''] ?? 'bg-base-content/10'
-}
+export const getStatusBorderColor = (status: string | undefined): string =>
+  getStatusStyle(status, 'border')
+
+export const getStatusTextColor = (status: string | undefined): string =>
+  getStatusStyle(status, 'text')
+
+export const getStatusBgLight = (status: string | undefined): string =>
+  getStatusStyle(status, 'bg')
