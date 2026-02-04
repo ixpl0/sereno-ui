@@ -148,26 +148,6 @@ export const formatTimeRange = (start: Date, end: Date): string => {
   return `${formatDate(start)} ${formatTime(start)} - ${formatDate(end)} ${formatTime(end)}`
 }
 
-export const formatDuration = (seconds: number): string => {
-  const hours = Math.floor(seconds / 3600)
-  const minutes = Math.floor((seconds % 3600) / 60)
-
-  if (hours >= 24 && hours % 24 === 0 && minutes === 0) {
-    const days = hours / 24
-    return `${days} ${days === 1 ? 'день' : days < 5 ? 'дня' : 'дней'}`
-  }
-
-  if (hours > 0 && minutes === 0) {
-    return `${hours} ч`
-  }
-
-  if (hours > 0) {
-    return `${hours} ч ${minutes} мин`
-  }
-
-  return `${minutes} мин`
-}
-
 export const formatDateShort = (date: Date): string => {
   const day = date.getDate()
   const months = ['янв', 'фев', 'мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек']

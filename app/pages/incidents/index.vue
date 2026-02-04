@@ -12,9 +12,10 @@ definePageMeta({
 const { currentStatus } = useIncidents()
 const { viewMode, setViewMode } = useViewMode('incidents')
 const { error: showError, success: showSuccess } = useToast()
-const { getTenantName } = useTenantNames()
+const { getTenantName, initTenants } = useTenants()
 
 const { data, status, refresh } = await useFetch<EventResponseIncidentList>('/api/v1/incidents')
+await initTenants()
 
 const incidents = computed(() => data.value?.incidents ?? [])
 const isLoading = computed(() => status.value === 'pending' && !data.value)

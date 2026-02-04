@@ -1,7 +1,7 @@
-const sidebarOpen = ref(false)
-const userDropdownOpen = ref(false)
-
 export const useMobileMenus = () => {
+  const sidebarOpen = useState('mobile-sidebar-open', () => false)
+  const userDropdownOpen = useState('mobile-user-dropdown-open', () => false)
+
   const openSidebar = () => {
     userDropdownOpen.value = false
     sidebarOpen.value = true

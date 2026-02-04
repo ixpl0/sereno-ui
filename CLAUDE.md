@@ -181,7 +181,7 @@ All composables in `app/composables/`:
 
 | Composable | Description |
 |------------|-------------|
-| **useTenants** | Teams list, create/update teams |
+| **useTenants** | Teams list, create/update, tenant selection, getTenantName helper |
 | **useTenantMembers** | Team members management (add, remove, set admin) |
 | **useTenantTokens** | API tokens for teams (create, delete) |
 
@@ -189,7 +189,8 @@ All composables in `app/composables/`:
 
 | Composable | Description |
 |------------|-------------|
-| **useAlerts** | Alerts list, status changes, comments, labels |
+| **useEventEntity** | Base composable for event entities (alerts/incidents), DRY abstraction |
+| **useAlerts** | Alerts list, status changes, comments, labels, annotations |
 | **useIncidents** | Incidents list, create, link alerts |
 | **useSchedules** | On-call schedules, rotations, overrides |
 | **useEscalations** | Escalation policies management |
@@ -198,15 +199,13 @@ All composables in `app/composables/`:
 
 | Composable | Description |
 |------------|-------------|
-| **useToast** | Toast notifications (success, error, warning, info) |
+| **useToast** | Toast notifications (success, error, warning, info), SSR-safe |
 | **useTheme** | Theme preference (light/dark/system), cookie persistence |
 | **useBreakpoints** | Responsive breakpoints helper (SSR-safe) |
 | **useViewMode** | Toggle between cards/table view, persisted in cookie |
 | **useEditableField** | Inline editable field state management |
-| **useMobileMenus** | Mobile menu open/close state |
+| **useMobileMenus** | Mobile menu open/close state, SSR-safe |
 | **useInlineAdd** | Inline add form state (isAdding, values, start/cancel) |
-| **useTenantSelector** | Tenant selection with auto-select first tenant |
-| **useTenantNames** | Get tenant name by ID |
 | **useEventDetailActions** | Common actions for alert/incident detail pages |
 
 ## Layout Components
@@ -288,7 +287,7 @@ Utility functions in `app/utils/`:
 
 | File | Functions |
 |------|-----------|
-| **api.ts** | `isApiError`, `extractApiError`, `getApiData` - API response handling |
+| **api.ts** | `isApiError`, `extractApiError`, `getApiData`, `withLoadingState` - API response handling |
 | **url.ts** | `isValidRedirectUrl`, `safeRedirect` - secure redirect validation |
 | **validation.ts** | `isValidEmail`, `isValidTelegram` - input validation |
 | **formatters.ts** | `formatDate`, `formatDateTime`, `formatDateTimeLocal`, `formatStatus`, `getStatusColor` - display formatting |

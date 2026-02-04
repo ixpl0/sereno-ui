@@ -15,7 +15,8 @@ useSeoMeta({
 
 const toast = useToast()
 
-const { tenants, selectedTenantId } = await useTenantSelector()
+const { tenants, selectedTenantId, initTenants } = useTenants()
+await initTenants()
 
 const { data: schedulesData, status: schedulesStatus, refresh: refreshSchedules } = await useFetch<TenantResponseScheduleList>(
   () => `/api/v1/tenants/${selectedTenantId.value}/schedules`,

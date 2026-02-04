@@ -10,12 +10,32 @@ import { getApiData } from '~/utils/api'
 
 export const useTenants = () => {
   const tenants = useState<ReadonlyArray<TenantResponseTenant>>('tenants', () => [])
+  const selectedTenantId = useState<string>('selected-tenant-id', () => '')
   const loading = ref(false)
   const error = ref<string | null>(null)
 
   const adminTenants = computed(() =>
     tenants.value.filter(t => t.role === 'admin'),
   )
+
+  const selectedTenant = computed(() =>
+    tenants.value.find(t => t.id === selectedTenantId.value),
+  )
+
+  const initTenants = async () => {
+    if (tenants.value.length > 0) {
+      return
+    }
+
+    const { data } = await useFetch<TenantResponseTenantList>('/api/v1/tenants')
+    if (data.value?.tenants) {
+      tenants.value = data.value.tenants
+      const first = data.value.tenants[0]
+      if (first && !selectedTenantId.value) {
+        selectedTenantId.value = first.id
+      }
+    }
+  }
 
   const fetchTenants = async (): Promise<ApiResponse<TenantResponseTenantList> | null> => {
     loading.value = true
@@ -30,6 +50,10 @@ export const useTenants = () => {
     const data = getApiData(response as ApiResponse<TenantResponseTenantList>)
     if (data?.tenants) {
       tenants.value = data.tenants
+      const first = data.tenants[0]
+      if (first && !selectedTenantId.value) {
+        selectedTenantId.value = first.id
+      }
     }
     else {
       error.value = 'Failed to fetch tenants'
@@ -89,14 +113,22 @@ export const useTenants = () => {
     return tenants.value.find(t => t.id === id)
   }
 
+  const getTenantName = (tenantId: string): string => {
+    return tenants.value.find(t => t.id === tenantId)?.name ?? tenantId
+  }
+
   return {
     tenants: readonly(tenants),
+    selectedTenantId,
+    selectedTenant,
     adminTenants,
     loading: readonly(loading),
     error: readonly(error),
+    initTenants,
     fetchTenants,
     createTenant,
     updateTenant,
     getTenantById,
+    getTenantName,
   }
 }

@@ -32,3 +32,26 @@ export const getApiData = <T>(response: ApiResponse<T>): T | null => {
   }
   return null
 }
+
+export interface ApiLoadingState {
+  loading: Ref<boolean>
+  error: Ref<string | null>
+}
+
+export const withLoadingState = <T>(
+  state: ApiLoadingState,
+  action: () => Promise<T>,
+  errorMessage: string,
+): Promise<T> => {
+  state.loading.value = true
+  state.error.value = null
+
+  return action().then((response) => {
+    state.loading.value = false
+    return response
+  }).catch((err) => {
+    state.loading.value = false
+    state.error.value = errorMessage
+    throw err
+  })
+}

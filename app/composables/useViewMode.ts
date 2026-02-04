@@ -8,7 +8,7 @@ export const useViewMode = (key: string) => {
     sameSite: 'lax',
   })
 
-  const viewMode = ref<ViewMode>(cookie.value)
+  const viewMode = ref<ViewMode>(cookie.value ?? 'cards')
 
   const setViewMode = (mode: ViewMode) => {
     viewMode.value = mode

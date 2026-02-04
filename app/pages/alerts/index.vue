@@ -12,9 +12,10 @@ definePageMeta({
 const { currentStatus } = useAlerts()
 const { viewMode, setViewMode } = useViewMode('alerts')
 const { error: showError, success: showSuccess } = useToast()
-const { getTenantName } = useTenantNames()
+const { getTenantName, initTenants } = useTenants()
 
 const { data, status, refresh } = await useFetch<EventResponseAlertList>('/api/v1/alerts')
+await initTenants()
 
 const alerts = computed(() => data.value?.alerts ?? [])
 const isLoading = computed(() => status.value === 'pending' && !data.value)

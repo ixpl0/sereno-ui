@@ -24,16 +24,17 @@ export const useEventDetailActions = <T>(options: EventDetailActionsOptions<T>) 
   const actionLoading = ref(false)
 
   const executeAction = async <R>(
-    action: () => Promise<ApiResponse<R>>,
+    action: (entityId: string) => Promise<ApiResponse<R>>,
     errorMessage: string,
     successMessage: string,
   ): Promise<boolean> => {
-    if (!entityRef.value) {
+    const entity = entityRef.value
+    if (!entity) {
       return false
     }
 
     actionLoading.value = true
-    const response = await action()
+    const response = await action(entity.id)
     actionLoading.value = false
 
     if ('error' in response && response.error) {
@@ -48,35 +49,35 @@ export const useEventDetailActions = <T>(options: EventDetailActionsOptions<T>) 
 
   const handleAddComment = (text: string) =>
     executeAction(
-      () => actions.addComment(entityRef.value!.id, text),
+      entityId => actions.addComment(entityId, text),
       'Не удалось добавить комментарий',
       'Комментарий добавлен',
     )
 
   const handleDeleteComment = (commentId: string) =>
     executeAction(
-      () => actions.deleteComment(entityRef.value!.id, commentId),
+      entityId => actions.deleteComment(entityId, commentId),
       'Не удалось удалить комментарий',
       'Комментарий удалён',
     )
 
   const handleAddLabel = (key: string, value: string) =>
     executeAction(
-      () => actions.addLabel(entityRef.value!.id, key, value),
+      entityId => actions.addLabel(entityId, key, value),
       'Не удалось добавить метку',
       'Метка добавлена',
     )
 
   const handleDeleteLabel = (key: string) =>
     executeAction(
-      () => actions.deleteLabel(entityRef.value!.id, key),
+      entityId => actions.deleteLabel(entityId, key),
       'Не удалось удалить метку',
       'Метка удалена',
     )
 
   const handleSetStatus = (status: 'acknowledged' | 'resolved') =>
     executeAction(
-      () => actions.setStatus(entityRef.value!.id, status),
+      entityId => actions.setStatus(entityId, status),
       'Не удалось изменить статус',
       'Статус изменён',
     )

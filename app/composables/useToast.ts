@@ -1,5 +1,3 @@
-import { ref, readonly } from 'vue'
-
 export type ToastType = 'info' | 'success' | 'warning' | 'error'
 
 export interface ToastMessage {
@@ -13,11 +11,11 @@ export type ToastOptions = Partial<Omit<ToastMessage, 'id' | 'message'>> & {
   message: string
 }
 
-const toasts = ref<ToastMessage[]>([])
-
 const DEFAULT_TIMEOUT = 5000
 
 export const useToast = () => {
+  const toasts = useState<ToastMessage[]>('toasts', () => [])
+
   const addToast = (options: ToastOptions): string => {
     const id = crypto.randomUUID()
     const newToast: ToastMessage = {
