@@ -40,7 +40,7 @@ const handleGoHome = () => {
 
 const handleGoBack = () => {
   clearError()
-  if (window.history.length > 1) {
+  if (import.meta.client && window.history.length > 1) {
     window.history.back()
   }
   else {

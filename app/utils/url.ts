@@ -9,6 +9,10 @@ export const isValidRedirectUrl = (url: string, allowedHosts?: ReadonlyArray<str
   try {
     const parsed = new URL(url)
 
+    if (parsed.protocol !== 'https:') {
+      return false
+    }
+
     if (import.meta.client) {
       const currentHost = window.location.hostname
       if (parsed.hostname === currentHost) {
@@ -16,13 +20,9 @@ export const isValidRedirectUrl = (url: string, allowedHosts?: ReadonlyArray<str
       }
     }
 
-    if (parsed.protocol !== 'https:') {
-      return false
-    }
-
     const hosts = allowedHosts ?? DEFAULT_ALLOWED_HOSTS
     return hosts.some(
-      host => parsed.hostname === host || parsed.hostname.endsWith(`.${host}`),
+      host => parsed.hostname === host,
     )
   }
   catch {

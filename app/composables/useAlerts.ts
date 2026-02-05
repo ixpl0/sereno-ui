@@ -19,7 +19,6 @@ import { useEventEntity } from './useEventEntity'
 export const useAlerts = () => {
   const base = useEventEntity<EventResponseAlert, EventResponseAlertList, EventResponseSingleAlert>({
     stateKey: 'alerts',
-    totalKey: 'alerts-total',
     sdk: {
       getList: getAlerts,
       getSingle: getAlertsById,
@@ -35,53 +34,36 @@ export const useAlerts = () => {
   })
 
   const addAnnotation = async (alertId: string, key: string, value: string) => {
-    base.setLoading(true)
-    base.setError(null)
-
-    const response = await postAlertsByIdAnnotationsAdd({
+    const result = await postAlertsByIdAnnotationsAdd({
       path: { id: alertId },
       body: { key, value },
     })
 
-    base.setLoading(false)
-
-    if (response.data?.alert) {
-      base.updateItem(alertId, response.data.alert)
-    }
-    else {
-      base.setError('Failed to add annotation')
+    if (result.data?.alert) {
+      await base.refresh()
     }
 
-    return response
+    return result
   }
 
   const deleteAnnotation = async (alertId: string, key: string) => {
-    base.setLoading(true)
-    base.setError(null)
-
-    const response = await postAlertsByIdAnnotationsDelete({
+    const result = await postAlertsByIdAnnotationsDelete({
       path: { id: alertId },
       body: { key },
     })
 
-    base.setLoading(false)
-
-    if (response.data?.alert) {
-      base.updateItem(alertId, response.data.alert)
-    }
-    else {
-      base.setError('Failed to delete annotation')
+    if (result.data?.alert) {
+      await base.refresh()
     }
 
-    return response
+    return result
   }
 
   return {
-    alerts: readonly(base.items),
+    alerts: base.items,
     total: base.total,
     loading: base.loading,
-    error: base.error,
-    fetchAlerts: base.fetchList,
+    refresh: base.refresh,
     fetchAlert: base.fetchSingle,
     addComment: base.addComment,
     deleteComment: base.deleteComment,

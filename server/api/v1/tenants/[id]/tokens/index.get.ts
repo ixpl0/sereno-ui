@@ -20,7 +20,13 @@ export default defineEventHandler((event) => {
     })
   }
 
-  const tokens = getMockTenantTokens(tenantId)
+  const rawTokens = getMockTenantTokens(tenantId)
+  const tokens = rawTokens.map(t => ({
+    id: t.id,
+    name: t.name,
+    created: t.since,
+    creator: 'mock-user',
+  }))
 
   return { tokens }
 })

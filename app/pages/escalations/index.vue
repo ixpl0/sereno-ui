@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { TenantResponseEscalationList, TenantRequestEscalation } from '~/api/types.gen'
+import type { TenantRequestEscalation } from '~/api/types.gen'
 
 definePageMeta({
   middleware: 'auth',
@@ -14,17 +14,12 @@ useSeoMeta({
 
 const toast = useToast()
 
-const { tenants, selectedTenantId, initTenants } = useTenants()
-await initTenants()
-
-const { data: escalationsData, status: escalationsStatus, refresh: refreshEscalations } = await useFetch<TenantResponseEscalationList>(
-  () => `/api/v1/tenants/${selectedTenantId.value}/escalations`,
-  { watch: [selectedTenantId] },
-)
-const escalations = computed(() => escalationsData.value?.escalations ?? [])
-const loading = computed(() => escalationsStatus.value === 'pending')
+const { tenants, selectedTenantId } = useTenants()
 
 const {
+  escalations,
+  loading,
+  refresh: refreshEscalations,
   createEscalation,
   deleteEscalation,
   toggleEscalation,
@@ -70,7 +65,6 @@ const handleCreate = async () => {
 
   toast.success('Эскалация создана')
   cancelCreate()
-  await refreshEscalations()
 
   const created = 'data' in response ? response.data?.escalation : null
   if (created) {
@@ -87,7 +81,6 @@ const handleDelete = async (id: string) => {
   }
 
   toast.success('Эскалация удалена')
-  await refreshEscalations()
 }
 
 const handleToggle = async (escalation: typeof escalations.value[number]) => {
@@ -104,7 +97,6 @@ const handleToggle = async (escalation: typeof escalations.value[number]) => {
   }
 
   toast.success(escalation.enabled ? 'Эскалация отключена' : 'Эскалация включена')
-  await refreshEscalations()
 }
 
 const formatDelay = (seconds: number): string => {

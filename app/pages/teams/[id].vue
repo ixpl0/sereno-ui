@@ -1,9 +1,4 @@
 <script setup lang="ts">
-import type {
-  TenantResponseTenantList,
-  TenantResponseMemberList,
-  TenantResponseTokenList,
-} from '~/api/types.gen'
 import { formatDate } from '~/utils/formatters'
 
 const route = useRoute()
@@ -20,27 +15,13 @@ useSeoMeta({
   description: 'Настройки команды',
 })
 
-const { data: tenantsData, refresh: refreshTenants } = await useFetch<TenantResponseTenantList>('/api/v1/tenants')
-const { data: membersData, status: membersStatus, refresh: refreshMembers } = await useFetch<TenantResponseMemberList>(
-  () => `/api/v1/tenants/${tenantId.value}/members`,
-)
-const { data: tokensData, status: tokensStatus, refresh: refreshTokens } = await useFetch<TenantResponseTokenList>(
-  () => `/api/v1/tenants/${tenantId.value}/tokens`,
-)
-
-const tenant = computed(() => tenantsData.value?.tenants?.find((t: { id: string }) => t.id === tenantId.value))
-const isAdmin = computed(() => tenant.value?.role === 'admin')
-const membersLoading = computed(() => membersStatus.value === 'pending' && !membersData.value)
-const tokensLoading = computed(() => tokensStatus.value === 'pending' && !tokensData.value)
-
-const { updateTenant } = useTenants()
-const tenantIdRef = ref(tenantId.value)
-watch(tenantId, (value) => {
-  tenantIdRef.value = value
-})
-const { updateMember, deleteMember } = useTenantMembers(tenantIdRef)
-const { createToken, deleteToken } = useTenantTokens(tenantIdRef)
+const { tenants, updateTenant } = useTenants()
+const { members, loading: membersLoading, updateMember, deleteMember } = useTenantMembers(tenantId)
+const { tokens, loading: tokensLoading, createToken, deleteToken } = useTenantTokens(tenantId)
 const toast = useToast()
+
+const tenant = computed(() => tenants.value.find(t => t.id === tenantId.value))
+const isAdmin = computed(() => tenant.value?.role === 'admin')
 
 const isEditingName = ref(false)
 const editNameValue = ref('')
@@ -73,7 +54,6 @@ const saveEditName = async () => {
     return
   }
 
-  await refreshTenants()
   toast.success('Сохранено')
   cancelEditName()
 }
@@ -111,7 +91,6 @@ const handleAddMember = async () => {
     return
   }
 
-  await refreshMembers()
   toast.success('Участник добавлен')
   cancelAddMember()
 }
@@ -125,7 +104,6 @@ const handleToggleMemberRole = async (memberId: string, currentRole: string) => 
     return
   }
 
-  await refreshMembers()
   toast.success('Права изменены')
 }
 
@@ -137,7 +115,6 @@ const handleDeleteMember = async (memberId: string) => {
     return
   }
 
-  await refreshMembers()
   toast.success('Участник удалён')
 }
 
@@ -183,8 +160,6 @@ const handleCreateToken = async () => {
     toast.success('Токен создан')
     cancelCreateToken()
   }
-
-  await refreshTokens()
 }
 
 const handleCopyToken = async () => {
@@ -192,8 +167,13 @@ const handleCopyToken = async () => {
     return
   }
 
-  await navigator.clipboard.writeText(createdTokenValue.value)
-  toast.success('Токен скопирован')
+  try {
+    await navigator.clipboard.writeText(createdTokenValue.value)
+    toast.success('Токен скопирован')
+  }
+  catch {
+    toast.error('Не удалось скопировать токен')
+  }
   cancelCreateToken()
 }
 
@@ -205,7 +185,6 @@ const handleDeleteToken = async (tokenId: string) => {
     return
   }
 
-  await refreshTokens()
   toast.success('Токен удалён')
 }
 </script>
@@ -367,7 +346,7 @@ const handleDeleteToken = async (tokenId: string) => {
               </div>
 
               <div
-                v-for="member in membersData?.members"
+                v-for="member in members"
                 :key="member.id"
                 class="flex items-center justify-between p-3 bg-base-100/50 rounded"
               >
@@ -420,7 +399,7 @@ const handleDeleteToken = async (tokenId: string) => {
               </div>
 
               <UiEmptyState
-                v-if="!membersData?.members?.length && !isAddingMember"
+                v-if="members.length === 0 && !isAddingMember"
                 icon="lucide:users"
                 title="Нет участников"
               />
@@ -520,7 +499,7 @@ const handleDeleteToken = async (tokenId: string) => {
               </div>
 
               <div
-                v-for="token in tokensData?.tokens"
+                v-for="token in tokens"
                 :key="token.id"
                 class="flex items-center justify-between p-3 bg-base-200/50 rounded"
               >
@@ -558,7 +537,7 @@ const handleDeleteToken = async (tokenId: string) => {
               </div>
 
               <UiEmptyState
-                v-if="!tokensData?.tokens?.length && !isCreatingToken"
+                v-if="tokens.length === 0 && !isCreatingToken"
                 icon="lucide:key"
                 title="Нет токенов"
               />

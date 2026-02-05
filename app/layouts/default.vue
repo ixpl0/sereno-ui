@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import type { UserResponseUser } from '~/api/types.gen'
-
 useSeoMeta({
   titleTemplate: '%s | Sereno UI',
   ogSiteName: 'Sereno UI',
@@ -8,10 +6,8 @@ useSeoMeta({
 })
 
 const { logout } = useAuth()
+const { user } = useUser()
 const router = useRouter()
-
-const { data: user } = await useFetch<UserResponseUser>('/api/v1/user')
-const userOrNull = computed(() => user.value ?? null)
 
 const sidebarCollapsedCookie = useCookie<boolean>('sidebar_collapsed', {
   default: () => false,
@@ -56,7 +52,7 @@ const handleLogout = async () => {
 
     <div class="relative z-10 min-h-screen flex flex-col pt-16">
       <LayoutAppHeader
-        :user="userOrNull"
+        :user="user"
         @toggle-mobile-sidebar="toggleSidebar"
         @logout="handleLogout"
       />

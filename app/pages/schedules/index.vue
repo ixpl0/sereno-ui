@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { TenantResponseScheduleList, TenantRequestNewSchedule, TenantRequestRotation, TenantRequestOverride } from '~/api/types.gen'
+import type { TenantRequestNewSchedule, TenantRequestRotation, TenantRequestOverride } from '~/api/types.gen'
 import { formatDateTimeLocal } from '~/utils/formatters'
 
 definePageMeta({
@@ -15,17 +15,11 @@ useSeoMeta({
 
 const toast = useToast()
 
-const { tenants, selectedTenantId, initTenants } = useTenants()
-await initTenants()
-
-const { data: schedulesData, status: schedulesStatus, refresh: refreshSchedules } = await useFetch<TenantResponseScheduleList>(
-  () => `/api/v1/tenants/${selectedTenantId.value}/schedules`,
-  { watch: [selectedTenantId] },
-)
-const schedules = computed(() => schedulesData.value?.schedules ?? [])
-const loading = computed(() => schedulesStatus.value === 'pending')
+const { tenants, selectedTenantId } = useTenants()
 
 const {
+  schedules,
+  loading,
   createSchedule,
   deleteSchedule,
   createRotation,
@@ -34,7 +28,7 @@ const {
   deleteOverride,
 } = useSchedules(selectedTenantId)
 
-const { members, fetchMembers } = useTenantMembers(selectedTenantId)
+const { members } = useTenantMembers(selectedTenantId)
 
 const isCreating = ref(false)
 const expandedId = ref<string | null>(null)
@@ -81,7 +75,6 @@ const handleCreate = async () => {
 
   toast.success('Расписание создано')
   cancelCreate()
-  await refreshSchedules()
 
   const created = 'data' in response ? response.data?.schedule : null
   if (created) {
@@ -98,7 +91,6 @@ const handleDelete = async (id: string) => {
   }
 
   toast.success('Расписание удалено')
-  await refreshSchedules()
   if (expandedId.value === id) {
     expandedId.value = null
   }
@@ -127,7 +119,6 @@ const handleAddRotation = async (scheduleId: string, data: {
   }
 
   toast.success('Ротация добавлена')
-  await refreshSchedules()
 }
 
 const handleDeleteRotation = async (scheduleId: string, index: number) => {
@@ -139,7 +130,6 @@ const handleDeleteRotation = async (scheduleId: string, index: number) => {
   }
 
   toast.success('Ротация удалена')
-  await refreshSchedules()
 }
 
 const handleAddOverride = async (scheduleId: string, data: {
@@ -163,7 +153,6 @@ const handleAddOverride = async (scheduleId: string, data: {
   }
 
   toast.success('Замена добавлена')
-  await refreshSchedules()
 }
 
 const handleDeleteOverride = async (scheduleId: string, index: number) => {
@@ -175,20 +164,7 @@ const handleDeleteOverride = async (scheduleId: string, index: number) => {
   }
 
   toast.success('Замена удалена')
-  await refreshSchedules()
 }
-
-onMounted(() => {
-  if (selectedTenantId.value) {
-    fetchMembers()
-  }
-})
-
-watch(selectedTenantId, () => {
-  if (selectedTenantId.value) {
-    fetchMembers()
-  }
-})
 </script>
 
 <template>

@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { client } from '~/api/client.gen'
-import type { EventResponseAlertList } from '~/api/types.gen'
 import { formatDateTime, formatStatus, getStatusColor } from '~/utils/formatters'
 
 definePageMeta({
@@ -9,16 +7,10 @@ definePageMeta({
   title: 'Алерты',
 })
 
-const { currentStatus } = useAlerts()
+const { alerts, loading: isLoading, refresh, currentStatus, setStatus } = useAlerts()
 const { viewMode, setViewMode } = useViewMode('alerts')
 const { error: showError, success: showSuccess } = useToast()
-const { getTenantName, initTenants } = useTenants()
-
-const { data, status, refresh } = await useFetch<EventResponseAlertList>('/api/v1/alerts')
-await initTenants()
-
-const alerts = computed(() => data.value?.alerts ?? [])
-const isLoading = computed(() => status.value === 'pending' && !data.value)
+const { getTenantName } = useTenants()
 
 const statusFilter = ref<string>('all')
 
@@ -39,19 +31,14 @@ const handleRefresh = async () => {
 }
 
 const handleStatusChange = async (alertId: string, newStatus: string) => {
-  const response = await client.post({
-    url: '/alerts/{id}/status/set',
-    path: { id: alertId },
-    body: { status: newStatus as 'acknowledged' | 'resolved' },
-  })
+  const response = await setStatus(alertId, newStatus as 'acknowledged' | 'resolved')
 
-  if (response.error) {
+  if ('error' in response && response.error) {
     showError('Не удалось изменить статус')
     return
   }
 
   showSuccess(newStatus === 'acknowledged' ? 'Алерт подтверждён' : 'Алерт закрыт')
-  await refresh()
 }
 </script>
 

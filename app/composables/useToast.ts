@@ -13,7 +13,7 @@ export type ToastOptions = Partial<Omit<ToastMessage, 'id' | 'message'>> & {
 
 const DEFAULT_TIMEOUT = 5000
 
-const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
+const toastTimeouts = import.meta.client ? new Map<string, ReturnType<typeof setTimeout>>() : undefined
 let toastCounter = 0
 
 const generateToastId = (): string => {
@@ -28,10 +28,10 @@ export const useToast = () => {
   const toasts = useState<ToastMessage[]>('toasts', () => [])
 
   const removeToast = (id: string) => {
-    const timeoutId = toastTimeouts.get(id)
+    const timeoutId = toastTimeouts?.get(id)
     if (timeoutId) {
       clearTimeout(timeoutId)
-      toastTimeouts.delete(id)
+      toastTimeouts?.delete(id)
     }
     toasts.value = toasts.value.filter(toast => toast.id !== id)
   }
@@ -47,11 +47,11 @@ export const useToast = () => {
 
     toasts.value = [...toasts.value, newToast]
 
-    if (newToast.timeout > 0) {
+    if (newToast.timeout > 0 && import.meta.client) {
       const timeoutId = setTimeout(() => {
         removeToast(id)
       }, newToast.timeout)
-      toastTimeouts.set(id, timeoutId)
+      toastTimeouts?.set(id, timeoutId)
     }
 
     return id

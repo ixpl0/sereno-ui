@@ -5,13 +5,10 @@ import {
   postTenantsByIdEscalationsUpdate,
 } from '~/api/sdk.gen'
 import type {
-  TenantResponseEscalation,
   TenantRequestEscalation,
   TenantRequestEscalationStep,
   TenantRequestEscalationRule,
 } from '~/api/types.gen'
-
-type EscalationsCache = Record<string, ReadonlyArray<TenantResponseEscalation>>
 
 type StepPosition = TenantRequestEscalationStep['position']
 type RuleEvent = TenantRequestEscalationRule['event']
@@ -26,103 +23,63 @@ const isValidEvent = (value: string | undefined): value is RuleEvent =>
   value === undefined || VALID_EVENTS.includes(value as NonNullable<RuleEvent>)
 
 export const useEscalations = (tenantId: Ref<string>) => {
-  const escalationsCache = useState<EscalationsCache>('escalations-cache', () => ({}))
-  const escalations = computed({
-    get: () => escalationsCache.value[tenantId.value] ?? [],
-    set: (value: ReadonlyArray<TenantResponseEscalation>) => {
-      escalationsCache.value = { ...escalationsCache.value, [tenantId.value]: value }
+  const { data: response, status: fetchStatus, refresh } = useAsyncData(
+    () => `escalations-${tenantId.value}`,
+    async () => {
+      if (!tenantId.value) {
+        return null
+      }
+      const result = await getTenantsByIdEscalations({
+        path: { id: tenantId.value },
+      })
+      if (result.error) {
+        throw createError({ message: 'Failed to fetch escalations' })
+      }
+      return result.data
     },
-  })
-  const loading = ref(false)
-  const error = ref<string | null>(null)
+    { watch: [tenantId] },
+  )
 
-  const fetchEscalations = async () => {
-    if (!tenantId.value) {
-      return null
-    }
-
-    loading.value = true
-    error.value = null
-
-    const response = await getTenantsByIdEscalations({
-      path: { id: tenantId.value },
-    })
-
-    loading.value = false
-
-    if (response.data?.escalations) {
-      escalations.value = response.data.escalations
-    }
-    else {
-      error.value = 'Failed to fetch escalations'
-    }
-
-    return response
-  }
+  const escalations = computed(() => response.value?.escalations ?? [])
+  const loading = computed(() => fetchStatus.value === 'pending')
 
   const createEscalation = async (escalation: TenantRequestEscalation) => {
-    loading.value = true
-    error.value = null
-
-    const response = await postTenantsByIdEscalationsCreate({
+    const result = await postTenantsByIdEscalationsCreate({
       path: { id: tenantId.value },
       body: escalation,
     })
 
-    loading.value = false
-
-    if (response.data?.escalation) {
-      escalations.value = [...escalations.value, response.data.escalation]
-    }
-    else {
-      error.value = 'Failed to create escalation'
+    if (result.data?.escalation) {
+      await refresh()
     }
 
-    return response
+    return result
   }
 
   const updateEscalation = async (escalation: TenantRequestEscalation) => {
-    loading.value = true
-    error.value = null
-
-    const response = await postTenantsByIdEscalationsUpdate({
+    const result = await postTenantsByIdEscalationsUpdate({
       path: { id: tenantId.value },
       body: escalation,
     })
 
-    loading.value = false
-
-    if (response.data?.escalation) {
-      escalations.value = escalations.value.map(e =>
-        e.name === escalation.name ? response.data.escalation : e,
-      )
-    }
-    else {
-      error.value = 'Failed to update escalation'
+    if (result.data?.escalation) {
+      await refresh()
     }
 
-    return response
+    return result
   }
 
   const deleteEscalation = async (escalationId: string) => {
-    loading.value = true
-    error.value = null
-
-    const response = await postTenantsByIdEscalationsDelete({
+    const result = await postTenantsByIdEscalationsDelete({
       path: { id: tenantId.value },
       body: { id: escalationId },
     })
 
-    loading.value = false
-
-    if (response.error) {
-      error.value = 'Failed to delete escalation'
-    }
-    else {
-      escalations.value = escalations.value.filter(e => e.id !== escalationId)
+    if (!result.error) {
+      await refresh()
     }
 
-    return response
+    return result
   }
 
   const toggleEscalation = async (escalation: {
@@ -153,10 +110,9 @@ export const useEscalations = (tenantId: Ref<string>) => {
   }
 
   return {
-    escalations: readonly(escalations),
-    loading: readonly(loading),
-    error: readonly(error),
-    fetchEscalations,
+    escalations,
+    loading,
+    refresh,
     createEscalation,
     updateEscalation,
     deleteEscalation,

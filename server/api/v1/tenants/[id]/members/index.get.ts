@@ -20,7 +20,12 @@ export default defineEventHandler((event) => {
     })
   }
 
-  const members = getMockTenantMembers(tenantId)
+  const rawMembers = getMockTenantMembers(tenantId)
+  const members = rawMembers.map(m => ({
+    id: m.id,
+    role: m.admin ? 'admin' : 'member',
+    since: m.since,
+  }))
 
   return { members }
 })

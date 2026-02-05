@@ -8,204 +8,116 @@ import {
   postSchedulesByIdOverrideDelete,
 } from '~/api/sdk.gen'
 import type {
-  TenantResponseSchedule,
   TenantResponseScheduleList,
   TenantRequestNewSchedule,
   TenantRequestRotation,
   TenantRequestOverride,
 } from '~/api/types.gen'
 
-type SchedulesCache = Record<string, ReadonlyArray<TenantResponseSchedule>>
-
 export const useSchedules = (tenantId: Ref<string>) => {
-  const schedulesCache = useState<SchedulesCache>('schedules-cache', () => ({}))
-  const schedules = computed({
-    get: () => schedulesCache.value[tenantId.value] ?? [],
-    set: (value: ReadonlyArray<TenantResponseSchedule>) => {
-      schedulesCache.value = { ...schedulesCache.value, [tenantId.value]: value }
+  const { data: response, status: fetchStatus, refresh } = useAsyncData(
+    () => `schedules-${tenantId.value}`,
+    async () => {
+      if (!tenantId.value) {
+        return null
+      }
+      const result = await client.get<{ 200: TenantResponseScheduleList }>({
+        url: '/tenants/{id}/schedules',
+        path: { id: tenantId.value },
+      })
+      if (result.error) {
+        throw createError({ message: 'Failed to fetch schedules' })
+      }
+      return result.data
     },
-  })
-  const loading = ref(false)
-  const error = ref<string | null>(null)
+    { watch: [tenantId] },
+  )
 
-  const fetchSchedules = async () => {
-    if (!tenantId.value) {
-      return null
-    }
-
-    loading.value = true
-    error.value = null
-
-    const response = await client.get<{ 200: TenantResponseScheduleList }>({
-      url: '/tenants/{id}/schedules',
-      path: { id: tenantId.value },
-    })
-
-    loading.value = false
-
-    if (response.data?.schedules) {
-      schedules.value = response.data.schedules
-    }
-    else {
-      error.value = 'Failed to fetch schedules'
-    }
-
-    return response
-  }
+  const schedules = computed(() => response.value?.schedules ?? [])
+  const loading = computed(() => fetchStatus.value === 'pending')
 
   const createSchedule = async (schedule: TenantRequestNewSchedule) => {
-    loading.value = true
-    error.value = null
-
-    const response = await postTenantsByIdSchedulesCreate({
+    const result = await postTenantsByIdSchedulesCreate({
       path: { id: tenantId.value },
       body: schedule,
     })
 
-    loading.value = false
-
-    if (response.data?.schedule) {
-      schedules.value = [...schedules.value, response.data.schedule]
-    }
-    else {
-      error.value = 'Failed to create schedule'
+    if (result.data?.schedule) {
+      await refresh()
     }
 
-    return response
+    return result
   }
 
   const deleteSchedule = async (scheduleId: string) => {
-    loading.value = true
-    error.value = null
-
-    const response = await postTenantsByIdSchedulesDelete({
+    const result = await postTenantsByIdSchedulesDelete({
       path: { id: tenantId.value },
       body: { id: scheduleId },
     })
 
-    loading.value = false
-
-    if (response.error) {
-      error.value = 'Failed to delete schedule'
-    }
-    else {
-      schedules.value = schedules.value.filter(s => s.id !== scheduleId)
+    if (!result.error) {
+      await refresh()
     }
 
-    return response
+    return result
   }
 
   const createRotation = async (scheduleId: string, rotation: TenantRequestRotation) => {
-    loading.value = true
-    error.value = null
-
-    const response = await postSchedulesByIdRotationCreate({
+    const result = await postSchedulesByIdRotationCreate({
       path: { id: scheduleId },
       body: rotation,
     })
 
-    loading.value = false
-
-    if (response.data?.rotation) {
-      const newRotation = response.data.rotation
-      schedules.value = schedules.value.map((s) => {
-        if (s.id === scheduleId) {
-          return { ...s, rotations: [...(s.rotations ?? []), newRotation] }
-        }
-        return s
-      })
-    }
-    else {
-      error.value = 'Failed to create rotation'
+    if (result.data?.rotation) {
+      await refresh()
     }
 
-    return response
+    return result
   }
 
   const deleteRotation = async (scheduleId: string, rotationIndex: number) => {
-    loading.value = true
-    error.value = null
-
-    const response = await postSchedulesByIdRotationDelete({
+    const result = await postSchedulesByIdRotationDelete({
       path: { id: scheduleId },
       body: { number: rotationIndex },
     })
 
-    loading.value = false
-
-    if (response.error) {
-      error.value = 'Failed to delete rotation'
-    }
-    else {
-      schedules.value = schedules.value.map((s) => {
-        if (s.id === scheduleId) {
-          return { ...s, rotations: (s.rotations ?? []).filter((_, i) => i !== rotationIndex) }
-        }
-        return s
-      })
+    if (!result.error) {
+      await refresh()
     }
 
-    return response
+    return result
   }
 
   const createOverride = async (scheduleId: string, override: TenantRequestOverride) => {
-    loading.value = true
-    error.value = null
-
-    const response = await postSchedulesByIdOverrideCreate({
+    const result = await postSchedulesByIdOverrideCreate({
       path: { id: scheduleId },
       body: override,
     })
 
-    loading.value = false
-
-    if (response.data?.rotation) {
-      const newOverride = response.data.rotation
-      schedules.value = schedules.value.map((s) => {
-        if (s.id === scheduleId) {
-          return { ...s, overrides: [...(s.overrides ?? []), newOverride] }
-        }
-        return s
-      })
-    }
-    else {
-      error.value = 'Failed to create override'
+    if (result.data?.rotation) {
+      await refresh()
     }
 
-    return response
+    return result
   }
 
   const deleteOverride = async (scheduleId: string, overrideIndex: number) => {
-    loading.value = true
-    error.value = null
-
-    const response = await postSchedulesByIdOverrideDelete({
+    const result = await postSchedulesByIdOverrideDelete({
       path: { id: scheduleId },
       body: { number: overrideIndex },
     })
 
-    loading.value = false
-
-    if (response.error) {
-      error.value = 'Failed to delete override'
-    }
-    else {
-      schedules.value = schedules.value.map((s) => {
-        if (s.id === scheduleId) {
-          return { ...s, overrides: (s.overrides ?? []).filter((_, i) => i !== overrideIndex) }
-        }
-        return s
-      })
+    if (!result.error) {
+      await refresh()
     }
 
-    return response
+    return result
   }
 
   return {
-    schedules: readonly(schedules),
-    loading: readonly(loading),
-    error: readonly(error),
-    fetchSchedules,
+    schedules,
+    loading,
+    refresh,
     createSchedule,
     deleteSchedule,
     createRotation,

@@ -20,7 +20,6 @@ import { useEventEntity } from './useEventEntity'
 export const useIncidents = () => {
   const base = useEventEntity<EventResponseIncident, EventResponseIncidentList, EventResponseSingleIncident>({
     stateKey: 'incidents',
-    totalKey: 'incidents-total',
     sdk: {
       getList: getIncidents,
       getSingle: getIncidentsById,
@@ -36,10 +35,7 @@ export const useIncidents = () => {
   })
 
   const createIncident = async (tenantId: string, title: string, description?: string) => {
-    base.setLoading(true)
-    base.setError(null)
-
-    const response = await postIncidentsCreate({
+    const result = await postIncidentsCreate({
       body: {
         tenant: { id: tenantId },
         title,
@@ -47,66 +43,44 @@ export const useIncidents = () => {
       },
     })
 
-    base.setLoading(false)
-
-    if (response.data) {
-      base.items.value = [...base.items.value, response.data]
-    }
-    else {
-      base.setError('Failed to create incident')
+    if (result.data) {
+      await base.refresh()
     }
 
-    return response
+    return result
   }
 
   const addAlert = async (incidentId: string, alertId: string) => {
-    base.setLoading(true)
-    base.setError(null)
-
-    const response = await postIncidentsByIdAlertsAdd({
+    const result = await postIncidentsByIdAlertsAdd({
       path: { id: incidentId },
       body: { id: alertId },
     })
 
-    base.setLoading(false)
-
-    if (response.data?.incident) {
-      base.updateItem(incidentId, response.data.incident)
-    }
-    else {
-      base.setError('Failed to add alert')
+    if (result.data?.incident) {
+      await base.refresh()
     }
 
-    return response
+    return result
   }
 
   const removeAlert = async (incidentId: string, alertId: string) => {
-    base.setLoading(true)
-    base.setError(null)
-
-    const response = await postIncidentsByIdAlertsDelete({
+    const result = await postIncidentsByIdAlertsDelete({
       path: { id: incidentId },
       body: { id: alertId },
     })
 
-    base.setLoading(false)
-
-    if (response.data?.incident) {
-      base.updateItem(incidentId, response.data.incident)
-    }
-    else {
-      base.setError('Failed to remove alert')
+    if (result.data?.incident) {
+      await base.refresh()
     }
 
-    return response
+    return result
   }
 
   return {
-    incidents: readonly(base.items),
+    incidents: base.items,
     total: base.total,
     loading: base.loading,
-    error: base.error,
-    fetchIncidents: base.fetchList,
+    refresh: base.refresh,
     fetchIncident: base.fetchSingle,
     createIncident,
     addComment: base.addComment,

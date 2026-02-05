@@ -3,20 +3,27 @@ import {
   postTenantsByIdMembersUpdate,
   postTenantsByIdMembersDelete,
 } from '~/api/sdk.gen'
-import type { TenantResponseMember } from '~/api/types.gen'
-
-type MembersCache = Record<string, ReadonlyArray<TenantResponseMember>>
 
 export const useTenantMembers = (tenantId: Ref<string>) => {
-  const membersCache = useState<MembersCache>('tenant-members-cache', () => ({}))
-  const members = computed({
-    get: () => membersCache.value[tenantId.value] ?? [],
-    set: (value: ReadonlyArray<TenantResponseMember>) => {
-      membersCache.value = { ...membersCache.value, [tenantId.value]: value }
+  const { data: response, status: fetchStatus, refresh } = useAsyncData(
+    () => `tenant-members-${tenantId.value}`,
+    async () => {
+      if (!tenantId.value) {
+        return null
+      }
+      const result = await getTenantsByIdMembers({
+        path: { id: tenantId.value },
+      })
+      if (result.error) {
+        throw createError({ message: 'Failed to fetch members' })
+      }
+      return result.data
     },
-  })
-  const loading = ref(false)
-  const error = ref<string | null>(null)
+    { watch: [tenantId] },
+  )
+
+  const members = computed(() => response.value?.members ?? [])
+  const loading = computed(() => fetchStatus.value === 'pending')
 
   const adminMembers = computed(() =>
     members.value.filter(m => m.role === 'admin'),
@@ -26,82 +33,38 @@ export const useTenantMembers = (tenantId: Ref<string>) => {
     members.value.filter(m => m.role !== 'admin'),
   )
 
-  const fetchMembers = async () => {
-    loading.value = true
-    error.value = null
-
-    const response = await getTenantsByIdMembers({
-      path: { id: tenantId.value },
-    })
-
-    loading.value = false
-
-    if (response.data?.members) {
-      members.value = response.data.members
-    }
-    else {
-      error.value = 'Failed to fetch members'
-    }
-
-    return response
-  }
-
   const updateMember = async (memberId: string, role: 'watcher' | 'member' | 'admin') => {
-    loading.value = true
-    error.value = null
-
-    const response = await postTenantsByIdMembersUpdate({
+    const result = await postTenantsByIdMembersUpdate({
       path: { id: tenantId.value },
       body: { id: memberId, role },
     })
 
-    loading.value = false
-
-    if (response.data?.member) {
-      const updatedMember = response.data.member
-      const existingMember = members.value.find(m => m.id === memberId)
-      if (existingMember) {
-        members.value = members.value.map(m => m.id === memberId ? updatedMember : m)
-      }
-      else {
-        members.value = [...members.value, updatedMember]
-      }
-    }
-    else {
-      error.value = 'Failed to update member'
+    if (result.data?.member) {
+      await refresh()
     }
 
-    return response
+    return result
   }
 
   const deleteMember = async (memberId: string) => {
-    loading.value = true
-    error.value = null
-
-    const response = await postTenantsByIdMembersDelete({
+    const result = await postTenantsByIdMembersDelete({
       path: { id: tenantId.value },
       body: { id: memberId },
     })
 
-    loading.value = false
-
-    if (response.error) {
-      error.value = 'Failed to delete member'
-    }
-    else {
-      members.value = members.value.filter(m => m.id !== memberId)
+    if (!result.error) {
+      await refresh()
     }
 
-    return response
+    return result
   }
 
   return {
-    members: readonly(members),
+    members,
     adminMembers,
     regularMembers,
-    loading: readonly(loading),
-    error: readonly(error),
-    fetchMembers,
+    loading,
+    refresh,
     updateMember,
     deleteMember,
   }

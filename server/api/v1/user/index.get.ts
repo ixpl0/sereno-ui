@@ -10,10 +10,12 @@ export default defineEventHandler((event) => {
   const user = getMockUser()
 
   return {
-    id: user.id,
-    first_name: user.firstName,
-    last_name: user.lastName,
-    timezone: user.timezone,
-    language: user.language,
+    user: {
+      id: user.id,
+      first_name: user.firstName,
+      last_name: user.lastName,
+      timezone: user.timezone,
+      language: user.language,
+    },
   }
 })

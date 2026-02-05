@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const body = await readBody<{ id?: string, admin?: boolean }>(event)
+  const body = await readBody<{ id?: string, role?: string, admin?: boolean }>(event)
 
   if (!body.id) {
     throw createError({
@@ -30,7 +30,8 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const member = updateMockTenantMember(tenantId, body.id, body.admin ?? false)
+  const isAdmin = body.role ? body.role === 'admin' : (body.admin ?? false)
+  const member = updateMockTenantMember(tenantId, body.id, isAdmin)
 
   if (!member) {
     throw createError({
@@ -40,5 +41,11 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  return { member }
+  return {
+    member: {
+      id: member.id,
+      role: member.admin ? 'admin' : 'member',
+      since: member.since,
+    },
+  }
 })

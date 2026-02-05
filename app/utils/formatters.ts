@@ -1,5 +1,5 @@
 export const formatDate = (timestamp: number | undefined): string => {
-  if (!timestamp) {
+  if (timestamp === undefined) {
     return ''
   }
   return new Date(timestamp * 1000).toLocaleDateString('ru-RU', {
@@ -42,7 +42,7 @@ export const formatContactKind = (kind: string | undefined): string => {
 }
 
 export const formatDateTime = (timestamp: number | undefined): string => {
-  if (!timestamp) {
+  if (timestamp === undefined) {
     return ''
   }
   return new Date(timestamp * 1000).toLocaleString('ru-RU', {

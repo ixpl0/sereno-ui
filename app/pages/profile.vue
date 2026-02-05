@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import type { UserResponseContactsList, UserResponseSessions, UserRequestContact } from '~/api/types.gen'
-import type { UserWithLanguage } from '~/types/api'
+import type { UserRequestContact } from '~/api/types.gen'
 import { formatDate, formatDevice, formatContactKind } from '~/utils/formatters'
 
 definePageMeta({
@@ -14,17 +13,9 @@ useSeoMeta({
   description: 'Настройки профиля пользователя',
 })
 
-const { data: user, status: userStatus, refresh: refreshUser } = await useFetch<UserWithLanguage>('/api/v1/user')
-const { data: contactsData, status: contactsStatus, refresh: refreshContacts } = await useFetch<UserResponseContactsList>('/api/v1/user/contacts')
-const { data: sessionsData, status: sessionsStatus, refresh: refreshSessions } = await useFetch<UserResponseSessions>('/api/v1/user/sessions')
-
-const userLoading = computed(() => userStatus.value === 'pending' && !user.value)
-const contactsLoading = computed(() => contactsStatus.value === 'pending' && !contactsData.value)
-const sessionsLoading = computed(() => sessionsStatus.value === 'pending' && !sessionsData.value)
-
-const { updateFirstName, updateLastName, updateTimezone, updateLanguage } = useUser()
-const { addContact, deleteContact, verifyContact } = useContacts()
-const { closeAllSessions } = useSessions()
+const { user, loading: userLoading, updateFirstName, updateLastName, updateTimezone, updateLanguage } = useUser()
+const { contacts, loading: contactsLoading, addContact, deleteContact, verifyContact } = useContacts()
+const { currentSession, otherSessions, loading: sessionsLoading, closeAllSessions } = useSessions()
 const toast = useToast()
 
 const isEditing = ref<'first_name' | 'last_name' | 'timezone' | 'language' | null>(null)
@@ -53,7 +44,7 @@ const startEdit = (field: 'first_name' | 'last_name' | 'timezone' | 'language') 
     editValue.value = user.value?.timezone ?? 'Europe/Moscow'
   }
   else {
-    editValue.value = user.value?.language ?? 'ru'
+    editValue.value = (user.value as Record<string, string> | null)?.language ?? 'ru'
   }
 
   nextTick(() => {
@@ -88,7 +79,6 @@ const saveEdit = async () => {
       await updateLanguage(editValue.value)
     }
 
-    await refreshUser()
     toast.success('Сохранено')
     isEditing.value = null
     editValue.value = ''
@@ -99,7 +89,7 @@ const saveEdit = async () => {
 }
 
 const currentLanguageLabel = computed(() => {
-  const code = user.value?.language ?? 'ru'
+  const code = (user.value as Record<string, string> | null)?.language ?? 'ru'
   return languageOptions.find(l => l.value === code)?.label ?? 'Русский'
 })
 
@@ -146,7 +136,7 @@ const handleAddContact = async () => {
     ? `@${rawValue}`
     : rawValue
 
-  const isDuplicate = contactsData.value?.contacts?.some(
+  const isDuplicate = contacts.value.some(
     c => c.value?.toLowerCase() === value.toLowerCase(),
   )
 
@@ -157,7 +147,6 @@ const handleAddContact = async () => {
 
   try {
     await addContact(newContactKind.value, value)
-    await refreshContacts()
     toast.success('Контакт добавлен')
     cancelAddContact()
   }
@@ -169,7 +158,6 @@ const handleAddContact = async () => {
 const handleDeleteContact = async (id: string) => {
   try {
     await deleteContact(id)
-    await refreshContacts()
     toast.success('Контакт удалён')
   }
   catch {
@@ -199,23 +187,18 @@ const handleVerifyContact = async () => {
     return
   }
 
-  await refreshContacts()
   toast.success('Контакт подтверждён')
   cancelVerifyContact()
 }
 
-const currentSession = computed(() =>
-  sessionsData.value?.sessions?.find(s => s.current === true),
-)
-
-const otherSessions = computed(() =>
-  sessionsData.value?.sessions?.filter(s => s.current !== true) ?? [],
-)
-
 const handleCloseAllSessions = async () => {
-  await closeAllSessions()
-  await refreshSessions()
-  toast.success('Все сессии закрыты')
+  try {
+    await closeAllSessions()
+    toast.success('Все сессии закрыты')
+  }
+  catch {
+    toast.error('Не удалось закрыть сессии')
+  }
 }
 </script>
 
@@ -450,7 +433,7 @@ const handleCloseAllSessions = async () => {
           class="space-y-3"
         >
           <div
-            v-for="contact in contactsData?.contacts"
+            v-for="contact in contacts"
             :key="contact.id"
             class="flex items-center justify-between p-3 rounded"
             :class="contact.verified ? 'bg-success/10' : 'bg-warning/10'"

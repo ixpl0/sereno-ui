@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { EventResponseSingleAlert } from '~/api/types.gen'
 import { formatDateTime, formatStatus, getStatusColor } from '~/utils/formatters'
 
 const route = useRoute()
@@ -10,16 +9,20 @@ definePageMeta({
   title: 'Алерт',
 })
 
-const alertsComposable = useAlerts()
-const { currentStatus, addComment, deleteComment, addLabel, deleteLabel, addAnnotation, deleteAnnotation, setStatus } = alertsComposable
+const { currentStatus, fetchAlert, addComment, deleteComment, addLabel, deleteLabel, addAnnotation, deleteAnnotation, setStatus } = useAlerts()
 
-const { data, status, refresh } = await useFetch<EventResponseSingleAlert>(
-  `/api/v1/alerts/${route.params.id}`,
-  { key: `alert-${route.params.id}` },
+const alertId = computed(() => route.params.id as string)
+
+const { data: alertData, status: fetchStatus, refresh } = useAsyncData(
+  () => `alert-${alertId.value}`,
+  async () => {
+    const result = await fetchAlert(alertId.value)
+    return result.data
+  },
 )
 
-const alert = computed(() => data.value?.alert)
-const isLoading = computed(() => status.value === 'pending' && !data.value)
+const alert = computed(() => alertData.value?.alert)
+const isLoading = computed(() => fetchStatus.value === 'pending' && !alertData.value)
 
 const {
   actionLoading,

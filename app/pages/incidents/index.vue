@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { client } from '~/api/client.gen'
-import type { EventResponseIncidentList } from '~/api/types.gen'
 import { formatDateTime, formatStatus, getStatusColor } from '~/utils/formatters'
 
 definePageMeta({
@@ -9,16 +7,10 @@ definePageMeta({
   title: 'Инциденты',
 })
 
-const { currentStatus } = useIncidents()
+const { incidents, loading: isLoading, refresh, currentStatus, setStatus } = useIncidents()
 const { viewMode, setViewMode } = useViewMode('incidents')
 const { error: showError, success: showSuccess } = useToast()
-const { getTenantName, initTenants } = useTenants()
-
-const { data, status, refresh } = await useFetch<EventResponseIncidentList>('/api/v1/incidents')
-await initTenants()
-
-const incidents = computed(() => data.value?.incidents ?? [])
-const isLoading = computed(() => status.value === 'pending' && !data.value)
+const { getTenantName } = useTenants()
 
 const statusFilter = ref<string>('all')
 
@@ -34,19 +26,14 @@ const handleRefresh = async () => {
 }
 
 const handleStatusChange = async (incidentId: string, newStatus: string) => {
-  const response = await client.post({
-    url: '/incidents/{id}/status/set',
-    path: { id: incidentId },
-    body: { status: newStatus as 'acknowledged' | 'resolved' },
-  })
+  const response = await setStatus(incidentId, newStatus as 'acknowledged' | 'resolved')
 
-  if (response.error) {
+  if ('error' in response && response.error) {
     showError('Не удалось изменить статус')
     return
   }
 
   showSuccess(newStatus === 'acknowledged' ? 'Инцидент подтверждён' : 'Инцидент закрыт')
-  await refresh()
 }
 </script>
 

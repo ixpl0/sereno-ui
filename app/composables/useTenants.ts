@@ -1,16 +1,21 @@
 import { getTenants, postTenantsCreate, postTenantsByIdUpdate } from '~/api/sdk.gen'
-import type {
-  TenantResponseTenant,
-  TenantResponseTenantList,
-} from '~/api/types.gen'
-
-let initTenantsPromise: Promise<void> | null = null
+import type { TenantResponseTenant } from '~/api/types.gen'
 
 export const useTenants = () => {
-  const tenants = useState<ReadonlyArray<TenantResponseTenant>>('tenants', () => [])
+  const { data: response, status: fetchStatus, refresh } = useAsyncData(
+    'tenants',
+    async () => {
+      const result = await getTenants()
+      if (result.error) {
+        throw createError({ message: 'Failed to fetch tenants' })
+      }
+      return result.data
+    },
+  )
+
+  const tenants = computed(() => response.value?.tenants ?? [])
+  const loading = computed(() => fetchStatus.value === 'pending')
   const selectedTenantId = useState<string>('selected-tenant-id', () => '')
-  const loading = ref(false)
-  const error = ref<string | null>(null)
 
   const adminTenants = computed(() =>
     tenants.value.filter(t => t.role === 'admin'),
@@ -20,95 +25,36 @@ export const useTenants = () => {
     tenants.value.find(t => t.id === selectedTenantId.value),
   )
 
-  const initTenants = async () => {
-    if (tenants.value.length > 0) {
-      return
+  watch(tenants, (value) => {
+    const first = value[0]
+    if (first && !selectedTenantId.value) {
+      selectedTenantId.value = first.id
     }
-
-    if (initTenantsPromise) {
-      return initTenantsPromise
-    }
-
-    initTenantsPromise = (async () => {
-      const { data } = await useFetch<TenantResponseTenantList>('/api/v1/tenants')
-      if (data.value?.tenants) {
-        tenants.value = data.value.tenants
-        const first = data.value.tenants[0]
-        if (first && !selectedTenantId.value) {
-          selectedTenantId.value = first.id
-        }
-      }
-    })()
-
-    try {
-      await initTenantsPromise
-    }
-    finally {
-      initTenantsPromise = null
-    }
-  }
-
-  const fetchTenants = async () => {
-    loading.value = true
-    error.value = null
-
-    const response = await getTenants()
-
-    loading.value = false
-
-    if (response.data?.tenants) {
-      tenants.value = response.data.tenants
-      const first = response.data.tenants[0]
-      if (first && !selectedTenantId.value) {
-        selectedTenantId.value = first.id
-      }
-    }
-    else {
-      error.value = 'Failed to fetch tenants'
-    }
-
-    return response
-  }
+  }, { immediate: true })
 
   const createTenant = async (name: string) => {
-    loading.value = true
-    error.value = null
-
-    const response = await postTenantsCreate({
+    const result = await postTenantsCreate({
       body: { name },
     })
 
-    loading.value = false
-
-    if (response.data?.tenant) {
-      tenants.value = [...tenants.value, response.data.tenant]
-    }
-    else {
-      error.value = 'Failed to create tenant'
+    if (result.data?.tenant) {
+      await refresh()
     }
 
-    return response
+    return result
   }
 
   const updateTenant = async (id: string, name: string) => {
-    loading.value = true
-    error.value = null
-
-    const response = await postTenantsByIdUpdate({
+    const result = await postTenantsByIdUpdate({
       path: { id },
       body: { name },
     })
 
-    loading.value = false
-
-    if (response.data?.tenant) {
-      tenants.value = tenants.value.map(t => t.id === id ? response.data.tenant : t)
-    }
-    else {
-      error.value = 'Failed to update tenant'
+    if (result.data?.tenant) {
+      await refresh()
     }
 
-    return response
+    return result
   }
 
   const getTenantById = (id: string): TenantResponseTenant | undefined => {
@@ -120,14 +66,12 @@ export const useTenants = () => {
   }
 
   return {
-    tenants: readonly(tenants),
+    tenants,
     selectedTenantId,
     selectedTenant,
     adminTenants,
-    loading: readonly(loading),
-    error: readonly(error),
-    initTenants,
-    fetchTenants,
+    loading,
+    refresh,
     createTenant,
     updateTenant,
     getTenantById,

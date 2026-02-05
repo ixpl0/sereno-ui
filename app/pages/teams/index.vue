@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { TenantResponseTenantList } from '~/api/types.gen'
 import { formatDate } from '~/utils/formatters'
 
 definePageMeta({
@@ -13,11 +12,7 @@ useSeoMeta({
   description: 'Управление командами',
 })
 
-const { data: tenantsData, status, refresh } = await useFetch<TenantResponseTenantList>('/api/v1/tenants')
-
-const loading = computed(() => status.value === 'pending' && !tenantsData.value)
-
-const { createTenant } = useTenants()
+const { tenants, loading, createTenant } = useTenants()
 const toast = useToast()
 
 const isCreating = ref(false)
@@ -50,7 +45,6 @@ const handleCreate = async () => {
     return
   }
 
-  await refresh()
   toast.success('Команда создана')
   cancelCreate()
 }
@@ -119,7 +113,7 @@ const handleCreate = async () => {
           </div>
 
           <UiEmptyState
-            v-if="!tenantsData?.tenants?.length && !isCreating"
+            v-if="tenants.length === 0 && !isCreating"
             icon="lucide:building-2"
             title="У вас пока нет команд"
             action-text="Создать первую команду"
@@ -127,7 +121,7 @@ const handleCreate = async () => {
           />
 
           <NuxtLink
-            v-for="tenant in tenantsData?.tenants"
+            v-for="tenant in tenants"
             :key="tenant.id"
             :to="`/teams/${tenant.id}`"
             class="flex items-center justify-between p-4 bg-base-200/50 hover:bg-base-200 transition-colors rounded"

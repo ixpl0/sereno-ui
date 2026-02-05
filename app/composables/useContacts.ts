@@ -4,12 +4,22 @@ import {
   postUserContactsByIdDelete,
   postUserContactsByIdVerify,
 } from '~/api/sdk.gen'
-import type { UserResponseContact, UserRequestContact } from '~/api/types.gen'
+import type { UserRequestContact } from '~/api/types.gen'
 
 export const useContacts = () => {
-  const contacts = useState<ReadonlyArray<UserResponseContact>>('contacts', () => [])
-  const loading = ref(false)
-  const error = ref<string | null>(null)
+  const { data: response, status: fetchStatus, refresh } = useAsyncData(
+    'contacts',
+    async () => {
+      const result = await getUserContacts()
+      if (result.error) {
+        throw createError({ message: 'Failed to fetch contacts' })
+      }
+      return result.data
+    },
+  )
+
+  const contacts = computed(() => response.value?.contacts ?? [])
+  const loading = computed(() => fetchStatus.value === 'pending')
 
   const verifiedContacts = computed(() =>
     contacts.value.filter(c => c.verified === true),
@@ -19,93 +29,49 @@ export const useContacts = () => {
     contacts.value.filter(c => c.verified !== true),
   )
 
-  const fetchContacts = async () => {
-    loading.value = true
-    error.value = null
-
-    const response = await getUserContacts()
-
-    loading.value = false
-
-    if (response.data?.contacts) {
-      contacts.value = response.data.contacts
-    }
-    else {
-      error.value = 'Failed to fetch contacts'
-    }
-
-    return response
-  }
-
   const addContact = async (kind: UserRequestContact['kind'], value: string) => {
-    loading.value = true
-    error.value = null
-
-    const response = await postUserContactsAdd({
+    const result = await postUserContactsAdd({
       body: { kind, value },
     })
 
-    loading.value = false
-
-    if (response.data?.contact) {
-      contacts.value = [...contacts.value, response.data.contact]
-    }
-    else {
-      error.value = 'Failed to add contact'
+    if (result.data?.contact) {
+      await refresh()
     }
 
-    return response
+    return result
   }
 
   const deleteContact = async (id: string) => {
-    loading.value = true
-    error.value = null
-
-    const response = await postUserContactsByIdDelete({
+    const result = await postUserContactsByIdDelete({
       path: { id },
     })
 
-    loading.value = false
-
-    if (response.error) {
-      error.value = 'Failed to delete contact'
-    }
-    else {
-      contacts.value = contacts.value.filter(c => c.id !== id)
+    if (!result.error) {
+      await refresh()
     }
 
-    return response
+    return result
   }
 
   const verifyContact = async (id: string, code: string) => {
-    loading.value = true
-    error.value = null
-
-    const response = await postUserContactsByIdVerify({
+    const result = await postUserContactsByIdVerify({
       path: { id },
       body: { code },
     })
 
-    loading.value = false
-
-    const verifiedContact = response.data?.contact
-    if (verifiedContact) {
-      contacts.value = contacts.value.map(c => c.id === id ? verifiedContact : c)
-    }
-    else {
-      error.value = 'Failed to verify contact'
+    if (result.data?.contact) {
+      await refresh()
     }
 
-    return response
+    return result
   }
 
   return {
-    contacts: readonly(contacts),
+    contacts,
     verifiedContacts,
     unverifiedContacts,
-    loading: readonly(loading),
-    error: readonly(error),
-    fetchContacts,
+    loading,
+    refresh,
     addContact,
     deleteContact,
     verifyContact,

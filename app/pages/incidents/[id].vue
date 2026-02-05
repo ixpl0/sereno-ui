@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { EventResponseSingleIncident, EventResponseAlertList } from '~/api/types.gen'
 import { formatDateTime, formatStatus, getStatusColor } from '~/utils/formatters'
 
 const route = useRoute()
@@ -10,7 +9,6 @@ definePageMeta({
   title: 'Инцидент',
 })
 
-const incidentsComposable = useIncidents()
 const {
   currentStatus,
   addComment,
@@ -20,19 +18,23 @@ const {
   setStatus,
   addAlert,
   removeAlert,
-} = incidentsComposable
-const { currentStatus: alertCurrentStatus } = useAlerts()
+} = useIncidents()
+const { alerts: allAlerts, currentStatus: alertCurrentStatus } = useAlerts()
 const toast = useToast()
 
-const { data, status, refresh } = await useFetch<EventResponseSingleIncident>(
-  `/api/v1/incidents/${route.params.id}`,
-  { key: `incident-${route.params.id}` },
+const incidentId = computed(() => route.params.id as string)
+
+const { data: incidentData, status: fetchStatus, refresh } = useAsyncData(
+  () => `incident-${incidentId.value}`,
+  async () => {
+    const { fetchIncident } = useIncidents()
+    const result = await fetchIncident(incidentId.value)
+    return result.data
+  },
 )
 
-const { data: alertsData } = await useFetch<EventResponseAlertList>('/api/v1/alerts')
-
-const incident = computed(() => data.value?.incident)
-const isLoading = computed(() => status.value === 'pending' && !data.value)
+const incident = computed(() => incidentData.value?.incident)
+const isLoading = computed(() => fetchStatus.value === 'pending' && !incidentData.value)
 
 const {
   actionLoading,
@@ -49,7 +51,7 @@ const {
 
 const availableAlerts = computed(() => {
   const linkedIds = new Set(incident.value?.alerts.map(a => a.id) ?? [])
-  return (alertsData.value?.alerts ?? []).filter(a => !linkedIds.has(a.id))
+  return allAlerts.value.filter(a => !linkedIds.has(a.id))
 })
 
 const isAddingAlert = ref(false)

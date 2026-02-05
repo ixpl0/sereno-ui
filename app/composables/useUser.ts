@@ -1,48 +1,32 @@
 import { getUser, postUserUpdate } from '~/api/sdk.gen'
-import type { UserResponseUser, UserRequestParameter } from '~/api/types.gen'
+import type { UserRequestParameter } from '~/api/types.gen'
 
 export const useUser = () => {
-  const user = useState<UserResponseUser | null>('user', () => null)
-  const loading = ref(false)
-  const error = ref<string | null>(null)
+  const { data: response, status: fetchStatus, refresh } = useAsyncData(
+    'user',
+    async () => {
+      const result = await getUser()
+      if (result.error) {
+        throw createError({ message: 'Failed to fetch user' })
+      }
+      return result.data
+    },
+  )
 
-  const fetchUser = async () => {
-    loading.value = true
-    error.value = null
-
-    const response = await getUser()
-
-    loading.value = false
-
-    if (response.data?.user) {
-      user.value = response.data.user
-    }
-    else {
-      error.value = 'Failed to fetch user'
-    }
-
-    return response
-  }
+  const user = computed(() => response.value?.user ?? null)
+  const loading = computed(() => fetchStatus.value === 'pending')
 
   const updateUserParameter = async (
     kind: UserRequestParameter['kind'],
     value: string,
   ) => {
-    loading.value = true
-    error.value = null
+    const result = await postUserUpdate({ body: { kind, value } })
 
-    const response = await postUserUpdate({ body: { kind, value } })
-
-    loading.value = false
-
-    if (response.data?.user) {
-      user.value = response.data.user
-    }
-    else {
-      error.value = 'Failed to update user'
+    if (result.data?.user) {
+      await refresh()
     }
 
-    return response
+    return result
   }
 
   const updateFirstName = (value: string) => updateUserParameter('first_name', value)
@@ -51,10 +35,9 @@ export const useUser = () => {
   const updateLanguage = (value: string) => updateUserParameter('language', value)
 
   return {
-    user: readonly(user),
-    loading: readonly(loading),
-    error: readonly(error),
-    fetchUser,
+    user,
+    loading,
+    refresh,
     updateFirstName,
     updateLastName,
     updateTimezone,

@@ -32,5 +32,13 @@ export default defineEventHandler(async (event) => {
 
   const createdToken = createMockTenantToken(tenantId, body.name.trim())
 
-  return { token: createdToken }
+  return {
+    token: {
+      id: createdToken.id,
+      name: createdToken.name,
+      created: createdToken.since,
+      creator: 'mock-user',
+      value: createdToken.value,
+    },
+  }
 })

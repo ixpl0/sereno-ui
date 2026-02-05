@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import type { UserResponseUser } from '~/api/types.gen'
-
 useSeoMeta({
   titleTemplate: '%s | Sereno',
   ogSiteName: 'Sereno',
@@ -8,10 +6,8 @@ useSeoMeta({
 })
 
 const { logout } = useAuth()
+const { user } = useUser()
 const router = useRouter()
-
-const { data: user } = await useFetch<UserResponseUser>('/api/v1/user')
-const userOrNull = computed(() => user.value ?? null)
 
 const handleLogout = async () => {
   await logout()
@@ -28,7 +24,7 @@ const handleLogout = async () => {
     </div>
 
     <LayoutPublicHeader
-      :user="userOrNull"
+      :user="user"
       @logout="handleLogout"
     />
 

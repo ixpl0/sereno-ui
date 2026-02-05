@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import type { TenantResponseTenantList } from '~/api/types.gen'
-
 definePageMeta({
   middleware: 'auth',
   layout: 'default',
@@ -9,11 +7,8 @@ definePageMeta({
 
 const router = useRouter()
 const { createIncident } = useIncidents()
+const { tenants } = useTenants()
 const toast = useToast()
-
-const { data: tenantsData } = await useFetch<TenantResponseTenantList>('/api/v1/tenants')
-
-const tenants = computed(() => tenantsData.value?.tenants ?? [])
 
 const form = ref({
   tenantId: '',

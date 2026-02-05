@@ -21,7 +21,6 @@ interface SdkFunctions<TList, TSingle> {
 
 interface EventEntityConfig<TEntity, TList, TSingle> {
   stateKey: string
-  totalKey: string
   sdk: SdkFunctions<TList, TSingle>
   getListItems: (data: TList) => ReadonlyArray<TEntity>
   getListTotal: (data: TList) => number
@@ -33,160 +32,94 @@ export const useEventEntity = <
   TList,
   TSingle,
 >(config: EventEntityConfig<TEntity, TList, TSingle>) => {
-  const items = useState<ReadonlyArray<TEntity>>(config.stateKey, () => [])
-  const total = useState<number>(config.totalKey, () => 0)
-  const loading = ref(false)
-  const error = ref<string | null>(null)
+  const { data: response, status: fetchStatus, refresh } = useAsyncData<TList>(
+    config.stateKey,
+    async () => {
+      const result = await config.sdk.getList()
+      if (result.error !== undefined || result.data === undefined) {
+        throw createError({ message: `Failed to fetch ${config.stateKey}` })
+      }
+      return result.data
+    },
+  )
 
-  const setLoading = (value: boolean) => {
-    loading.value = value
-  }
-
-  const setError = (message: string | null) => {
-    error.value = message
-  }
-
-  const updateItem = (id: string, updatedItem: TEntity) => {
-    items.value = items.value.map(item => item.id === id ? updatedItem : item)
-  }
-
-  const fetchList = async (limit?: number, offset?: number) => {
-    setLoading(true)
-    setError(null)
-
-    const response = await config.sdk.getList({ query: { limit, offset } })
-
-    setLoading(false)
-
-    if (response.error === undefined && response.data !== undefined) {
-      items.value = config.getListItems(response.data)
-      total.value = config.getListTotal(response.data)
-    }
-    else {
-      setError(`Failed to fetch ${config.stateKey}`)
-    }
-
-    return response
-  }
+  const items = computed(() => response.value ? config.getListItems(response.value as TList) : [])
+  const total = computed(() => response.value ? config.getListTotal(response.value as TList) : 0)
+  const loading = computed(() => fetchStatus.value === 'pending')
 
   const fetchSingle = async (id: string) => {
-    setLoading(true)
-    setError(null)
+    const result = await config.sdk.getSingle({ path: { id } })
 
-    const response = await config.sdk.getSingle({ path: { id } })
-
-    setLoading(false)
-
-    if (response.error !== undefined || response.data === undefined) {
-      setError(`Failed to fetch item`)
+    if (result.error !== undefined || result.data === undefined) {
+      throw createError({ message: 'Failed to fetch item' })
     }
 
-    return response
+    return result
   }
 
   const addComment = async (entityId: string, text: string) => {
-    setLoading(true)
-    setError(null)
-
-    const response = await config.sdk.addComment({
+    const result = await config.sdk.addComment({
       path: { id: entityId },
       body: { text },
     })
 
-    setLoading(false)
-
-    if (response.error === undefined && response.data !== undefined) {
-      updateItem(entityId, config.getSingleItem(response.data))
-    }
-    else {
-      setError('Failed to add comment')
+    if (result.error === undefined && result.data !== undefined) {
+      await refresh()
     }
 
-    return response
+    return result
   }
 
   const deleteComment = async (entityId: string, commentId: string) => {
-    setLoading(true)
-    setError(null)
-
-    const response = await config.sdk.deleteComment({
+    const result = await config.sdk.deleteComment({
       path: { id: entityId },
       body: { id: commentId },
     })
 
-    setLoading(false)
-
-    if (response.error === undefined && response.data !== undefined) {
-      updateItem(entityId, config.getSingleItem(response.data))
-    }
-    else {
-      setError('Failed to delete comment')
+    if (result.error === undefined && result.data !== undefined) {
+      await refresh()
     }
 
-    return response
+    return result
   }
 
   const addLabel = async (entityId: string, key: string, value: string) => {
-    setLoading(true)
-    setError(null)
-
-    const response = await config.sdk.addLabel({
+    const result = await config.sdk.addLabel({
       path: { id: entityId },
       body: { key, value },
     })
 
-    setLoading(false)
-
-    if (response.error === undefined && response.data !== undefined) {
-      updateItem(entityId, config.getSingleItem(response.data))
-    }
-    else {
-      setError('Failed to add label')
+    if (result.error === undefined && result.data !== undefined) {
+      await refresh()
     }
 
-    return response
+    return result
   }
 
   const deleteLabel = async (entityId: string, key: string) => {
-    setLoading(true)
-    setError(null)
-
-    const response = await config.sdk.deleteLabel({
+    const result = await config.sdk.deleteLabel({
       path: { id: entityId },
       body: { key },
     })
 
-    setLoading(false)
-
-    if (response.error === undefined && response.data !== undefined) {
-      updateItem(entityId, config.getSingleItem(response.data))
-    }
-    else {
-      setError('Failed to delete label')
+    if (result.error === undefined && result.data !== undefined) {
+      await refresh()
     }
 
-    return response
+    return result
   }
 
   const setStatus = async (entityId: string, status: 'acknowledged' | 'resolved') => {
-    setLoading(true)
-    setError(null)
-
-    const response = await config.sdk.setStatus({
+    const result = await config.sdk.setStatus({
       path: { id: entityId },
       body: { status },
     })
 
-    setLoading(false)
-
-    if (response.error === undefined && response.data !== undefined) {
-      updateItem(entityId, config.getSingleItem(response.data))
-    }
-    else {
-      setError('Failed to set status')
+    if (result.error === undefined && result.data !== undefined) {
+      await refresh()
     }
 
-    return response
+    return result
   }
 
   const getById = (id: string): TEntity | undefined => {
@@ -195,10 +128,9 @@ export const useEventEntity = <
 
   return {
     items,
-    total: readonly(total),
-    loading: readonly(loading),
-    error: readonly(error),
-    fetchList,
+    total,
+    loading,
+    refresh,
     fetchSingle,
     addComment,
     deleteComment,
@@ -206,9 +138,7 @@ export const useEventEntity = <
     deleteLabel,
     setStatus,
     getById,
-    updateItem,
-    setLoading,
-    setError,
+    getSingleItem: config.getSingleItem,
     currentStatus: getCurrentEventStatus,
   }
 }
