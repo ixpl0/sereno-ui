@@ -1,11 +1,3 @@
-export interface ApiErrorDetail {
-  error: string
-  message?: string
-  code?: string
-  statusMessage?: string
-  statusCode?: number
-}
-
 export type SdkResponse<TData, TError = unknown>
   = | { data: TData, error: undefined }
     | { data: undefined, error: TError }

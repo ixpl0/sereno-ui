@@ -145,7 +145,7 @@ describe('UiPinInput', () => {
         global: globalConfig,
       })
       const input = wrapper.find('input')
-      expect(input.classes()).toContain('border-base-content/20')
+      expect(input.classes()).toContain('input-bordered')
     })
 
     it('applies error state classes', () => {
@@ -154,7 +154,7 @@ describe('UiPinInput', () => {
         global: globalConfig,
       })
       const input = wrapper.find('input')
-      expect(input.classes()).toContain('border-error')
+      expect(input.classes()).toContain('input-error')
     })
 
     it('applies success state classes', () => {
@@ -163,7 +163,7 @@ describe('UiPinInput', () => {
         global: globalConfig,
       })
       const input = wrapper.find('input')
-      expect(input.classes()).toContain('border-success')
+      expect(input.classes()).toContain('input-success')
     })
   })
 

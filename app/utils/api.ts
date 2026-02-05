@@ -1,17 +1,9 @@
-import type { ApiErrorDetail, SdkResponse } from '~/types/api'
+import type { SdkResponse } from '~/types/api'
 
 export const isApiError = <T, E = unknown>(
   response: SdkResponse<T, E>,
 ): response is { data: undefined, error: E } => {
   return response.error !== undefined
-}
-
-const isApiErrorDetail = (value: unknown): value is ApiErrorDetail => {
-  if (typeof value !== 'object' || value === null) {
-    return false
-  }
-  const obj = value as Record<string, unknown>
-  return typeof obj.error === 'string' || typeof obj.message === 'string'
 }
 
 export const extractApiError = <E>(
@@ -24,17 +16,16 @@ export const extractApiError = <E>(
     return error
   }
 
-  if (!error) {
+  if (!error || typeof error !== 'object') {
     return fallback
   }
 
-  if (isApiErrorDetail(error)) {
-    if (error.error) {
-      return error.error
-    }
-    if (error.message) {
-      return error.message
-    }
+  const obj = error as Record<string, unknown>
+  if (obj.error) {
+    return String(obj.error)
+  }
+  if (obj.message) {
+    return String(obj.message)
   }
 
   return fallback
@@ -42,9 +33,9 @@ export const extractApiError = <E>(
 
 export const getApiData = <T, E = unknown>(
   response: SdkResponse<T, E>,
-): T | undefined => {
+): T | null => {
   if (response.data !== undefined) {
     return response.data
   }
-  return undefined
+  return null
 }
