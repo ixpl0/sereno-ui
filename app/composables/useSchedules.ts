@@ -19,6 +19,9 @@ export const useSchedules = (tenantId: Ref<string>) => {
     () => `schedules-${tenantId.value}`,
     async () => {
       if (!tenantId.value) {
+        await waitForRef(tenantId)
+      }
+      if (!tenantId.value) {
         return null
       }
       const result = await client.get<{ 200: TenantResponseScheduleList }>({

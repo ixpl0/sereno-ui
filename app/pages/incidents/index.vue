@@ -105,7 +105,7 @@ const handleStatusChange = async (incidentId: string, newStatus: string) => {
 
       <div
         v-else-if="viewMode === 'cards'"
-        class="flex flex-col gap-3"
+        class="flex flex-col gap-3 animate-slide-up"
       >
         <EventIncidentCard
           v-for="incident in filteredIncidents"

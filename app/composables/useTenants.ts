@@ -2,6 +2,11 @@ import { getTenants, postTenantsCreate, postTenantsByIdUpdate } from '~/api/sdk.
 import type { TenantResponseTenant } from '~/api/types.gen'
 
 export const useTenants = () => {
+  const selectedTenantId = useCookie('selected-tenant-id', {
+    default: () => '',
+    sameSite: 'lax' as const,
+  })
+
   const { data: response, status: fetchStatus, refresh } = useAsyncData(
     'tenants',
     async () => {
@@ -9,13 +14,17 @@ export const useTenants = () => {
       if (result.error) {
         throw createError({ message: 'Failed to fetch tenants' })
       }
+      const list = result.data?.tenants ?? []
+      const first = list[0]
+      if (first && !list.some(t => t.id === selectedTenantId.value)) {
+        selectedTenantId.value = first.id
+      }
       return result.data
     },
   )
 
   const tenants = computed(() => response.value?.tenants ?? [])
   const loading = computed(() => fetchStatus.value === 'pending')
-  const selectedTenantId = useState<string>('selected-tenant-id', () => '')
 
   const adminTenants = computed(() =>
     tenants.value.filter(t => t.role === 'admin'),
@@ -27,7 +36,7 @@ export const useTenants = () => {
 
   watch(tenants, (value) => {
     const first = value[0]
-    if (first && !selectedTenantId.value) {
+    if (first && !value.some(t => t.id === selectedTenantId.value)) {
       selectedTenantId.value = first.id
     }
   }, { immediate: true })

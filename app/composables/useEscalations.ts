@@ -27,6 +27,9 @@ export const useEscalations = (tenantId: Ref<string>) => {
     () => `escalations-${tenantId.value}`,
     async () => {
       if (!tenantId.value) {
+        await waitForRef(tenantId)
+      }
+      if (!tenantId.value) {
         return null
       }
       const result = await getTenantsByIdEscalations({
