@@ -203,7 +203,6 @@ All composables in `app/composables/`:
 | **useTheme** | Theme preference (light/dark/system), cookie persistence |
 | **useBreakpoints** | Responsive breakpoints helper (SSR-safe) |
 | **useViewMode** | Toggle between cards/table view, persisted in cookie |
-| **useEditableField** | Inline editable field state management |
 | **useMobileMenus** | Mobile menu open/close state, SSR-safe |
 | **useInlineAdd** | Inline add form state (isAdding, values, start/cancel) |
 | **useEventDetailActions** | Common actions for alert/incident detail pages |
@@ -287,7 +286,7 @@ Utility functions in `app/utils/`:
 
 | File | Functions |
 |------|-----------|
-| **api.ts** | `isApiError`, `extractApiError`, `getApiData`, `withLoadingState` - API response handling |
+| **api.ts** | `isApiError`, `extractApiError`, `getApiData` - API response handling |
 | **url.ts** | `isValidRedirectUrl`, `safeRedirect` - secure redirect validation |
 | **validation.ts** | `isValidEmail`, `isValidTelegram` - input validation |
 | **formatters.ts** | `formatDate`, `formatDateTime`, `formatDateTimeLocal`, `formatStatus`, `getStatusColor` - display formatting |
