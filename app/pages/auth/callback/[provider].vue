@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { OAuthProvider } from '~/types/auth'
+import { isOAuthProvider } from '~/types/auth'
 import { extractApiError } from '~/utils/api'
-import { MOCK_OAUTH_PROVIDERS, MOCK_OAUTH_PROVIDER_CONFIG } from '~~/server/utils/mockAuth'
+import { MOCK_OAUTH_PROVIDER_CONFIG } from '~~/server/utils/mockAuth'
 
 definePageMeta({
   layout: 'auth',
@@ -11,15 +11,15 @@ const route = useRoute()
 const router = useRouter()
 const auth = useAuth()
 
-const provider = computed(() => route.params.provider as string)
+const providerParam = computed(() => route.params.provider as string)
 
-const isValidProvider = computed(() =>
-  MOCK_OAUTH_PROVIDERS.includes(provider.value as OAuthProvider),
+const validatedProvider = computed(() =>
+  isOAuthProvider(providerParam.value) ? providerParam.value : null,
 )
 
 const providerConfig = computed(() =>
-  isValidProvider.value
-    ? MOCK_OAUTH_PROVIDER_CONFIG[provider.value as OAuthProvider]
+  validatedProvider.value !== null
+    ? MOCK_OAUTH_PROVIDER_CONFIG[validatedProvider.value]
     : null,
 )
 
@@ -27,9 +27,9 @@ const status = ref<'loading' | 'success' | 'error'>('loading')
 const errorMessage = ref<string | null>(null)
 
 const handleCallback = async () => {
-  if (!isValidProvider.value) {
+  if (validatedProvider.value === null) {
     status.value = 'error'
-    errorMessage.value = `Неизвестный провайдер: ${provider.value}`
+    errorMessage.value = `Неизвестный провайдер: ${providerParam.value}`
     return
   }
 
@@ -63,7 +63,7 @@ const handleCallback = async () => {
   }, {})
 
   const response = await auth.handleOAuthCallback(
-    provider.value as OAuthProvider,
+    validatedProvider.value,
     Object.keys(callbackParams).length > 0 ? callbackParams : undefined,
   )
 

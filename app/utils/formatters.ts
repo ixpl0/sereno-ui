@@ -79,8 +79,11 @@ const STATUS_STYLE_DEFAULTS: Record<StatusStyleType, string> = {
   bg: 'bg-base-content/10',
 }
 
+const isStatusStyleKey = (value: string | undefined): value is StatusStyleKey =>
+  value !== undefined && value in STATUS_STYLES
+
 const getStatusStyle = (status: string | undefined, type: StatusStyleType): string =>
-  STATUS_STYLES[status as StatusStyleKey]?.[type] ?? STATUS_STYLE_DEFAULTS[type]
+  isStatusStyleKey(status) ? STATUS_STYLES[status][type] : STATUS_STYLE_DEFAULTS[type]
 
 export const getStatusColor = (status: string | undefined): string =>
   getStatusStyle(status, 'badge')

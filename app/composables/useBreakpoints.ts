@@ -1,29 +1,29 @@
 type Breakpoints = Record<string, number>
 
-interface ThrottledFn<T extends (...args: unknown[]) => void> {
-  fn: T
+interface ThrottledFn {
+  fn: () => void
   cancel: () => void
 }
 
-const createThrottledFn = <T extends (...args: unknown[]) => void>(fn: T, delay: number): ThrottledFn<T> => {
+const createThrottledFn = (fn: () => void, delay: number): ThrottledFn => {
   let timeoutId: ReturnType<typeof setTimeout> | null = null
   let lastRun = 0
 
-  const throttled = ((...args: unknown[]) => {
+  const throttled = () => {
     const now = Date.now()
 
     if (now - lastRun >= delay) {
-      fn(...args)
+      fn()
       lastRun = now
     }
     else if (!timeoutId) {
       timeoutId = setTimeout(() => {
-        fn(...args)
+        fn()
         lastRun = Date.now()
         timeoutId = null
       }, delay - (now - lastRun))
     }
-  }) as T
+  }
 
   const cancel = () => {
     if (timeoutId) {

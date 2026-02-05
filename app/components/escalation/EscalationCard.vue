@@ -3,7 +3,13 @@ import type {
   TenantResponseEscalationStep,
   TenantRequestEscalation,
   TenantRequestEscalationStep,
+  TenantRequestEscalationRule,
 } from '~/api/types.gen'
+
+type RuleEvent = TenantRequestEscalationRule['event']
+const VALID_EVENTS: ReadonlyArray<NonNullable<RuleEvent>> = ['alert', 'incident']
+const isValidEvent = (value: string | undefined): value is RuleEvent =>
+  value === undefined || VALID_EVENTS.includes(value as NonNullable<RuleEvent>)
 
 interface EscalationData {
   id: string
@@ -105,7 +111,7 @@ const handleSave = async () => {
     steps,
     rules: props.escalation.rules.map(rule => ({
       description: rule.description,
-      event: rule.event as 'alert' | 'incident' | undefined,
+      event: isValidEvent(rule.event) ? rule.event : undefined,
       labels: rule.labels,
     })),
   }

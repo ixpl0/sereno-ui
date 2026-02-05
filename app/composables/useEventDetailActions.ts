@@ -1,30 +1,33 @@
-import type { ApiResponse } from '~/types/api'
-
 interface EventEntity {
   id: string
 }
 
-interface EventActions<T> {
-  addComment: (id: string, text: string) => Promise<ApiResponse<T>>
-  deleteComment: (id: string, commentId: string) => Promise<ApiResponse<T>>
-  addLabel: (id: string, key: string, value: string) => Promise<ApiResponse<T>>
-  deleteLabel: (id: string, key: string) => Promise<ApiResponse<T>>
-  setStatus: (id: string, status: 'acknowledged' | 'resolved') => Promise<ApiResponse<T>>
+interface ActionResponse {
+  data: unknown
+  error: unknown
 }
 
-interface EventDetailActionsOptions<T> {
+interface EventActions {
+  addComment: (id: string, text: string) => Promise<ActionResponse>
+  deleteComment: (id: string, commentId: string) => Promise<ActionResponse>
+  addLabel: (id: string, key: string, value: string) => Promise<ActionResponse>
+  deleteLabel: (id: string, key: string) => Promise<ActionResponse>
+  setStatus: (id: string, status: 'acknowledged' | 'resolved') => Promise<ActionResponse>
+}
+
+interface EventDetailActionsOptions {
   entityRef: Ref<EventEntity | undefined>
-  actions: EventActions<T>
+  actions: EventActions
   refresh: () => Promise<void>
 }
 
-export const useEventDetailActions = <T>(options: EventDetailActionsOptions<T>) => {
+export const useEventDetailActions = (options: EventDetailActionsOptions) => {
   const { entityRef, actions, refresh } = options
   const toast = useToast()
   const actionLoading = ref(false)
 
-  const executeAction = async <R>(
-    action: (entityId: string) => Promise<ApiResponse<R>>,
+  const executeAction = async (
+    action: (entityId: string) => Promise<ActionResponse>,
     errorMessage: string,
     successMessage: string,
   ): Promise<boolean> => {
@@ -37,7 +40,7 @@ export const useEventDetailActions = <T>(options: EventDetailActionsOptions<T>) 
     const response = await action(entity.id)
     actionLoading.value = false
 
-    if ('error' in response && response.error) {
+    if (response.error) {
       toast.error(errorMessage)
       return false
     }

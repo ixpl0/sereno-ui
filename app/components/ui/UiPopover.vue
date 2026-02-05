@@ -66,10 +66,12 @@ const updatePosition = () => {
 }
 
 const handleDocumentClick = (event: MouseEvent) => {
-  const target = event.target as Node
+  if (!(event.target instanceof Node)) {
+    return
+  }
 
-  const isInsideTrigger = triggerRef.value?.contains(target) ?? false
-  const isInsidePopover = popoverRef.value?.contains(target) ?? false
+  const isInsideTrigger = triggerRef.value?.contains(event.target) ?? false
+  const isInsidePopover = popoverRef.value?.contains(event.target) ?? false
 
   if (!isInsideTrigger && !isInsidePopover) {
     emit('update:open', false)
@@ -104,7 +106,15 @@ onUnmounted(() => {
 type TriggerRefSetter = (el: Element | ComponentPublicInstance | null) => void
 
 const setTriggerRef: TriggerRefSetter = (el) => {
-  triggerRef.value = el as HTMLElement | null
+  if (el instanceof HTMLElement) {
+    triggerRef.value = el
+  }
+  else if (el && '$el' in el && el.$el instanceof HTMLElement) {
+    triggerRef.value = el.$el
+  }
+  else {
+    triggerRef.value = null
+  }
 }
 
 defineExpose({

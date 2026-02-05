@@ -7,9 +7,23 @@ import {
 import type {
   TenantResponseEscalation,
   TenantRequestEscalation,
+  TenantRequestEscalationStep,
+  TenantRequestEscalationRule,
 } from '~/api/types.gen'
 
 type EscalationsCache = Record<string, ReadonlyArray<TenantResponseEscalation>>
+
+type StepPosition = TenantRequestEscalationStep['position']
+type RuleEvent = TenantRequestEscalationRule['event']
+
+const VALID_POSITIONS: ReadonlyArray<NonNullable<StepPosition>> = ['current', 'next', 'previous', 'all']
+const VALID_EVENTS: ReadonlyArray<NonNullable<RuleEvent>> = ['alert', 'incident']
+
+const isValidPosition = (value: string | undefined): value is StepPosition =>
+  value === undefined || VALID_POSITIONS.includes(value as NonNullable<StepPosition>)
+
+const isValidEvent = (value: string | undefined): value is RuleEvent =>
+  value === undefined || VALID_EVENTS.includes(value as NonNullable<RuleEvent>)
 
 export const useEscalations = (tenantId: Ref<string>) => {
   const escalationsCache = useState<EscalationsCache>('escalations-cache', () => ({}))
@@ -125,12 +139,12 @@ export const useEscalations = (tenantId: Ref<string>) => {
         delay: step.delay,
         description: step.description,
         member: step.member,
-        position: step.position as 'current' | 'next' | 'previous' | 'all' | undefined,
+        position: isValidPosition(step.position) ? step.position : undefined,
         schedule: step.schedule,
       })),
       rules: escalation.rules.map(rule => ({
         description: rule.description,
-        event: rule.event as 'alert' | 'incident' | undefined,
+        event: isValidEvent(rule.event) ? rule.event : undefined,
         labels: rule.labels ? { ...rule.labels } : undefined,
       })),
     }

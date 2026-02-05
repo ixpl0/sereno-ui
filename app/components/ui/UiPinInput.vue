@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { ComponentPublicInstance } from 'vue'
+
 interface Props {
   modelValue?: string
   length?: number
@@ -28,6 +30,12 @@ const emit = defineEmits<{
 
 const inputRefs = ref<(HTMLInputElement | null)[]>([])
 const values = ref<string[]>(Array.from({ length: props.length }, () => ''))
+
+const setInputRef = (index: number, el: Element | ComponentPublicInstance | null) => {
+  if (el instanceof HTMLInputElement) {
+    inputRefs.value[index] = el
+  }
+}
 
 const groups = computed(() => {
   const result: number[][] = []
@@ -67,8 +75,10 @@ const focusInput = (index: number) => {
 }
 
 const handleInput = (index: number, event: Event) => {
-  const input = event.target as HTMLInputElement
-  const value = input.value.replace(/\D/g, '').slice(-1)
+  if (!(event.target instanceof HTMLInputElement)) {
+    return
+  }
+  const value = event.target.value.replace(/\D/g, '').slice(-1)
 
   values.value = values.value.map((v, i) => (i === index ? value : v))
   emitValue()
@@ -150,7 +160,7 @@ defineExpose({ focus })
           <input
             v-for="index in group"
             :key="index"
-            :ref="(el) => inputRefs[index] = el as HTMLInputElement"
+            :ref="(el) => setInputRef(index, el)"
             type="text"
             inputmode="numeric"
             maxlength="1"

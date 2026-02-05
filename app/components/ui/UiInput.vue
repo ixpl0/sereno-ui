@@ -92,8 +92,10 @@ const inputAttrs = computed(() => {
 const inputRef = ref<HTMLInputElement | null>(null)
 
 const handleInput = (event: Event) => {
-  const target = event.target as HTMLInputElement
-  emit('update:modelValue', target.value)
+  if (!(event.target instanceof HTMLInputElement)) {
+    return
+  }
+  emit('update:modelValue', event.target.value)
 }
 
 const focus = () => {

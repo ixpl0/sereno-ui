@@ -7,12 +7,19 @@ import {
   getAuthLoginByProviderCallback,
 } from '~/api/sdk.gen'
 import type { UserResponseAccessJwt } from '~/api/types.gen'
-import type { OAuthRedirectResponse, SdkResponse } from '~/types/api'
+import type { OAuthRedirectResponse } from '~/types/api'
 import type { OAuthProvider } from '~/types/auth'
 import { useAuthStore } from '~/stores/auth'
 
-type OAuthUrlResponse = SdkResponse<OAuthRedirectResponse, unknown>
-type OAuthCallbackResponse = SdkResponse<UserResponseAccessJwt, unknown>
+interface OAuthUrlResponse {
+  data: OAuthRedirectResponse | undefined
+  error: unknown
+}
+
+interface OAuthCallbackResponse {
+  data: UserResponseAccessJwt | undefined
+  error: unknown
+}
 
 export const useAuth = () => {
   const store = useAuthStore()
@@ -64,12 +71,12 @@ export const useAuth = () => {
       query: params,
     } as Parameters<typeof getAuthLoginByProviderCallback>[0])
 
-    const data = response.data as UserResponseAccessJwt | undefined
-    if (data?.token) {
-      store.setToken(data.token)
+    const typedResponse = response as OAuthCallbackResponse
+    if (typedResponse.data?.token) {
+      store.setToken(typedResponse.data.token)
     }
 
-    return response as OAuthCallbackResponse
+    return typedResponse
   }
 
   return {

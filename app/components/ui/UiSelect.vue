@@ -58,8 +58,10 @@ const selectClasses = computed(() => [
 const selectRef = ref<HTMLSelectElement | null>(null)
 
 const handleChange = (event: Event) => {
-  const target = event.target as HTMLSelectElement
-  emit('update:modelValue', target.value)
+  if (!(event.target instanceof HTMLSelectElement)) {
+    return
+  }
+  emit('update:modelValue', event.target.value)
 }
 
 const focus = () => {

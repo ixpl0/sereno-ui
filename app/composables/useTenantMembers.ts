@@ -58,12 +58,13 @@ export const useTenantMembers = (tenantId: Ref<string>) => {
     loading.value = false
 
     if (response.data?.member) {
+      const updatedMember = response.data.member
       const existingMember = members.value.find(m => m.id === memberId)
       if (existingMember) {
-        members.value = members.value.map(m => m.id === memberId ? response.data!.member : m)
+        members.value = members.value.map(m => m.id === memberId ? updatedMember : m)
       }
       else {
-        members.value = [...members.value, response.data.member]
+        members.value = [...members.value, updatedMember]
       }
     }
     else {

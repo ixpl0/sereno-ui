@@ -7,7 +7,7 @@ export const useInlineAdd = <T extends Record<string, string>>(
   inputRefGetter?: () => FocusableElement | null,
 ) => {
   const isAdding = ref(false)
-  const values = ref<T>({ ...initialValues }) as Ref<T>
+  const values = shallowRef<T>({ ...initialValues })
 
   const startAdding = () => {
     isAdding.value = true

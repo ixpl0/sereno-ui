@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { OAuthProvider } from '~/types/auth'
+import { isOAuthProvider } from '~/types/auth'
 import {
   MOCK_OAUTH_PROVIDERS,
   MOCK_OAUTH_USERS,
@@ -14,21 +14,21 @@ definePageMeta({
 const route = useRoute()
 const router = useRouter()
 
-const provider = computed(() => route.params.provider as string)
+const providerParam = computed(() => route.params.provider as string)
 
-const isValidProvider = computed(() =>
-  MOCK_OAUTH_PROVIDERS.includes(provider.value as OAuthProvider),
+const validatedProvider = computed(() =>
+  isOAuthProvider(providerParam.value) ? providerParam.value : null,
 )
 
 const providerConfig = computed(() =>
-  isValidProvider.value
-    ? MOCK_OAUTH_PROVIDER_CONFIG[provider.value as OAuthProvider]
+  validatedProvider.value !== null
+    ? MOCK_OAUTH_PROVIDER_CONFIG[validatedProvider.value]
     : null,
 )
 
 const defaultUser = computed(() =>
-  isValidProvider.value
-    ? MOCK_OAUTH_USERS[provider.value as OAuthProvider][0]
+  validatedProvider.value !== null
+    ? MOCK_OAUTH_USERS[validatedProvider.value][0]
     : null,
 )
 
@@ -47,7 +47,7 @@ const handleCancel = () => {
 }
 
 const handleScenarioAction = async (scenario: MockOAuthScenario) => {
-  const callbackPath = `/auth/callback/${provider.value}`
+  const callbackPath = `/auth/callback/${providerParam.value}`
 
   if (scenario === 'success' && defaultUser.value) {
     isLoading.value = true
@@ -93,7 +93,7 @@ useSeoMeta({
     appear
   >
     <UiCard
-      v-if="isValidProvider && providerConfig"
+      v-if="validatedProvider !== null && providerConfig"
       class="w-full max-w-md"
     >
       <template #header>
@@ -202,7 +202,7 @@ useSeoMeta({
           aria-hidden="true"
         />
         <p class="text-base-content/70 mb-4">
-          Провайдер "{{ provider }}" не поддерживается.
+          Провайдер "{{ providerParam }}" не поддерживается.
         </p>
         <p class="text-sm text-base-content/50">
           Доступные провайдеры: {{ MOCK_OAUTH_PROVIDERS.join(', ') }}

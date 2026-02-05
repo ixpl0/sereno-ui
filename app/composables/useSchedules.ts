@@ -17,10 +17,6 @@ import type {
 
 type SchedulesCache = Record<string, ReadonlyArray<TenantResponseSchedule>>
 
-type GetTenantSchedulesResponses = {
-  200: TenantResponseScheduleList
-}
-
 export const useSchedules = (tenantId: Ref<string>) => {
   const schedulesCache = useState<SchedulesCache>('schedules-cache', () => ({}))
   const schedules = computed({
@@ -40,7 +36,7 @@ export const useSchedules = (tenantId: Ref<string>) => {
     loading.value = true
     error.value = null
 
-    const response = await client.get<GetTenantSchedulesResponses>({
+    const response = await client.get<{ 200: TenantResponseScheduleList }>({
       url: '/tenants/{id}/schedules',
       path: { id: tenantId.value },
     })

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { AuthStep, OAuthProvider, OAuthProviderConfig } from '~/types/auth'
-import { isApiError, extractApiError, getApiData } from '~/utils/api'
+import { isApiError, extractApiError } from '~/utils/api'
 import { safeRedirect } from '~/utils/url'
 
 definePageMeta({
@@ -83,14 +83,13 @@ const handleOAuth = async (provider: OAuthProvider) => {
 
   isLoading.value = false
 
-  if (isApiError(response)) {
+  if (response.error) {
     toast.error(`Ошибка авторизации через ${provider}`)
     return
   }
 
-  const data = getApiData(response)
-  if (data?.redirect_url) {
-    const redirected = safeRedirect(data.redirect_url, config.public.allowedRedirectHosts)
+  if (response.data?.redirect_url) {
+    const redirected = safeRedirect(response.data.redirect_url, config.public.allowedRedirectHosts)
     if (!redirected) {
       toast.error('Недопустимый URL для редиректа')
     }

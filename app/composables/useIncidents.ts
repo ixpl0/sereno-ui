@@ -4,7 +4,14 @@ import type {
   EventResponseSingleIncident,
 } from '~/api/types.gen'
 import {
+  getIncidents,
+  getIncidentsById,
   postIncidentsCreate,
+  postIncidentsByIdCommentsAdd,
+  postIncidentsByIdCommentsDelete,
+  postIncidentsByIdLabelsAdd,
+  postIncidentsByIdLabelsDelete,
+  postIncidentsByIdStatusSet,
   postIncidentsByIdAlertsAdd,
   postIncidentsByIdAlertsDelete,
 } from '~/api/sdk.gen'
@@ -14,7 +21,15 @@ export const useIncidents = () => {
   const base = useEventEntity<EventResponseIncident, EventResponseIncidentList, EventResponseSingleIncident>({
     stateKey: 'incidents',
     totalKey: 'incidents-total',
-    basePath: '/incidents',
+    sdk: {
+      getList: getIncidents,
+      getSingle: getIncidentsById,
+      addComment: postIncidentsByIdCommentsAdd,
+      deleteComment: postIncidentsByIdCommentsDelete,
+      addLabel: postIncidentsByIdLabelsAdd,
+      deleteLabel: postIncidentsByIdLabelsDelete,
+      setStatus: postIncidentsByIdStatusSet,
+    },
     getListItems: data => data.incidents,
     getListTotal: data => data.total,
     getSingleItem: data => data.incident,

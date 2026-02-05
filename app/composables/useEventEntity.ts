@@ -1,4 +1,3 @@
-import { client } from '~/api/client.gen'
 import type {
   EventRequestComment,
   EventRequestId,
@@ -6,15 +5,24 @@ import type {
   EventRequestKey,
   EventRequestStatus,
 } from '~/api/types.gen'
-import type { ApiResponse } from '~/types/api'
 import { getCurrentEventStatus } from '~/utils/event'
 
-type EntityPath = '/alerts' | '/incidents'
+type SdkResponse<T> = { data: T | undefined, error: unknown }
+
+interface SdkFunctions<TList, TSingle> {
+  getList: (options?: { query?: { limit?: number, offset?: number } }) => Promise<SdkResponse<TList>>
+  getSingle: (options: { path: { id: string } }) => Promise<SdkResponse<TSingle>>
+  addComment: (options: { path: { id: string }, body: EventRequestComment }) => Promise<SdkResponse<TSingle>>
+  deleteComment: (options: { path: { id: string }, body: EventRequestId }) => Promise<SdkResponse<TSingle>>
+  addLabel: (options: { path: { id: string }, body: EventRequestKeyValue }) => Promise<SdkResponse<TSingle>>
+  deleteLabel: (options: { path: { id: string }, body: EventRequestKey }) => Promise<SdkResponse<TSingle>>
+  setStatus: (options: { path: { id: string }, body: EventRequestStatus }) => Promise<SdkResponse<TSingle>>
+}
 
 interface EventEntityConfig<TEntity, TList, TSingle> {
   stateKey: string
   totalKey: string
-  basePath: EntityPath
+  sdk: SdkFunctions<TList, TSingle>
   getListItems: (data: TList) => ReadonlyArray<TEntity>
   getListTotal: (data: TList) => number
   getSingleItem: (data: TSingle) => TEntity
@@ -42,14 +50,11 @@ export const useEventEntity = <
     items.value = items.value.map(item => item.id === id ? updatedItem : item)
   }
 
-  const fetchList = async (limit?: number, offset?: number): Promise<ApiResponse<TList>> => {
+  const fetchList = async (limit?: number, offset?: number) => {
     setLoading(true)
     setError(null)
 
-    const response = await client.get({
-      url: config.basePath,
-      query: { limit, offset },
-    }) as ApiResponse<TList>
+    const response = await config.sdk.getList({ query: { limit, offset } })
 
     setLoading(false)
 
@@ -64,14 +69,11 @@ export const useEventEntity = <
     return response
   }
 
-  const fetchSingle = async (id: string): Promise<ApiResponse<TSingle>> => {
+  const fetchSingle = async (id: string) => {
     setLoading(true)
     setError(null)
 
-    const response = await client.get({
-      url: `${config.basePath}/{id}` as '/alerts/{id}',
-      path: { id },
-    }) as ApiResponse<TSingle>
+    const response = await config.sdk.getSingle({ path: { id } })
 
     setLoading(false)
 
@@ -82,16 +84,14 @@ export const useEventEntity = <
     return response
   }
 
-  const addComment = async (entityId: string, text: string): Promise<ApiResponse<TSingle>> => {
+  const addComment = async (entityId: string, text: string) => {
     setLoading(true)
     setError(null)
 
-    const body: EventRequestComment = { text }
-    const response = await client.post({
-      url: `${config.basePath}/{id}/comments/add` as '/alerts/{id}/comments/add',
+    const response = await config.sdk.addComment({
       path: { id: entityId },
-      body,
-    }) as ApiResponse<TSingle>
+      body: { text },
+    })
 
     setLoading(false)
 
@@ -105,16 +105,14 @@ export const useEventEntity = <
     return response
   }
 
-  const deleteComment = async (entityId: string, commentId: string): Promise<ApiResponse<TSingle>> => {
+  const deleteComment = async (entityId: string, commentId: string) => {
     setLoading(true)
     setError(null)
 
-    const body: EventRequestId = { id: commentId }
-    const response = await client.post({
-      url: `${config.basePath}/{id}/comments/delete` as '/alerts/{id}/comments/delete',
+    const response = await config.sdk.deleteComment({
       path: { id: entityId },
-      body,
-    }) as ApiResponse<TSingle>
+      body: { id: commentId },
+    })
 
     setLoading(false)
 
@@ -128,16 +126,14 @@ export const useEventEntity = <
     return response
   }
 
-  const addLabel = async (entityId: string, key: string, value: string): Promise<ApiResponse<TSingle>> => {
+  const addLabel = async (entityId: string, key: string, value: string) => {
     setLoading(true)
     setError(null)
 
-    const body: EventRequestKeyValue = { key, value }
-    const response = await client.post({
-      url: `${config.basePath}/{id}/labels/add` as '/alerts/{id}/labels/add',
+    const response = await config.sdk.addLabel({
       path: { id: entityId },
-      body,
-    }) as ApiResponse<TSingle>
+      body: { key, value },
+    })
 
     setLoading(false)
 
@@ -151,16 +147,14 @@ export const useEventEntity = <
     return response
   }
 
-  const deleteLabel = async (entityId: string, key: string): Promise<ApiResponse<TSingle>> => {
+  const deleteLabel = async (entityId: string, key: string) => {
     setLoading(true)
     setError(null)
 
-    const body: EventRequestKey = { key }
-    const response = await client.post({
-      url: `${config.basePath}/{id}/labels/delete` as '/alerts/{id}/labels/delete',
+    const response = await config.sdk.deleteLabel({
       path: { id: entityId },
-      body,
-    }) as ApiResponse<TSingle>
+      body: { key },
+    })
 
     setLoading(false)
 
@@ -174,16 +168,14 @@ export const useEventEntity = <
     return response
   }
 
-  const setStatus = async (entityId: string, status: 'acknowledged' | 'resolved'): Promise<ApiResponse<TSingle>> => {
+  const setStatus = async (entityId: string, status: 'acknowledged' | 'resolved') => {
     setLoading(true)
     setError(null)
 
-    const body: EventRequestStatus = { status }
-    const response = await client.post({
-      url: `${config.basePath}/{id}/status/set` as '/alerts/{id}/status/set',
+    const response = await config.sdk.setStatus({
       path: { id: entityId },
-      body,
-    }) as ApiResponse<TSingle>
+      body: { status },
+    })
 
     setLoading(false)
 

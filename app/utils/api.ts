@@ -6,6 +6,14 @@ export const isApiError = <T, E = unknown>(
   return response.error !== undefined
 }
 
+const isApiErrorDetail = (value: unknown): value is ApiErrorDetail => {
+  if (typeof value !== 'object' || value === null) {
+    return false
+  }
+  const obj = value as Record<string, unknown>
+  return typeof obj.error === 'string' || typeof obj.message === 'string'
+}
+
 export const extractApiError = <E>(
   response: { error: E },
   fallback: string,
@@ -20,13 +28,13 @@ export const extractApiError = <E>(
     return fallback
   }
 
-  const errorObj = error as unknown as ApiErrorDetail
-  if (errorObj.error) {
-    return String(errorObj.error)
-  }
-
-  if (errorObj.message) {
-    return errorObj.message
+  if (isApiErrorDetail(error)) {
+    if (error.error) {
+      return error.error
+    }
+    if (error.message) {
+      return error.message
+    }
   }
 
   return fallback

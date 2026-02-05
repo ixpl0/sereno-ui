@@ -4,6 +4,13 @@ import type {
   EventResponseSingleAlert,
 } from '~/api/types.gen'
 import {
+  getAlerts,
+  getAlertsById,
+  postAlertsByIdCommentsAdd,
+  postAlertsByIdCommentsDelete,
+  postAlertsByIdLabelsAdd,
+  postAlertsByIdLabelsDelete,
+  postAlertsByIdStatusSet,
   postAlertsByIdAnnotationsAdd,
   postAlertsByIdAnnotationsDelete,
 } from '~/api/sdk.gen'
@@ -13,7 +20,15 @@ export const useAlerts = () => {
   const base = useEventEntity<EventResponseAlert, EventResponseAlertList, EventResponseSingleAlert>({
     stateKey: 'alerts',
     totalKey: 'alerts-total',
-    basePath: '/alerts',
+    sdk: {
+      getList: getAlerts,
+      getSingle: getAlertsById,
+      addComment: postAlertsByIdCommentsAdd,
+      deleteComment: postAlertsByIdCommentsDelete,
+      addLabel: postAlertsByIdLabelsAdd,
+      deleteLabel: postAlertsByIdLabelsDelete,
+      setStatus: postAlertsByIdStatusSet,
+    },
     getListItems: data => data.alerts,
     getListTotal: data => data.total,
     getSingleItem: data => data.alert,

@@ -53,11 +53,13 @@ const toggleDay = (day: number) => {
 }
 
 const addMember = (event: Event) => {
-  const target = event.target as HTMLSelectElement
-  const memberId = target.value
+  if (!(event.target instanceof HTMLSelectElement)) {
+    return
+  }
+  const memberId = event.target.value
   if (memberId) {
     selectedMembers.value = [...selectedMembers.value, { id: memberId }]
-    target.value = ''
+    event.target.value = ''
   }
 }
 

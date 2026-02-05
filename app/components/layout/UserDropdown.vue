@@ -40,8 +40,10 @@ const handleLogout = () => {
 }
 
 const handleClickOutside = (event: MouseEvent) => {
-  const target = event.target as HTMLElement
-  if (!target.closest('.user-dropdown')) {
+  if (!(event.target instanceof Element)) {
+    return
+  }
+  if (!event.target.closest('.user-dropdown')) {
     closeUserDropdown()
   }
 }
