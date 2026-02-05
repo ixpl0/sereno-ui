@@ -1,10 +1,15 @@
 type Breakpoints = Record<string, number>
 
-const createThrottledFn = <T extends (...args: unknown[]) => void>(fn: T, delay: number): T => {
+interface ThrottledFn<T extends (...args: unknown[]) => void> {
+  fn: T
+  cancel: () => void
+}
+
+const createThrottledFn = <T extends (...args: unknown[]) => void>(fn: T, delay: number): ThrottledFn<T> => {
   let timeoutId: ReturnType<typeof setTimeout> | null = null
   let lastRun = 0
 
-  return ((...args: unknown[]) => {
+  const throttled = ((...args: unknown[]) => {
     const now = Date.now()
 
     if (now - lastRun >= delay) {
@@ -19,6 +24,15 @@ const createThrottledFn = <T extends (...args: unknown[]) => void>(fn: T, delay:
       }, delay - (now - lastRun))
     }
   }) as T
+
+  const cancel = () => {
+    if (timeoutId) {
+      clearTimeout(timeoutId)
+      timeoutId = null
+    }
+  }
+
+  return { fn: throttled, cancel }
 }
 
 export const useBreakpoints = <T extends Breakpoints>(breakpoints: T) => {
@@ -29,16 +43,17 @@ export const useBreakpoints = <T extends Breakpoints>(breakpoints: T) => {
     width.value = window.innerWidth
   }
 
-  const throttledUpdateWidth = createThrottledFn(updateWidth, 100)
+  const throttled = createThrottledFn(updateWidth, 100)
 
   onMounted(() => {
     updateWidth()
     isMounted.value = true
-    window.addEventListener('resize', throttledUpdateWidth)
+    window.addEventListener('resize', throttled.fn)
   })
 
   onUnmounted(() => {
-    window.removeEventListener('resize', throttledUpdateWidth)
+    window.removeEventListener('resize', throttled.fn)
+    throttled.cancel()
   })
 
   const greater = (key: keyof T) => {

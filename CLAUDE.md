@@ -128,6 +128,9 @@ Auth middleware (`app/middleware/auth.ts`):
 - Run `pnpm generate:api` after updating swagger
 - Generated directory excluded from ESLint
 - **IMPORTANT**: `swagger.yaml` is read-only and provided by backend team. Do not edit it manually.
+- Uses `@hey-api/sdk` plugin for typed SDK functions (e.g., `postAuthLoginEmail`, `getTenants`)
+- Composables use SDK functions instead of raw `client.get/post` for type safety
+- For better SDK function names, backend should add `operationId` to swagger endpoints
 
 ## Pages
 
@@ -296,7 +299,7 @@ Utility functions in `app/utils/`:
 
 Nuxt plugins in `app/plugins/`:
 
-- **api.ts** - Configures API client baseUrl for mock mode (`/api/v1`)
+- **api.ts** - Configures API client baseUrl and adds Authorization header interceptor
 
 ## Code Style
 
@@ -326,16 +329,12 @@ Husky runs `lint-staged` on commit, which applies ESLint fix to `*.{js,ts,vue,mj
 
 Issues identified during code review that should be addressed:
 
-### Priority: High
-
-1. **API token not sent in headers** - `plugins/api.ts` only sets `baseUrl`, doesn't pass Authorization header. Works only in mock mode.
-
 ### Priority: Medium
 
-2. **E2E tests use text selectors** - Tests use Russian text for selectors, should use `data-testid`.
+1. **E2E tests use text selectors** - Tests use Russian text for selectors, should use `data-testid`.
 
 ### Priority: Low
 
-3. **Test coverage gaps** - Missing unit tests for: `useSchedules`, `useAlerts`, `useIncidents`, `useEscalations`. Missing E2E for schedules page.
+2. **Test coverage gaps** - Missing unit tests for: `useSchedules`, `useAlerts`, `useIncidents`, `useEscalations`. Missing E2E for schedules page.
 
-4. **Hardcoded Russian strings** - All UI text is hardcoded. Consider `@nuxtjs/i18n` for future localization.
+3. **Hardcoded Russian strings** - All UI text is hardcoded. Consider `@nuxtjs/i18n` for future localization.

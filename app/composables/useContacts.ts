@@ -1,13 +1,10 @@
-import { client } from '~/api/client.gen'
-import type {
-  UserResponseContact,
-  UserResponseContactsList,
-  UserResponseSingleContact,
-  UserRequestContact,
-  UserRequestCode,
-} from '~/api/types.gen'
-import type { ApiResponse } from '~/types/api'
-import { getApiData } from '~/utils/api'
+import {
+  getUserContacts,
+  postUserContactsAdd,
+  postUserContactsByIdDelete,
+  postUserContactsByIdVerify,
+} from '~/api/sdk.gen'
+import type { UserResponseContact, UserRequestContact } from '~/api/types.gen'
 
 export const useContacts = () => {
   const contacts = useState<ReadonlyArray<UserResponseContact>>('contacts', () => [])
@@ -22,86 +19,76 @@ export const useContacts = () => {
     contacts.value.filter(c => c.verified !== true),
   )
 
-  const fetchContacts = async (): Promise<ApiResponse<UserResponseContactsList> | null> => {
+  const fetchContacts = async () => {
     loading.value = true
     error.value = null
 
-    const response = await client.get({
-      url: '/user/contacts',
-    })
+    const response = await getUserContacts()
 
     loading.value = false
 
-    const data = getApiData(response as ApiResponse<UserResponseContactsList>)
-    if (data?.contacts) {
-      contacts.value = data.contacts
+    if (response.data?.contacts) {
+      contacts.value = response.data.contacts
     }
     else {
       error.value = 'Failed to fetch contacts'
     }
 
-    return response as ApiResponse<UserResponseContactsList>
+    return response
   }
 
-  const addContact = async (kind: UserRequestContact['kind'], value: string): Promise<ApiResponse<UserResponseSingleContact>> => {
+  const addContact = async (kind: UserRequestContact['kind'], value: string) => {
     loading.value = true
     error.value = null
 
-    const body: UserRequestContact = { kind, value }
-    const response = await client.post({
-      url: '/user/contacts/add',
-      body,
+    const response = await postUserContactsAdd({
+      body: { kind, value },
     })
 
     loading.value = false
 
-    const data = getApiData(response as ApiResponse<UserResponseSingleContact>)
-    if (data?.contact) {
-      contacts.value = [...contacts.value, data.contact]
+    if (response.data?.contact) {
+      contacts.value = [...contacts.value, response.data.contact]
     }
     else {
       error.value = 'Failed to add contact'
     }
 
-    return response as ApiResponse<UserResponseSingleContact>
+    return response
   }
 
-  const deleteContact = async (id: string): Promise<ApiResponse<void>> => {
+  const deleteContact = async (id: string) => {
     loading.value = true
     error.value = null
 
-    const response = await client.post({
-      url: '/user/contacts/{id}/delete',
+    const response = await postUserContactsByIdDelete({
       path: { id },
     })
 
     loading.value = false
 
-    if ('error' in response && response.error) {
+    if (response.error) {
       error.value = 'Failed to delete contact'
     }
     else {
       contacts.value = contacts.value.filter(c => c.id !== id)
     }
 
-    return response as ApiResponse<void>
+    return response
   }
 
-  const verifyContact = async (id: string, code: string): Promise<ApiResponse<UserResponseSingleContact>> => {
+  const verifyContact = async (id: string, code: string) => {
     loading.value = true
     error.value = null
 
-    const body: UserRequestCode = { code }
-    const response = await client.post({
-      url: '/user/contacts/{id}/verify',
+    const response = await postUserContactsByIdVerify({
       path: { id },
-      body,
+      body: { code },
     })
 
     loading.value = false
 
-    const data = getApiData(response as ApiResponse<UserResponseSingleContact>)
-    const verifiedContact = data?.contact
+    const verifiedContact = response.data?.contact
     if (verifiedContact) {
       contacts.value = contacts.value.map(c => c.id === id ? verifiedContact : c)
     }
@@ -109,7 +96,7 @@ export const useContacts = () => {
       error.value = 'Failed to verify contact'
     }
 
-    return response as ApiResponse<UserResponseSingleContact>
+    return response
   }
 
   return {

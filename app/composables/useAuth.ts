@@ -1,13 +1,18 @@
-import { client } from '~/api/client.gen'
-import type {
-  UserRequestEmail,
-  UserRequestEmailCode,
-  UserResponseAccessJwt,
-} from '~/api/types.gen'
-import type { ApiResponse, OAuthRedirectResponse } from '~/types/api'
+import {
+  postAuthLoginEmailCode,
+  postAuthLoginEmail,
+  postAuthLogout,
+  postAuthRefresh,
+  getAuthLoginByProvider,
+  getAuthLoginByProviderCallback,
+} from '~/api/sdk.gen'
+import type { UserResponseAccessJwt } from '~/api/types.gen'
+import type { OAuthRedirectResponse, SdkResponse } from '~/types/api'
 import type { OAuthProvider } from '~/types/auth'
 import { useAuthStore } from '~/stores/auth'
-import { getApiData } from '~/utils/api'
+
+type OAuthUrlResponse = SdkResponse<OAuthRedirectResponse, unknown>
+type OAuthCallbackResponse = SdkResponse<UserResponseAccessJwt, unknown>
 
 export const useAuth = () => {
   const store = useAuthStore()
@@ -15,78 +20,56 @@ export const useAuth = () => {
   const isAuthenticated = computed(() => store.isAuthenticated)
   const token = computed(() => store.token)
 
-  const requestEmailCode = async (email: string): Promise<ApiResponse<void>> => {
-    const body: UserRequestEmail = { email }
-    const response = await client.post({
-      url: '/auth/login/email/code',
-      body,
-    })
-    return response as ApiResponse<void>
+  const requestEmailCode = async (email: string) => {
+    return postAuthLoginEmailCode({ body: { email } })
   }
 
-  const loginWithEmail = async (email: string, code: string): Promise<ApiResponse<UserResponseAccessJwt>> => {
-    const body: UserRequestEmailCode = { email, code }
-    const response = await client.post({
-      url: '/auth/login/email',
-      body,
-    })
+  const loginWithEmail = async (email: string, code: string) => {
+    const response = await postAuthLoginEmail({ body: { email, code } })
 
-    const data = getApiData(response as ApiResponse<UserResponseAccessJwt>)
-    if (data?.token) {
-      store.setToken(data.token)
+    if (response.data?.token) {
+      store.setToken(response.data.token)
     }
 
-    return response as ApiResponse<UserResponseAccessJwt>
+    return response
   }
 
-  const logout = async (): Promise<ApiResponse<void>> => {
-    const response = await client.post({
-      url: '/auth/logout',
-    })
-
+  const logout = async () => {
+    const response = await postAuthLogout()
     store.clearToken()
-
-    return response as ApiResponse<void>
+    return response
   }
 
-  const refresh = async (): Promise<ApiResponse<UserResponseAccessJwt>> => {
-    const response = await client.post({
-      url: '/auth/refresh',
-    })
+  const refresh = async () => {
+    const response = await postAuthRefresh()
 
-    const data = getApiData(response as ApiResponse<UserResponseAccessJwt>)
-    if (data?.token) {
-      store.setToken(data.token)
+    if (response.data?.token) {
+      store.setToken(response.data.token)
     }
 
-    return response as ApiResponse<UserResponseAccessJwt>
+    return response
   }
 
-  const getOAuthUrl = async (provider: OAuthProvider): Promise<ApiResponse<OAuthRedirectResponse>> => {
-    const response = await client.get({
-      url: `/auth/login/${provider}`,
-    })
-    return response as ApiResponse<OAuthRedirectResponse>
+  const getOAuthUrl = async (provider: OAuthProvider): Promise<OAuthUrlResponse> => {
+    const response = await getAuthLoginByProvider({ path: { provider } })
+    return response as OAuthUrlResponse
   }
 
   const handleOAuthCallback = async (
     provider: OAuthProvider,
     params?: Record<string, string>,
-  ): Promise<ApiResponse<UserResponseAccessJwt>> => {
-    const queryString = params
-      ? `?${new URLSearchParams(params).toString()}`
-      : ''
+  ): Promise<OAuthCallbackResponse> => {
+    const response = await getAuthLoginByProviderCallback({
+      path: { provider },
+      query: params,
+    } as Parameters<typeof getAuthLoginByProviderCallback>[0])
 
-    const response = await client.get({
-      url: `/auth/login/${provider}/callback${queryString}`,
-    })
-
-    const data = getApiData(response as ApiResponse<UserResponseAccessJwt>)
+    const data = response.data as UserResponseAccessJwt | undefined
     if (data?.token) {
       store.setToken(data.token)
     }
 
-    return response as ApiResponse<UserResponseAccessJwt>
+    return response as OAuthCallbackResponse
   }
 
   return {

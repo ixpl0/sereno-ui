@@ -1,25 +1,38 @@
 import { client } from '~/api/client.gen'
+import {
+  postTenantsByIdSchedulesCreate,
+  postTenantsByIdSchedulesDelete,
+  postSchedulesByIdRotationCreate,
+  postSchedulesByIdRotationDelete,
+  postSchedulesByIdOverrideCreate,
+  postSchedulesByIdOverrideDelete,
+} from '~/api/sdk.gen'
 import type {
   TenantResponseSchedule,
   TenantResponseScheduleList,
-  TenantResponseSingleSchedule,
-  TenantResponseSingleRotation,
-  TenantResponseSingleOverride,
   TenantRequestNewSchedule,
   TenantRequestRotation,
   TenantRequestOverride,
-  TenantRequestId,
-  TenantRequestNumber,
 } from '~/api/types.gen'
-import type { ApiResponse } from '~/types/api'
-import { getApiData } from '~/utils/api'
+
+type SchedulesCache = Record<string, ReadonlyArray<TenantResponseSchedule>>
+
+type GetTenantSchedulesResponses = {
+  200: TenantResponseScheduleList
+}
 
 export const useSchedules = (tenantId: Ref<string>) => {
-  const schedules = ref<ReadonlyArray<TenantResponseSchedule>>([])
+  const schedulesCache = useState<SchedulesCache>('schedules-cache', () => ({}))
+  const schedules = computed({
+    get: () => schedulesCache.value[tenantId.value] ?? [],
+    set: (value: ReadonlyArray<TenantResponseSchedule>) => {
+      schedulesCache.value = { ...schedulesCache.value, [tenantId.value]: value }
+    },
+  })
   const loading = ref(false)
   const error = ref<string | null>(null)
 
-  const fetchSchedules = async (): Promise<ApiResponse<TenantResponseScheduleList> | null> => {
+  const fetchSchedules = async () => {
     if (!tenantId.value) {
       return null
     }
@@ -27,87 +40,81 @@ export const useSchedules = (tenantId: Ref<string>) => {
     loading.value = true
     error.value = null
 
-    const response = await client.get({
+    const response = await client.get<GetTenantSchedulesResponses>({
       url: '/tenants/{id}/schedules',
       path: { id: tenantId.value },
     })
 
     loading.value = false
 
-    const data = getApiData(response as ApiResponse<TenantResponseScheduleList>)
-    if (data?.schedules) {
-      schedules.value = data.schedules
+    if (response.data?.schedules) {
+      schedules.value = response.data.schedules
     }
     else {
       error.value = 'Failed to fetch schedules'
     }
 
-    return response as ApiResponse<TenantResponseScheduleList>
+    return response
   }
 
-  const createSchedule = async (schedule: TenantRequestNewSchedule): Promise<ApiResponse<TenantResponseSingleSchedule>> => {
+  const createSchedule = async (schedule: TenantRequestNewSchedule) => {
     loading.value = true
     error.value = null
 
-    const response = await client.post({
-      url: '/tenants/{id}/schedules/create',
+    const response = await postTenantsByIdSchedulesCreate({
       path: { id: tenantId.value },
       body: schedule,
     })
 
     loading.value = false
 
-    const data = getApiData(response as ApiResponse<TenantResponseSingleSchedule>)
-    if (data?.schedule) {
-      schedules.value = [...schedules.value, data.schedule]
+    if (response.data?.schedule) {
+      schedules.value = [...schedules.value, response.data.schedule]
     }
     else {
       error.value = 'Failed to create schedule'
     }
 
-    return response as ApiResponse<TenantResponseSingleSchedule>
+    return response
   }
 
-  const deleteSchedule = async (scheduleId: string): Promise<ApiResponse<void>> => {
+  const deleteSchedule = async (scheduleId: string) => {
     loading.value = true
     error.value = null
 
-    const body: TenantRequestId = { id: scheduleId }
-    const response = await client.post({
-      url: '/tenants/{id}/schedules/delete',
+    const response = await postTenantsByIdSchedulesDelete({
       path: { id: tenantId.value },
-      body,
+      body: { id: scheduleId },
     })
 
     loading.value = false
 
-    if ('error' in response && response.error) {
+    if (response.error) {
       error.value = 'Failed to delete schedule'
     }
     else {
       schedules.value = schedules.value.filter(s => s.id !== scheduleId)
     }
 
-    return response as ApiResponse<void>
+    return response
   }
 
-  const createRotation = async (scheduleId: string, rotation: TenantRequestRotation): Promise<ApiResponse<TenantResponseSingleRotation>> => {
+  const createRotation = async (scheduleId: string, rotation: TenantRequestRotation) => {
     loading.value = true
     error.value = null
 
-    const response = await client.post({
-      url: '/schedules/{id}/rotation/create',
+    const response = await postSchedulesByIdRotationCreate({
       path: { id: scheduleId },
       body: rotation,
     })
 
     loading.value = false
 
-    const data = getApiData(response as ApiResponse<TenantResponseSingleRotation>)
-    if (data?.rotation) {
+    if (response.data?.rotation) {
+      const newRotation = response.data.rotation
       schedules.value = schedules.value.map((s) => {
         if (s.id === scheduleId) {
-          return { ...s, rotations: [...(s.rotations ?? []), data.rotation] }
+          return { ...s, rotations: [...(s.rotations ?? []), newRotation] }
         }
         return s
       })
@@ -116,23 +123,21 @@ export const useSchedules = (tenantId: Ref<string>) => {
       error.value = 'Failed to create rotation'
     }
 
-    return response as ApiResponse<TenantResponseSingleRotation>
+    return response
   }
 
-  const deleteRotation = async (scheduleId: string, rotationIndex: number): Promise<ApiResponse<void>> => {
+  const deleteRotation = async (scheduleId: string, rotationIndex: number) => {
     loading.value = true
     error.value = null
 
-    const body: TenantRequestNumber = { number: rotationIndex }
-    const response = await client.post({
-      url: '/schedules/{id}/rotation/delete',
+    const response = await postSchedulesByIdRotationDelete({
       path: { id: scheduleId },
-      body,
+      body: { number: rotationIndex },
     })
 
     loading.value = false
 
-    if ('error' in response && response.error) {
+    if (response.error) {
       error.value = 'Failed to delete rotation'
     }
     else {
@@ -144,26 +149,25 @@ export const useSchedules = (tenantId: Ref<string>) => {
       })
     }
 
-    return response as ApiResponse<void>
+    return response
   }
 
-  const createOverride = async (scheduleId: string, override: TenantRequestOverride): Promise<ApiResponse<TenantResponseSingleOverride>> => {
+  const createOverride = async (scheduleId: string, override: TenantRequestOverride) => {
     loading.value = true
     error.value = null
 
-    const response = await client.post({
-      url: '/schedules/{id}/override/create',
+    const response = await postSchedulesByIdOverrideCreate({
       path: { id: scheduleId },
       body: override,
     })
 
     loading.value = false
 
-    const data = getApiData(response as ApiResponse<TenantResponseSingleOverride>)
-    if (data?.rotation) {
+    if (response.data?.rotation) {
+      const newOverride = response.data.rotation
       schedules.value = schedules.value.map((s) => {
         if (s.id === scheduleId) {
-          return { ...s, overrides: [...(s.overrides ?? []), data.rotation] }
+          return { ...s, overrides: [...(s.overrides ?? []), newOverride] }
         }
         return s
       })
@@ -172,23 +176,21 @@ export const useSchedules = (tenantId: Ref<string>) => {
       error.value = 'Failed to create override'
     }
 
-    return response as ApiResponse<TenantResponseSingleOverride>
+    return response
   }
 
-  const deleteOverride = async (scheduleId: string, overrideIndex: number): Promise<ApiResponse<void>> => {
+  const deleteOverride = async (scheduleId: string, overrideIndex: number) => {
     loading.value = true
     error.value = null
 
-    const body: TenantRequestNumber = { number: overrideIndex }
-    const response = await client.post({
-      url: '/schedules/{id}/override/delete',
+    const response = await postSchedulesByIdOverrideDelete({
       path: { id: scheduleId },
-      body,
+      body: { number: overrideIndex },
     })
 
     loading.value = false
 
-    if ('error' in response && response.error) {
+    if (response.error) {
       error.value = 'Failed to delete override'
     }
     else {
@@ -200,14 +202,8 @@ export const useSchedules = (tenantId: Ref<string>) => {
       })
     }
 
-    return response as ApiResponse<void>
+    return response
   }
-
-  watch(tenantId, () => {
-    if (tenantId.value) {
-      fetchSchedules()
-    }
-  })
 
   return {
     schedules: readonly(schedules),

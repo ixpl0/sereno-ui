@@ -1,8 +1,3 @@
-export interface ApiSuccessResponse<T> {
-  data: T
-  error?: never
-}
-
 export interface ApiErrorDetail {
   error: string
   message?: string
@@ -11,12 +6,11 @@ export interface ApiErrorDetail {
   statusCode?: number
 }
 
-export interface ApiErrorResponse {
-  data?: never
-  error: ApiErrorDetail | string
-}
+export type SdkResponse<TData, TError = unknown>
+  = | { data: TData, error: undefined }
+    | { data: undefined, error: TError }
 
-export type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse
+export type ApiResponse<TData, TError = unknown> = SdkResponse<TData, TError>
 
 export interface OAuthRedirectResponse {
   redirect_url: string

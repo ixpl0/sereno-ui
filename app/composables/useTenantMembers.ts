@@ -1,16 +1,20 @@
-import { client } from '~/api/client.gen'
-import type {
-  TenantResponseMember,
-  TenantResponseMemberList,
-  TenantResponseSingleMember,
-  TenantRequestMember,
-  TenantRequestId,
-} from '~/api/types.gen'
-import type { ApiResponse } from '~/types/api'
-import { getApiData } from '~/utils/api'
+import {
+  getTenantsByIdMembers,
+  postTenantsByIdMembersUpdate,
+  postTenantsByIdMembersDelete,
+} from '~/api/sdk.gen'
+import type { TenantResponseMember } from '~/api/types.gen'
+
+type MembersCache = Record<string, ReadonlyArray<TenantResponseMember>>
 
 export const useTenantMembers = (tenantId: Ref<string>) => {
-  const members = ref<ReadonlyArray<TenantResponseMember>>([])
+  const membersCache = useState<MembersCache>('tenant-members-cache', () => ({}))
+  const members = computed({
+    get: () => membersCache.value[tenantId.value] ?? [],
+    set: (value: ReadonlyArray<TenantResponseMember>) => {
+      membersCache.value = { ...membersCache.value, [tenantId.value]: value }
+    },
+  })
   const loading = ref(false)
   const error = ref<string | null>(null)
 
@@ -22,79 +26,72 @@ export const useTenantMembers = (tenantId: Ref<string>) => {
     members.value.filter(m => m.role !== 'admin'),
   )
 
-  const fetchMembers = async (): Promise<ApiResponse<TenantResponseMemberList> | null> => {
+  const fetchMembers = async () => {
     loading.value = true
     error.value = null
 
-    const response = await client.get({
-      url: '/tenants/{id}/members',
+    const response = await getTenantsByIdMembers({
       path: { id: tenantId.value },
     })
 
     loading.value = false
 
-    const data = getApiData(response as ApiResponse<TenantResponseMemberList>)
-    if (data?.members) {
-      members.value = data.members
+    if (response.data?.members) {
+      members.value = response.data.members
     }
     else {
       error.value = 'Failed to fetch members'
     }
 
-    return response as ApiResponse<TenantResponseMemberList>
+    return response
   }
 
-  const updateMember = async (memberId: string, role: 'watcher' | 'member' | 'admin'): Promise<ApiResponse<TenantResponseSingleMember>> => {
+  const updateMember = async (memberId: string, role: 'watcher' | 'member' | 'admin') => {
     loading.value = true
     error.value = null
 
-    const body: TenantRequestMember = { id: memberId, role }
-    const response = await client.post({
-      url: '/tenants/{id}/members/update',
+    const response = await postTenantsByIdMembersUpdate({
       path: { id: tenantId.value },
-      body,
+      body: { id: memberId, role },
     })
 
     loading.value = false
 
-    const data = getApiData(response as ApiResponse<TenantResponseSingleMember>)
-    if (data?.member) {
+    if (response.data?.member) {
       const existingMember = members.value.find(m => m.id === memberId)
       if (existingMember) {
-        members.value = members.value.map(m => m.id === memberId ? data.member : m)
+        members.value = members.value.map(m => m.id === memberId ? response.data!.member : m)
       }
       else {
-        members.value = [...members.value, data.member]
+        members.value = [...members.value, response.data.member]
       }
     }
     else {
       error.value = 'Failed to update member'
     }
 
-    return response as ApiResponse<TenantResponseSingleMember>
+    return response
   }
 
-  const deleteMember = async (memberId: string): Promise<ApiResponse<void>> => {
+  const deleteMember = async (memberId: string) => {
     loading.value = true
     error.value = null
 
-    const body: TenantRequestId = { id: memberId }
-    const response = await client.post({
-      url: '/tenants/{id}/members/delete',
+    const response = await postTenantsByIdMembersDelete({
       path: { id: tenantId.value },
-      body,
+      body: { id: memberId },
     })
 
     loading.value = false
 
-    if ('error' in response && response.error) {
+    if (response.error) {
       error.value = 'Failed to delete member'
     }
     else {
       members.value = members.value.filter(m => m.id !== memberId)
     }
 
-    return response as ApiResponse<void>
+    return response
   }
 
   return {

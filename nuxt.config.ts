@@ -30,6 +30,7 @@ export default defineNuxtConfig({
     public: {
       mockApi: false,
       apiBaseUrl: 'http://localhost:8080/api/v1',
+      allowedRedirectHosts: ['oauth.example.com', 'oauth.yandex.ru', 'oauth.vk.com', 'id.vk.com'],
     },
   },
   routeRules: {

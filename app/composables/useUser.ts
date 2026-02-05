@@ -1,61 +1,48 @@
-import { client } from '~/api/client.gen'
-import type {
-  UserResponseUser,
-  UserRequestParameter,
-} from '~/api/types.gen'
-import type { ApiResponse } from '~/types/api'
-import { getApiData } from '~/utils/api'
+import { getUser, postUserUpdate } from '~/api/sdk.gen'
+import type { UserResponseUser, UserRequestParameter } from '~/api/types.gen'
 
 export const useUser = () => {
   const user = useState<UserResponseUser | null>('user', () => null)
   const loading = ref(false)
   const error = ref<string | null>(null)
 
-  const fetchUser = async (): Promise<ApiResponse<UserResponseUser> | null> => {
+  const fetchUser = async () => {
     loading.value = true
     error.value = null
 
-    const response = await client.get({
-      url: '/user',
-    })
+    const response = await getUser()
 
     loading.value = false
 
-    const data = getApiData(response as ApiResponse<UserResponseUser>)
-    if (data) {
-      user.value = data
+    if (response.data?.user) {
+      user.value = response.data.user
     }
     else {
       error.value = 'Failed to fetch user'
     }
 
-    return response as ApiResponse<UserResponseUser>
+    return response
   }
 
   const updateUserParameter = async (
     kind: UserRequestParameter['kind'],
     value: string,
-  ): Promise<ApiResponse<UserResponseUser>> => {
+  ) => {
     loading.value = true
     error.value = null
 
-    const body: UserRequestParameter = { kind, value }
-    const response = await client.post({
-      url: '/user/update',
-      body,
-    })
+    const response = await postUserUpdate({ body: { kind, value } })
 
     loading.value = false
 
-    const data = getApiData(response as ApiResponse<UserResponseUser>)
-    if (data) {
-      user.value = data
+    if (response.data?.user) {
+      user.value = response.data.user
     }
     else {
       error.value = 'Failed to update user'
     }
 
-    return response as ApiResponse<UserResponseUser>
+    return response
   }
 
   const updateFirstName = (value: string) => updateUserParameter('first_name', value)

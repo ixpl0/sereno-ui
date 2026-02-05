@@ -1,86 +1,83 @@
-import { client } from '~/api/client.gen'
-import type {
-  TenantResponseToken,
-  TenantResponseTokenList,
-  TenantResponseSingleToken,
-  TenantRequestName,
-  TenantRequestId,
-} from '~/api/types.gen'
-import type { ApiResponse } from '~/types/api'
-import { getApiData } from '~/utils/api'
+import {
+  getTenantsByIdTokens,
+  postTenantsByIdTokensCreate,
+  postTenantsByIdTokensDelete,
+} from '~/api/sdk.gen'
+import type { TenantResponseToken } from '~/api/types.gen'
+
+type TokensCache = Record<string, ReadonlyArray<TenantResponseToken>>
 
 export const useTenantTokens = (tenantId: Ref<string>) => {
-  const tokens = ref<ReadonlyArray<TenantResponseToken>>([])
+  const tokensCache = useState<TokensCache>('tenant-tokens-cache', () => ({}))
+  const tokens = computed({
+    get: () => tokensCache.value[tenantId.value] ?? [],
+    set: (value: ReadonlyArray<TenantResponseToken>) => {
+      tokensCache.value = { ...tokensCache.value, [tenantId.value]: value }
+    },
+  })
   const loading = ref(false)
   const error = ref<string | null>(null)
 
-  const fetchTokens = async (): Promise<ApiResponse<TenantResponseTokenList> | null> => {
+  const fetchTokens = async () => {
     loading.value = true
     error.value = null
 
-    const response = await client.get({
-      url: '/tenants/{id}/tokens',
+    const response = await getTenantsByIdTokens({
       path: { id: tenantId.value },
     })
 
     loading.value = false
 
-    const data = getApiData(response as ApiResponse<TenantResponseTokenList>)
-    if (data?.tokens) {
-      tokens.value = data.tokens
+    if (response.data?.tokens) {
+      tokens.value = response.data.tokens
     }
     else {
       error.value = 'Failed to fetch tokens'
     }
 
-    return response as ApiResponse<TenantResponseTokenList>
+    return response
   }
 
-  const createToken = async (name: string): Promise<ApiResponse<TenantResponseSingleToken>> => {
+  const createToken = async (name: string) => {
     loading.value = true
     error.value = null
 
-    const body: TenantRequestName = { name }
-    const response = await client.post({
-      url: '/tenants/{id}/tokens/create',
+    const response = await postTenantsByIdTokensCreate({
       path: { id: tenantId.value },
-      body,
+      body: { name },
     })
 
     loading.value = false
 
-    const data = getApiData(response as ApiResponse<TenantResponseSingleToken>)
-    if (data?.token) {
-      tokens.value = [...tokens.value, data.token]
+    if (response.data?.token) {
+      tokens.value = [...tokens.value, response.data.token]
     }
     else {
       error.value = 'Failed to create token'
     }
 
-    return response as ApiResponse<TenantResponseSingleToken>
+    return response
   }
 
-  const deleteToken = async (tokenId: string): Promise<ApiResponse<void>> => {
+  const deleteToken = async (tokenId: string) => {
     loading.value = true
     error.value = null
 
-    const body: TenantRequestId = { id: tokenId }
-    const response = await client.post({
-      url: '/tenants/{id}/tokens/delete',
+    const response = await postTenantsByIdTokensDelete({
       path: { id: tenantId.value },
-      body,
+      body: { id: tokenId },
     })
 
     loading.value = false
 
-    if ('error' in response && response.error) {
+    if (response.error) {
       error.value = 'Failed to delete token'
     }
     else {
       tokens.value = tokens.value.filter(t => t.id !== tokenId)
     }
 
-    return response as ApiResponse<void>
+    return response
   }
 
   return {

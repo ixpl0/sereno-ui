@@ -1,12 +1,10 @@
-import { client } from '~/api/client.gen'
+import { getTenants, postTenantsCreate, postTenantsByIdUpdate } from '~/api/sdk.gen'
 import type {
   TenantResponseTenant,
   TenantResponseTenantList,
-  TenantResponseSingleTenant,
-  TenantRequestName,
 } from '~/api/types.gen'
-import type { ApiResponse } from '~/types/api'
-import { getApiData } from '~/utils/api'
+
+let initTenantsPromise: Promise<void> | null = null
 
 export const useTenants = () => {
   const tenants = useState<ReadonlyArray<TenantResponseTenant>>('tenants', () => [])
@@ -27,30 +25,40 @@ export const useTenants = () => {
       return
     }
 
-    const { data } = await useFetch<TenantResponseTenantList>('/api/v1/tenants')
-    if (data.value?.tenants) {
-      tenants.value = data.value.tenants
-      const first = data.value.tenants[0]
-      if (first && !selectedTenantId.value) {
-        selectedTenantId.value = first.id
+    if (initTenantsPromise) {
+      return initTenantsPromise
+    }
+
+    initTenantsPromise = (async () => {
+      const { data } = await useFetch<TenantResponseTenantList>('/api/v1/tenants')
+      if (data.value?.tenants) {
+        tenants.value = data.value.tenants
+        const first = data.value.tenants[0]
+        if (first && !selectedTenantId.value) {
+          selectedTenantId.value = first.id
+        }
       }
+    })()
+
+    try {
+      await initTenantsPromise
+    }
+    finally {
+      initTenantsPromise = null
     }
   }
 
-  const fetchTenants = async (): Promise<ApiResponse<TenantResponseTenantList> | null> => {
+  const fetchTenants = async () => {
     loading.value = true
     error.value = null
 
-    const response = await client.get({
-      url: '/tenants',
-    })
+    const response = await getTenants()
 
     loading.value = false
 
-    const data = getApiData(response as ApiResponse<TenantResponseTenantList>)
-    if (data?.tenants) {
-      tenants.value = data.tenants
-      const first = data.tenants[0]
+    if (response.data?.tenants) {
+      tenants.value = response.data.tenants
+      const first = response.data.tenants[0]
       if (first && !selectedTenantId.value) {
         selectedTenantId.value = first.id
       }
@@ -59,54 +67,48 @@ export const useTenants = () => {
       error.value = 'Failed to fetch tenants'
     }
 
-    return response as ApiResponse<TenantResponseTenantList>
+    return response
   }
 
-  const createTenant = async (name: string): Promise<ApiResponse<TenantResponseSingleTenant>> => {
+  const createTenant = async (name: string) => {
     loading.value = true
     error.value = null
 
-    const body: TenantRequestName = { name }
-    const response = await client.post({
-      url: '/tenants/create',
-      body,
+    const response = await postTenantsCreate({
+      body: { name },
     })
 
     loading.value = false
 
-    const data = getApiData(response as ApiResponse<TenantResponseSingleTenant>)
-    if (data?.tenant) {
-      tenants.value = [...tenants.value, data.tenant]
+    if (response.data?.tenant) {
+      tenants.value = [...tenants.value, response.data.tenant]
     }
     else {
       error.value = 'Failed to create tenant'
     }
 
-    return response as ApiResponse<TenantResponseSingleTenant>
+    return response
   }
 
-  const updateTenant = async (id: string, name: string): Promise<ApiResponse<TenantResponseSingleTenant>> => {
+  const updateTenant = async (id: string, name: string) => {
     loading.value = true
     error.value = null
 
-    const body: TenantRequestName = { name }
-    const response = await client.post({
-      url: '/tenants/{id}/update',
+    const response = await postTenantsByIdUpdate({
       path: { id },
-      body,
+      body: { name },
     })
 
     loading.value = false
 
-    const data = getApiData(response as ApiResponse<TenantResponseSingleTenant>)
-    if (data?.tenant) {
-      tenants.value = tenants.value.map(t => t.id === id ? data.tenant : t)
+    if (response.data?.tenant) {
+      tenants.value = tenants.value.map(t => t.id === id ? response.data.tenant : t)
     }
     else {
       error.value = 'Failed to update tenant'
     }
 
-    return response as ApiResponse<TenantResponseSingleTenant>
+    return response
   }
 
   const getTenantById = (id: string): TenantResponseTenant | undefined => {

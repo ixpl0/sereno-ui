@@ -16,6 +16,7 @@ useSeoMeta({
 const auth = useAuth()
 const router = useRouter()
 const toast = useToast()
+const config = useRuntimeConfig()
 
 const step = ref<AuthStep>('email')
 const email = ref('')
@@ -89,7 +90,7 @@ const handleOAuth = async (provider: OAuthProvider) => {
 
   const data = getApiData(response)
   if (data?.redirect_url) {
-    const redirected = safeRedirect(data.redirect_url)
+    const redirected = safeRedirect(data.redirect_url, config.public.allowedRedirectHosts)
     if (!redirected) {
       toast.error('Недопустимый URL для редиректа')
     }

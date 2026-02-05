@@ -13,11 +13,31 @@ export type ToastOptions = Partial<Omit<ToastMessage, 'id' | 'message'>> & {
 
 const DEFAULT_TIMEOUT = 5000
 
+const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
+let toastCounter = 0
+
+const generateToastId = (): string => {
+  if (import.meta.server) {
+    toastCounter += 1
+    return `toast-${Date.now()}-${toastCounter}`
+  }
+  return crypto.randomUUID()
+}
+
 export const useToast = () => {
   const toasts = useState<ToastMessage[]>('toasts', () => [])
 
+  const removeToast = (id: string) => {
+    const timeoutId = toastTimeouts.get(id)
+    if (timeoutId) {
+      clearTimeout(timeoutId)
+      toastTimeouts.delete(id)
+    }
+    toasts.value = toasts.value.filter(toast => toast.id !== id)
+  }
+
   const addToast = (options: ToastOptions): string => {
-    const id = crypto.randomUUID()
+    const id = generateToastId()
     const newToast: ToastMessage = {
       id,
       type: options.type ?? 'info',
@@ -28,16 +48,13 @@ export const useToast = () => {
     toasts.value = [...toasts.value, newToast]
 
     if (newToast.timeout > 0) {
-      setTimeout(() => {
+      const timeoutId = setTimeout(() => {
         removeToast(id)
       }, newToast.timeout)
+      toastTimeouts.set(id, timeoutId)
     }
 
     return id
-  }
-
-  const removeToast = (id: string) => {
-    toasts.value = toasts.value.filter(toast => toast.id !== id)
   }
 
   const success = (message: string, timeout?: number) =>

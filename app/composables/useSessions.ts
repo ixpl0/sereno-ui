@@ -1,10 +1,5 @@
-import { client } from '~/api/client.gen'
-import type {
-  UserResponseSession,
-  UserResponseSessions,
-} from '~/api/types.gen'
-import type { ApiResponse } from '~/types/api'
-import { getApiData } from '~/utils/api'
+import { getUserSessions, postUserSessionsClose } from '~/api/sdk.gen'
+import type { UserResponseSession } from '~/api/types.gen'
 
 export const useSessions = () => {
   const sessions = useState<ReadonlyArray<UserResponseSession>>('sessions', () => [])
@@ -19,45 +14,40 @@ export const useSessions = () => {
     sessions.value.filter(s => s.current !== true),
   )
 
-  const fetchSessions = async (): Promise<ApiResponse<UserResponseSessions> | null> => {
+  const fetchSessions = async () => {
     loading.value = true
     error.value = null
 
-    const response = await client.get({
-      url: '/user/sessions',
-    })
+    const response = await getUserSessions()
 
     loading.value = false
 
-    const data = getApiData(response as ApiResponse<UserResponseSessions>)
-    if (data?.sessions) {
-      sessions.value = data.sessions
+    if (response.data?.sessions) {
+      sessions.value = response.data.sessions
     }
     else {
       error.value = 'Failed to fetch sessions'
     }
 
-    return response as ApiResponse<UserResponseSessions>
+    return response
   }
 
-  const closeAllSessions = async (): Promise<ApiResponse<void> | null> => {
+  const closeAllSessions = async () => {
     loading.value = true
     error.value = null
 
-    const response = await client.post({
-      url: '/user/sessions/close',
-    })
+    const response = await postUserSessionsClose()
 
     loading.value = false
 
-    if ('error' in response && response.error) {
+    if (response.error) {
       error.value = 'Failed to close sessions'
     }
     else {
       sessions.value = sessions.value.filter(s => s.current === true)
     }
 
-    return response as ApiResponse<void>
+    return response
   }
 
   return {

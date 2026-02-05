@@ -474,9 +474,10 @@ const handleCloseAllSessions = async () => {
             <div class="flex items-center gap-1 sm:gap-2 shrink-0">
               <template v-if="!contact.verified && verifyingContactId !== contact.id">
                 <UiButton
+                  v-if="contact.id"
                   variant="ghost"
                   size="sm"
-                  @click="startVerifyContact(contact.id!)"
+                  @click="startVerifyContact(contact.id)"
                 >
                   <Icon
                     name="lucide:check"
@@ -513,10 +514,10 @@ const handleCloseAllSessions = async () => {
                 </UiButton>
               </template>
               <UiButton
-                v-if="verifyingContactId !== contact.id"
+                v-if="contact.id && verifyingContactId !== contact.id"
                 variant="ghost"
                 size="sm"
-                @click="handleDeleteContact(contact.id!)"
+                @click="handleDeleteContact(contact.id)"
               >
                 <Icon
                   name="lucide:trash-2"

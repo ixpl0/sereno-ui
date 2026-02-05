@@ -2,12 +2,12 @@ import type {
   EventResponseIncident,
   EventResponseIncidentList,
   EventResponseSingleIncident,
-  EventRequestIncident,
-  EventRequestId,
 } from '~/api/types.gen'
-import { client } from '~/api/client.gen'
-import type { ApiResponse } from '~/types/api'
-import { getApiData } from '~/utils/api'
+import {
+  postIncidentsCreate,
+  postIncidentsByIdAlertsAdd,
+  postIncidentsByIdAlertsDelete,
+} from '~/api/sdk.gen'
 import { useEventEntity } from './useEventEntity'
 
 export const useIncidents = () => {
@@ -20,25 +20,22 @@ export const useIncidents = () => {
     getSingleItem: data => data.incident,
   })
 
-  const createIncident = async (tenantId: string, title: string, description?: string): Promise<ApiResponse<EventResponseIncident>> => {
+  const createIncident = async (tenantId: string, title: string, description?: string) => {
     base.setLoading(true)
     base.setError(null)
 
-    const body: EventRequestIncident = {
-      tenant: { id: tenantId },
-      title,
-      description,
-    }
-    const response = await client.post({
-      url: '/incidents/create',
-      body,
-    }) as ApiResponse<EventResponseIncident>
+    const response = await postIncidentsCreate({
+      body: {
+        tenant: { id: tenantId },
+        title,
+        description,
+      },
+    })
 
     base.setLoading(false)
 
-    const data = getApiData(response)
-    if (data) {
-      base.items.value = [...base.items.value, data]
+    if (response.data) {
+      base.items.value = [...base.items.value, response.data]
     }
     else {
       base.setError('Failed to create incident')
@@ -47,22 +44,19 @@ export const useIncidents = () => {
     return response
   }
 
-  const addAlert = async (incidentId: string, alertId: string): Promise<ApiResponse<EventResponseSingleIncident>> => {
+  const addAlert = async (incidentId: string, alertId: string) => {
     base.setLoading(true)
     base.setError(null)
 
-    const body: EventRequestId = { id: alertId }
-    const response = await client.post({
-      url: '/incidents/{id}/alerts/add',
+    const response = await postIncidentsByIdAlertsAdd({
       path: { id: incidentId },
-      body,
-    }) as ApiResponse<EventResponseSingleIncident>
+      body: { id: alertId },
+    })
 
     base.setLoading(false)
 
-    const data = getApiData(response)
-    if (data?.incident) {
-      base.updateItem(incidentId, data.incident)
+    if (response.data?.incident) {
+      base.updateItem(incidentId, response.data.incident)
     }
     else {
       base.setError('Failed to add alert')
@@ -71,22 +65,19 @@ export const useIncidents = () => {
     return response
   }
 
-  const removeAlert = async (incidentId: string, alertId: string): Promise<ApiResponse<EventResponseSingleIncident>> => {
+  const removeAlert = async (incidentId: string, alertId: string) => {
     base.setLoading(true)
     base.setError(null)
 
-    const body: EventRequestId = { id: alertId }
-    const response = await client.post({
-      url: '/incidents/{id}/alerts/delete',
+    const response = await postIncidentsByIdAlertsDelete({
       path: { id: incidentId },
-      body,
-    }) as ApiResponse<EventResponseSingleIncident>
+      body: { id: alertId },
+    })
 
     base.setLoading(false)
 
-    const data = getApiData(response)
-    if (data?.incident) {
-      base.updateItem(incidentId, data.incident)
+    if (response.data?.incident) {
+      base.updateItem(incidentId, response.data.incident)
     }
     else {
       base.setError('Failed to remove alert')

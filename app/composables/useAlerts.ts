@@ -2,12 +2,11 @@ import type {
   EventResponseAlert,
   EventResponseAlertList,
   EventResponseSingleAlert,
-  EventRequestKeyValue,
-  EventRequestKey,
 } from '~/api/types.gen'
-import { client } from '~/api/client.gen'
-import type { ApiResponse } from '~/types/api'
-import { getApiData } from '~/utils/api'
+import {
+  postAlertsByIdAnnotationsAdd,
+  postAlertsByIdAnnotationsDelete,
+} from '~/api/sdk.gen'
 import { useEventEntity } from './useEventEntity'
 
 export const useAlerts = () => {
@@ -20,22 +19,19 @@ export const useAlerts = () => {
     getSingleItem: data => data.alert,
   })
 
-  const addAnnotation = async (alertId: string, key: string, value: string): Promise<ApiResponse<EventResponseSingleAlert>> => {
+  const addAnnotation = async (alertId: string, key: string, value: string) => {
     base.setLoading(true)
     base.setError(null)
 
-    const body: EventRequestKeyValue = { key, value }
-    const response = await client.post({
-      url: '/alerts/{id}/annotations/add',
+    const response = await postAlertsByIdAnnotationsAdd({
       path: { id: alertId },
-      body,
-    }) as ApiResponse<EventResponseSingleAlert>
+      body: { key, value },
+    })
 
     base.setLoading(false)
 
-    const data = getApiData(response)
-    if (data?.alert) {
-      base.updateItem(alertId, data.alert)
+    if (response.data?.alert) {
+      base.updateItem(alertId, response.data.alert)
     }
     else {
       base.setError('Failed to add annotation')
@@ -44,22 +40,19 @@ export const useAlerts = () => {
     return response
   }
 
-  const deleteAnnotation = async (alertId: string, key: string): Promise<ApiResponse<EventResponseSingleAlert>> => {
+  const deleteAnnotation = async (alertId: string, key: string) => {
     base.setLoading(true)
     base.setError(null)
 
-    const body: EventRequestKey = { key }
-    const response = await client.post({
-      url: '/alerts/{id}/annotations/delete',
+    const response = await postAlertsByIdAnnotationsDelete({
       path: { id: alertId },
-      body,
-    }) as ApiResponse<EventResponseSingleAlert>
+      body: { key },
+    })
 
     base.setLoading(false)
 
-    const data = getApiData(response)
-    if (data?.alert) {
-      base.updateItem(alertId, data.alert)
+    if (response.data?.alert) {
+      base.updateItem(alertId, response.data.alert)
     }
     else {
       base.setError('Failed to delete annotation')

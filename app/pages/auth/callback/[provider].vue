@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { OAuthProvider } from '~/types/auth'
-import { isApiError, extractApiError } from '~/utils/api'
+import { extractApiError } from '~/utils/api'
 import { MOCK_OAUTH_PROVIDERS, MOCK_OAUTH_PROVIDER_CONFIG } from '~~/server/utils/mockAuth'
 
 definePageMeta({
@@ -55,24 +55,21 @@ const handleCallback = async () => {
     return
   }
 
-  const callbackParams: Record<string, string> = {}
   const queryKeys = ['scenario', 'user_id', 'email', 'name'] as const
 
-  queryKeys.forEach((key) => {
+  const callbackParams = queryKeys.reduce<Record<string, string>>((acc, key) => {
     const value = route.query[key]
-    if (typeof value === 'string') {
-      callbackParams[key] = value
-    }
-  })
+    return typeof value === 'string' ? { ...acc, [key]: value } : acc
+  }, {})
 
   const response = await auth.handleOAuthCallback(
     provider.value as OAuthProvider,
     Object.keys(callbackParams).length > 0 ? callbackParams : undefined,
   )
 
-  if (isApiError(response)) {
+  if (response.error) {
     status.value = 'error'
-    errorMessage.value = extractApiError(response, 'Ошибка авторизации')
+    errorMessage.value = extractApiError(response as { error: unknown }, 'Ошибка авторизации')
     return
   }
 

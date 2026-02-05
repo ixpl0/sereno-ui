@@ -10,5 +10,6 @@ export default defineConfig({
   plugins: [
     '@hey-api/typescript',
     '@hey-api/client-fetch',
+    '@hey-api/sdk',
   ],
 })

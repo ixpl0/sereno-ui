@@ -1,20 +1,28 @@
-import { client } from '~/api/client.gen'
+import {
+  getTenantsByIdEscalations,
+  postTenantsByIdEscalationsCreate,
+  postTenantsByIdEscalationsDelete,
+  postTenantsByIdEscalationsUpdate,
+} from '~/api/sdk.gen'
 import type {
   TenantResponseEscalation,
-  TenantResponseEscalationList,
-  TenantResponseSingleEscalation,
   TenantRequestEscalation,
-  TenantRequestId,
 } from '~/api/types.gen'
-import type { ApiResponse } from '~/types/api'
-import { getApiData } from '~/utils/api'
+
+type EscalationsCache = Record<string, ReadonlyArray<TenantResponseEscalation>>
 
 export const useEscalations = (tenantId: Ref<string>) => {
-  const escalations = ref<ReadonlyArray<TenantResponseEscalation>>([])
+  const escalationsCache = useState<EscalationsCache>('escalations-cache', () => ({}))
+  const escalations = computed({
+    get: () => escalationsCache.value[tenantId.value] ?? [],
+    set: (value: ReadonlyArray<TenantResponseEscalation>) => {
+      escalationsCache.value = { ...escalationsCache.value, [tenantId.value]: value }
+    },
+  })
   const loading = ref(false)
   const error = ref<string | null>(null)
 
-  const fetchEscalations = async (): Promise<ApiResponse<TenantResponseEscalationList> | null> => {
+  const fetchEscalations = async () => {
     if (!tenantId.value) {
       return null
     }
@@ -22,92 +30,85 @@ export const useEscalations = (tenantId: Ref<string>) => {
     loading.value = true
     error.value = null
 
-    const response = await client.get({
-      url: '/tenants/{id}/escalations',
+    const response = await getTenantsByIdEscalations({
       path: { id: tenantId.value },
     })
 
     loading.value = false
 
-    const data = getApiData(response as ApiResponse<TenantResponseEscalationList>)
-    if (data?.escalations) {
-      escalations.value = data.escalations
+    if (response.data?.escalations) {
+      escalations.value = response.data.escalations
     }
     else {
       error.value = 'Failed to fetch escalations'
     }
 
-    return response as ApiResponse<TenantResponseEscalationList>
+    return response
   }
 
-  const createEscalation = async (escalation: TenantRequestEscalation): Promise<ApiResponse<TenantResponseSingleEscalation>> => {
+  const createEscalation = async (escalation: TenantRequestEscalation) => {
     loading.value = true
     error.value = null
 
-    const response = await client.post({
-      url: '/tenants/{id}/escalation/create',
+    const response = await postTenantsByIdEscalationsCreate({
       path: { id: tenantId.value },
       body: escalation,
     })
 
     loading.value = false
 
-    const data = getApiData(response as ApiResponse<TenantResponseSingleEscalation>)
-    if (data?.escalation) {
-      escalations.value = [...escalations.value, data.escalation]
+    if (response.data?.escalation) {
+      escalations.value = [...escalations.value, response.data.escalation]
     }
     else {
       error.value = 'Failed to create escalation'
     }
 
-    return response as ApiResponse<TenantResponseSingleEscalation>
+    return response
   }
 
-  const updateEscalation = async (escalationId: string, escalation: TenantRequestEscalation): Promise<ApiResponse<TenantResponseSingleEscalation>> => {
+  const updateEscalation = async (escalation: TenantRequestEscalation) => {
     loading.value = true
     error.value = null
 
-    const response = await client.post({
-      url: '/tenants/{id}/escalation/update',
+    const response = await postTenantsByIdEscalationsUpdate({
       path: { id: tenantId.value },
-      query: { escalation: escalationId },
       body: escalation,
     })
 
     loading.value = false
 
-    const data = getApiData(response as ApiResponse<TenantResponseSingleEscalation>)
-    if (data?.escalation) {
-      escalations.value = escalations.value.map(e => e.id === escalationId ? data.escalation : e)
+    if (response.data?.escalation) {
+      escalations.value = escalations.value.map(e =>
+        e.name === escalation.name ? response.data.escalation : e,
+      )
     }
     else {
       error.value = 'Failed to update escalation'
     }
 
-    return response as ApiResponse<TenantResponseSingleEscalation>
+    return response
   }
 
-  const deleteEscalation = async (escalationId: string): Promise<ApiResponse<void>> => {
+  const deleteEscalation = async (escalationId: string) => {
     loading.value = true
     error.value = null
 
-    const body: TenantRequestId = { id: escalationId }
-    const response = await client.post({
-      url: '/tenants/{id}/escalation/delete',
+    const response = await postTenantsByIdEscalationsDelete({
       path: { id: tenantId.value },
-      body,
+      body: { id: escalationId },
     })
 
     loading.value = false
 
-    if ('error' in response && response.error) {
+    if (response.error) {
       error.value = 'Failed to delete escalation'
     }
     else {
       escalations.value = escalations.value.filter(e => e.id !== escalationId)
     }
 
-    return response as ApiResponse<void>
+    return response
   }
 
   const toggleEscalation = async (escalation: {
@@ -116,7 +117,7 @@ export const useEscalations = (tenantId: Ref<string>) => {
     enabled: boolean
     steps: ReadonlyArray<{ delay: number, description?: string, member?: string, position?: string, schedule?: string }>
     rules: ReadonlyArray<{ description?: string, event?: string, labels?: Record<string, string> }>
-  }): Promise<ApiResponse<TenantResponseSingleEscalation>> => {
+  }) => {
     const updated: TenantRequestEscalation = {
       name: escalation.name,
       enabled: !escalation.enabled,
@@ -134,14 +135,8 @@ export const useEscalations = (tenantId: Ref<string>) => {
       })),
     }
 
-    return updateEscalation(escalation.id, updated)
+    return updateEscalation(updated)
   }
-
-  watch(tenantId, () => {
-    if (tenantId.value) {
-      fetchEscalations()
-    }
-  })
 
   return {
     escalations: readonly(escalations),

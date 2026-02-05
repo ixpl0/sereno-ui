@@ -7,7 +7,6 @@ import type {
   EventRequestStatus,
 } from '~/api/types.gen'
 import type { ApiResponse } from '~/types/api'
-import { getApiData } from '~/utils/api'
 import { getCurrentEventStatus } from '~/utils/event'
 
 type EntityPath = '/alerts' | '/incidents'
@@ -54,10 +53,9 @@ export const useEventEntity = <
 
     setLoading(false)
 
-    const data = getApiData(response)
-    if (data) {
-      items.value = config.getListItems(data)
-      total.value = config.getListTotal(data)
+    if (response.error === undefined && response.data !== undefined) {
+      items.value = config.getListItems(response.data)
+      total.value = config.getListTotal(response.data)
     }
     else {
       setError(`Failed to fetch ${config.stateKey}`)
@@ -77,8 +75,7 @@ export const useEventEntity = <
 
     setLoading(false)
 
-    const data = getApiData(response)
-    if (!data) {
+    if (response.error !== undefined || response.data === undefined) {
       setError(`Failed to fetch item`)
     }
 
@@ -98,9 +95,8 @@ export const useEventEntity = <
 
     setLoading(false)
 
-    const data = getApiData(response)
-    if (data) {
-      updateItem(entityId, config.getSingleItem(data))
+    if (response.error === undefined && response.data !== undefined) {
+      updateItem(entityId, config.getSingleItem(response.data))
     }
     else {
       setError('Failed to add comment')
@@ -122,9 +118,8 @@ export const useEventEntity = <
 
     setLoading(false)
 
-    const data = getApiData(response)
-    if (data) {
-      updateItem(entityId, config.getSingleItem(data))
+    if (response.error === undefined && response.data !== undefined) {
+      updateItem(entityId, config.getSingleItem(response.data))
     }
     else {
       setError('Failed to delete comment')
@@ -146,9 +141,8 @@ export const useEventEntity = <
 
     setLoading(false)
 
-    const data = getApiData(response)
-    if (data) {
-      updateItem(entityId, config.getSingleItem(data))
+    if (response.error === undefined && response.data !== undefined) {
+      updateItem(entityId, config.getSingleItem(response.data))
     }
     else {
       setError('Failed to add label')
@@ -170,9 +164,8 @@ export const useEventEntity = <
 
     setLoading(false)
 
-    const data = getApiData(response)
-    if (data) {
-      updateItem(entityId, config.getSingleItem(data))
+    if (response.error === undefined && response.data !== undefined) {
+      updateItem(entityId, config.getSingleItem(response.data))
     }
     else {
       setError('Failed to delete label')
@@ -194,9 +187,8 @@ export const useEventEntity = <
 
     setLoading(false)
 
-    const data = getApiData(response)
-    if (data) {
-      updateItem(entityId, config.getSingleItem(data))
+    if (response.error === undefined && response.data !== undefined) {
+      updateItem(entityId, config.getSingleItem(response.data))
     }
     else {
       setError('Failed to set status')

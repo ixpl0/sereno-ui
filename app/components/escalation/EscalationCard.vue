@@ -110,7 +110,7 @@ const handleSave = async () => {
     })),
   }
 
-  const response = await updateEscalation(props.escalation.id, escalation)
+  const response = await updateEscalation(escalation)
 
   if ('error' in response && response.error) {
     toast.error('Не удалось сохранить')

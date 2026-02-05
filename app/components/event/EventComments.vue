@@ -39,7 +39,7 @@ const handleDelete = (id: string) => {
 }
 
 const activeComments = computed(() =>
-  [...props.comments].filter(c => !c.deleted).sort((a, b) => b.created - a.created),
+  props.comments.filter(c => !c.deleted).toSorted((a, b) => b.created - a.created),
 )
 </script>
 

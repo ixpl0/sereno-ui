@@ -1,11 +1,11 @@
-const ALLOWED_REDIRECT_HOSTS = [
+const DEFAULT_ALLOWED_HOSTS = [
   'oauth.example.com',
   'oauth.yandex.ru',
   'oauth.vk.com',
   'id.vk.com',
 ]
 
-export const isValidRedirectUrl = (url: string): boolean => {
+export const isValidRedirectUrl = (url: string, allowedHosts?: ReadonlyArray<string>): boolean => {
   try {
     const parsed = new URL(url)
 
@@ -20,7 +20,8 @@ export const isValidRedirectUrl = (url: string): boolean => {
       return false
     }
 
-    return ALLOWED_REDIRECT_HOSTS.some(
+    const hosts = allowedHosts ?? DEFAULT_ALLOWED_HOSTS
+    return hosts.some(
       host => parsed.hostname === host || parsed.hostname.endsWith(`.${host}`),
     )
   }
@@ -29,8 +30,8 @@ export const isValidRedirectUrl = (url: string): boolean => {
   }
 }
 
-export const safeRedirect = (url: string): boolean => {
-  if (!isValidRedirectUrl(url)) {
+export const safeRedirect = (url: string, allowedHosts?: ReadonlyArray<string>): boolean => {
+  if (!isValidRedirectUrl(url, allowedHosts)) {
     if (import.meta.dev) {
       console.warn(`[safeRedirect] Blocked redirect to: ${url}`)
     }
