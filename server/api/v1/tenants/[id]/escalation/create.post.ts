@@ -29,11 +29,24 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  const steps = (body.steps ?? []).map((step: { name?: string, delay: number, member?: string, position?: string, schedule?: string }) => ({
+    delay: step.delay,
+    member: step.member,
+    description: step.name,
+    schedule: step.schedule ? { id: step.schedule, position: step.position ?? 'current' } : undefined,
+  }))
+
+  const rules = (body.rules ?? []).map((rule: { name?: string, event?: string, labels?: Record<string, string> }) => ({
+    description: rule.name,
+    event: rule.event,
+    labels: rule.labels,
+  }))
+
   const escalation = createMockEscalation(tenantId, {
     name: body.name,
     enabled: body.enabled ?? true,
-    steps: body.steps,
-    rules: body.rules,
+    steps,
+    rules,
   })
 
   return { escalation }
