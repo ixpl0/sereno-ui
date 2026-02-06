@@ -325,11 +325,6 @@ definitions:
     type: object
   tenant.RequestEscalationRule:
     properties:
-      description:
-        example: Escalation rule description
-        maxLength: 64
-        minLength: 1
-        type: string
       event:
         enum:
         - alert
@@ -343,6 +338,11 @@ definitions:
           key1: value1
           key2: value2
         type: object
+      name:
+        example: Escalation rule name
+        maxLength: 64
+        minLength: 1
+        type: string
     type: object
   tenant.RequestEscalationStep:
     properties:
@@ -350,13 +350,13 @@ definitions:
         example: 300
         minimum: 0
         type: integer
-      description:
-        example: Escalation step description
-        maxLength: 64
-        minLength: 1
-        type: string
       member:
         example: 00112233-4455-6677-8899-aabbccddeeff
+        type: string
+      name:
+        example: Escalation step name
+        maxLength: 64
+        minLength: 1
         type: string
       position:
         enum:
@@ -433,11 +433,6 @@ definitions:
     type: object
   tenant.RequestOverride:
     properties:
-      description:
-        example: Override description
-        maxLength: 64
-        minLength: 1
-        type: string
       duration:
         example: 86400
         minimum: 600
@@ -445,13 +440,18 @@ definitions:
       member:
         example: 00112233-4455-6677-8899-aabbccddeeff
         type: string
+      name:
+        example: Override name
+        maxLength: 64
+        minLength: 1
+        type: string
       since:
         example: 1769904000
         type: integer
     required:
-    - description
     - duration
     - member
+    - name
     - since
     type: object
   tenant.RequestRotation:
@@ -468,11 +468,6 @@ definitions:
         maxItems: 7
         minItems: 1
         type: array
-      description:
-        example: Rotation description
-        maxLength: 64
-        minLength: 1
-        type: string
       duration:
         example: 86400
         minimum: 600
@@ -484,14 +479,19 @@ definitions:
           type: string
         minItems: 1
         type: array
+      name:
+        example: Rotation name
+        maxLength: 64
+        minLength: 1
+        type: string
       since:
-        example: 1769904000
+        example: 36000
         type: integer
     required:
     - days
-    - description
     - duration
     - members
+    - name
     - since
     type: object
   tenant.RequestSchedule:
@@ -617,18 +617,20 @@ definitions:
       creator:
         example: 00112233-4455-6677-8899-aabbccddeeff
         type: string
-      description:
-        example: Override description
+      name:
+        example: Override name
         type: string
-      shifts:
-        items:
-          $ref: '#/definitions/tenant.ResponseShift'
-        type: array
+      number:
+        example: 1
+        type: integer
+      shift:
+        $ref: '#/definitions/tenant.ResponseShift'
     required:
     - created
     - creator
-    - description
-    - shifts
+    - name
+    - number
+    - shift
     type: object
   tenant.ResponseRotation:
     properties:
@@ -638,15 +640,18 @@ definitions:
       creator:
         example: 00112233-4455-6677-8899-aabbccddeeff
         type: string
-      description:
-        example: Rotation description
-        type: string
       members:
         example:
         - 00112233-4455-6677-8899-aabbccddeeff
         items:
           type: string
         type: array
+      name:
+        example: Rotation name
+        type: string
+      number:
+        example: 1
+        type: integer
       shifts:
         items:
           $ref: '#/definitions/tenant.ResponseShift'
@@ -654,8 +659,9 @@ definitions:
     required:
     - created
     - creator
-    - description
     - members
+    - name
+    - number
     - shifts
     type: object
   tenant.ResponseSchedule:
@@ -677,6 +683,7 @@ definitions:
           $ref: '#/definitions/tenant.ResponseOverride'
         type: array
       rotations:
+        description: UntilF    string             `json:"until_format"`
         items:
           $ref: '#/definitions/tenant.ResponseRotation'
         type: array
@@ -686,6 +693,7 @@ definitions:
       tenant:
         $ref: '#/definitions/tenant.ResponseTenant'
       until:
+        description: SinceF    string             `json:"since_format"`
         example: 1769990400
         type: integer
       updated:
@@ -720,6 +728,7 @@ definitions:
         example: 1769904000
         type: integer
       until:
+        description: SinceF string `json:"since_format"`
         example: 1769990400
         type: integer
     required:
@@ -1963,6 +1972,16 @@ paths:
         name: id
         required: true
         type: string
+      - description: Since timestamp
+        in: query
+        name: since
+        required: true
+        type: integer
+      - description: Until timestamp
+        in: query
+        name: until
+        required: true
+        type: integer
       produces:
       - application/json
       responses:
@@ -1998,6 +2017,16 @@ paths:
         name: id
         required: true
         type: string
+      - description: Since timestamp
+        in: query
+        name: since
+        required: true
+        type: integer
+      - description: Until timestamp
+        in: query
+        name: until
+        required: true
+        type: integer
       - description: Request JSON
         in: body
         name: request
@@ -2078,6 +2107,16 @@ paths:
         name: id
         required: true
         type: string
+      - description: Since timestamp
+        in: query
+        name: since
+        required: true
+        type: integer
+      - description: Until timestamp
+        in: query
+        name: until
+        required: true
+        type: integer
       - description: Request JSON
         in: body
         name: request
@@ -2112,7 +2151,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Удаляет Rotation по его номеру в Schedule
+      description: Отмечает Rotation как удаленный по его номеру в Schedule
       parameters:
       - description: Schedule ID
         in: path

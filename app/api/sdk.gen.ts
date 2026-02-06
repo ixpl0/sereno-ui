@@ -849,7 +849,7 @@ export const postSchedulesByIdRotationCreate = <
 /**
  * Удаление ротации в расписании
  *
- * Удаляет Rotation по его номеру в Schedule
+ * Отмечает Rotation как удаленный по его номеру в Schedule
  */
 export const postSchedulesByIdRotationDelete = <
   ThrowOnError extends boolean = false,

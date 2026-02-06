@@ -49,7 +49,7 @@ const editSteps = ref<Array<{
   delay: number
   delayMinutes: number
   member: string
-  description: string
+  name: string
 }>>([])
 
 const sortedSteps = computed(() =>
@@ -63,7 +63,7 @@ const initEditSteps = () => {
       delay: step.delay,
       delayMinutes: Math.floor(step.delay / 60),
       member: step.member ?? '',
-      description: step.description ?? '',
+      name: step.description ?? '',
     }))
 }
 
@@ -79,7 +79,7 @@ const addStep = () => {
   const lastDelay = lastStep?.delayMinutes ?? 0
   editSteps.value = [
     ...editSteps.value,
-    { delay: (lastDelay + 5) * 60, delayMinutes: lastDelay + 5, member: '', description: '' },
+    { delay: (lastDelay + 5) * 60, delayMinutes: lastDelay + 5, member: '', name: '' },
   ]
 }
 
@@ -102,7 +102,7 @@ const handleSave = async () => {
   const steps: Array<TenantRequestEscalationStep> = editSteps.value.map(step => ({
     delay: step.delayMinutes * 60,
     member: step.member || undefined,
-    description: step.description || undefined,
+    name: step.name || undefined,
   }))
 
   const escalation: TenantRequestEscalation = {
@@ -110,7 +110,7 @@ const handleSave = async () => {
     enabled: props.escalation.enabled,
     steps,
     rules: props.escalation.rules.map(rule => ({
-      description: rule.description,
+      name: rule.description,
       event: isValidEvent(rule.event) ? rule.event : undefined,
       labels: rule.labels,
     })),

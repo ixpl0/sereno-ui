@@ -14,6 +14,16 @@ import type {
   TenantRequestOverride,
 } from '~/api/types.gen'
 
+const getDefaultScheduleRange = (): { since: number, until: number } => {
+  const now = Math.floor(Date.now() / 1000)
+  const thirtyDaysInSeconds = 30 * 24 * 60 * 60
+  const ninetyDaysInSeconds = 90 * 24 * 60 * 60
+  return {
+    since: now - thirtyDaysInSeconds,
+    until: now + ninetyDaysInSeconds,
+  }
+}
+
 export const useSchedules = (tenantId: Ref<string>) => {
   const { data: response, status: fetchStatus, refresh } = useAsyncData(
     () => `schedules-${tenantId.value}`,
@@ -69,6 +79,7 @@ export const useSchedules = (tenantId: Ref<string>) => {
     const result = await postSchedulesByIdRotationCreate({
       path: { id: scheduleId },
       body: rotation,
+      query: getDefaultScheduleRange(),
     })
 
     if (result.data?.rotation) {
@@ -95,6 +106,7 @@ export const useSchedules = (tenantId: Ref<string>) => {
     const result = await postSchedulesByIdOverrideCreate({
       path: { id: scheduleId },
       body: override,
+      query: getDefaultScheduleRange(),
     })
 
     if (result.data?.rotation) {

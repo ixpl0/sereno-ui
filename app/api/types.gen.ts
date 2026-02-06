@@ -123,17 +123,17 @@ export type TenantRequestEscalation = {
 };
 
 export type TenantRequestEscalationRule = {
-  description?: string;
   event?: "alert" | "incident";
   labels?: {
     [key: string]: string;
   };
+  name?: string;
 };
 
 export type TenantRequestEscalationStep = {
   delay: number;
-  description?: string;
   member?: string;
+  name?: string;
   position?: "current" | "next" | "previous" | "all";
   schedule?: string;
 };
@@ -162,17 +162,17 @@ export type TenantRequestNumber = {
 };
 
 export type TenantRequestOverride = {
-  description: string;
   duration: number;
   member: string;
+  name: string;
   since: number;
 };
 
 export type TenantRequestRotation = {
   days: Array<number>;
-  description: string;
   duration: number;
   members: Array<string>;
+  name: string;
   since: number;
 };
 
@@ -222,15 +222,17 @@ export type TenantResponseMemberList = {
 export type TenantResponseOverride = {
   created: number;
   creator: string;
-  description: string;
-  shifts: Array<TenantResponseShift>;
+  name: string;
+  number: number;
+  shift: TenantResponseShift;
 };
 
 export type TenantResponseRotation = {
   created: number;
   creator: string;
-  description: string;
   members: Array<string>;
+  name: string;
+  number: number;
   shifts: Array<TenantResponseShift>;
 };
 
@@ -240,9 +242,15 @@ export type TenantResponseSchedule = {
   id: string;
   name: string;
   overrides?: Array<TenantResponseOverride>;
+  /**
+   * UntilF    string             `json:"until_format"`
+   */
   rotations?: Array<TenantResponseRotation>;
   since: number;
   tenant: TenantResponseTenant;
+  /**
+   * SinceF    string             `json:"since_format"`
+   */
   until?: number;
   updated?: number;
   updater?: string;
@@ -255,6 +263,9 @@ export type TenantResponseScheduleList = {
 export type TenantResponseShift = {
   member: string;
   since: number;
+  /**
+   * SinceF string `json:"since_format"`
+   */
   until: number;
 };
 
@@ -1402,7 +1413,16 @@ export type GetSchedulesByIdData = {
      */
     id: string;
   };
-  query?: never;
+  query: {
+    /**
+     * Since timestamp
+     */
+    since: number;
+    /**
+     * Until timestamp
+     */
+    until: number;
+  };
   url: "/schedules/{id}";
 };
 
@@ -1445,7 +1465,16 @@ export type PostSchedulesByIdOverrideCreateData = {
      */
     id: string;
   };
-  query?: never;
+  query: {
+    /**
+     * Since timestamp
+     */
+    since: number;
+    /**
+     * Until timestamp
+     */
+    until: number;
+  };
   url: "/schedules/{id}/override/create";
 };
 
@@ -1528,7 +1557,16 @@ export type PostSchedulesByIdRotationCreateData = {
      */
     id: string;
   };
-  query?: never;
+  query: {
+    /**
+     * Since timestamp
+     */
+    since: number;
+    /**
+     * Until timestamp
+     */
+    until: number;
+  };
   url: "/schedules/{id}/rotation/create";
 };
 

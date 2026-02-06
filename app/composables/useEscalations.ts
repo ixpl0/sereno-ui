@@ -97,13 +97,13 @@ export const useEscalations = (tenantId: Ref<string>) => {
       enabled: !escalation.enabled,
       steps: escalation.steps.map(step => ({
         delay: step.delay,
-        description: step.description,
+        name: step.description,
         member: step.member,
         position: isValidPosition(step.position) ? step.position : undefined,
         schedule: step.schedule,
       })),
       rules: escalation.rules.map(rule => ({
-        description: rule.description,
+        name: rule.description,
         event: isValidEvent(rule.event) ? rule.event : undefined,
         labels: rule.labels ? { ...rule.labels } : undefined,
       })),

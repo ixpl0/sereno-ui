@@ -10,7 +10,7 @@ const props = defineProps<Props>()
 
 const emit = defineEmits<{
   submit: [data: {
-    description: string
+    name: string
     duration: number
     since: number
     members: string[]
@@ -19,7 +19,7 @@ const emit = defineEmits<{
   cancel: []
 }>()
 
-const description = ref('')
+const name = ref('')
 const durationHours = ref(24)
 const durationMinutes = ref(0)
 const startTime = ref('09:00')
@@ -68,7 +68,7 @@ const removeMember = (memberId: string) => {
 }
 
 const isValid = computed(() => {
-  return description.value.trim() !== ''
+  return name.value.trim() !== ''
     && (durationHours.value > 0 || durationMinutes.value > 0)
     && selectedMembers.value.length > 0
     && selectedDays.value.length > 0
@@ -89,7 +89,7 @@ const handleSubmit = () => {
   const sinceTimestamp = Math.floor(now.getTime() / 1000)
 
   emit('submit', {
-    description: description.value.trim(),
+    name: name.value.trim(),
     duration: durationSeconds,
     since: sinceTimestamp,
     members: selectedMembers.value.map(m => m.id),
@@ -103,7 +103,7 @@ const handleSubmit = () => {
     <div>
       <UiLabel>Название ротации</UiLabel>
       <UiInput
-        v-model="description"
+        v-model="name"
         placeholder="Например: Дневная смена"
       />
     </div>

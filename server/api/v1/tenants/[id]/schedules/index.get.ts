@@ -32,17 +32,19 @@ export default defineEventHandler((event) => {
     creator: s.creator,
     tenant: { id: tenantId, name: tenant?.name ?? '', role: tenant?.admin ? 'admin' : 'member', since: tenant?.since ?? 0 },
     rotations: s.rotations.map(r => ({
-      description: r.description,
+      name: r.name,
+      number: r.number,
       members: r.members,
       created: r.created,
       creator: r.creator,
       shifts: r.shifts,
     })),
     overrides: s.overrides.map(o => ({
-      description: o.description,
+      name: o.name,
+      number: o.number,
       created: o.created,
       creator: o.creator,
-      shifts: o.shifts,
+      shift: o.shift,
     })),
   }))
 

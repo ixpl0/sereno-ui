@@ -13,7 +13,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<{
   submit: [data: {
-    description: string
+    name: string
     duration: number
     since: number
     member: string
@@ -34,14 +34,14 @@ const getInitialDuration = (): { value: number, unit: 'hours' | 'days' } => {
 
 const initialDuration = getInitialDuration()
 
-const description = ref('')
+const name = ref('')
 const durationValue = ref(initialDuration.value)
 const durationUnit = ref<'hours' | 'days'>(initialDuration.unit)
 const since = ref(props.prefill ? formatDateTimeLocal(props.prefill.since) : new Date().toISOString().slice(0, 16))
 const selectedMember = ref('')
 
 const isValid = computed(() => {
-  return description.value.trim() !== ''
+  return name.value.trim() !== ''
     && durationValue.value > 0
     && selectedMember.value !== ''
 })
@@ -58,7 +58,7 @@ const handleSubmit = () => {
   const sinceTimestamp = Math.floor(new Date(since.value).getTime() / 1000)
 
   emit('submit', {
-    description: description.value.trim(),
+    name: name.value.trim(),
     duration: durationSeconds,
     since: sinceTimestamp,
     member: selectedMember.value,
@@ -69,9 +69,9 @@ const handleSubmit = () => {
 <template>
   <div class="space-y-4">
     <div>
-      <UiLabel>Описание</UiLabel>
+      <UiLabel>Название замены</UiLabel>
       <UiInput
-        v-model="description"
+        v-model="name"
         placeholder="Например: Отпуск Ивана"
       />
     </div>

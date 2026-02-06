@@ -76,10 +76,10 @@ const handleDeleteOverride = () => {
         {{ timeLabel }}
       </div>
       <div
-        v-if="slotData.description"
+        v-if="slotData.name"
         class="text-sm text-base-content/50"
       >
-        {{ slotData.description }}
+        {{ slotData.name }}
       </div>
       <div
         v-if="slotData.isOverride"

@@ -25,7 +25,7 @@ const emit = defineEmits<{
   expand: []
   collapse: []
   addRotation: [data: {
-    description: string
+    name: string
     duration: number
     since: number
     members: string[]
@@ -33,7 +33,7 @@ const emit = defineEmits<{
   }]
   deleteRotation: [index: number]
   addOverride: [data: {
-    description: string
+    name: string
     duration: number
     since: number
     member: string
@@ -69,7 +69,7 @@ const rotationsSummary = computed(() => {
 })
 
 const handleAddRotation = (data: {
-  description: string
+  name: string
   duration: number
   since: number
   members: string[]
@@ -80,7 +80,7 @@ const handleAddRotation = (data: {
 }
 
 const handleAddOverride = (data: {
-  description: string
+  name: string
   duration: number
   since: number
   member: string

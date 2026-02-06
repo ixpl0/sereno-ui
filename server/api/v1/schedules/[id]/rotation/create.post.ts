@@ -21,16 +21,16 @@ export default defineEventHandler(async (event) => {
   }
 
   const body = await readBody(event)
-  if (!body.description || !body.duration || body.since === undefined || !body.members || !body.days) {
+  if (!body.name || !body.duration || body.since === undefined || !body.members || !body.days) {
     throw createError({
       statusCode: 400,
       statusMessage: 'Bad Request',
-      data: { error: { code: 'invalid_request', message: 'description, duration, since, members, and days are required' } },
+      data: { error: { code: 'invalid_request', message: 'name, duration, since, members, and days are required' } },
     })
   }
 
   const schedule = createMockRotation(scheduleId, {
-    description: body.description,
+    name: body.name,
     duration: body.duration,
     since: body.since,
     members: body.members,
@@ -55,7 +55,8 @@ export default defineEventHandler(async (event) => {
   }
 
   const rotation = {
-    description: mockRotation.description,
+    name: mockRotation.name,
+    number: mockRotation.number,
     members: mockRotation.members,
     created: mockRotation.created,
     creator: mockRotation.creator,

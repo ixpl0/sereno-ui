@@ -59,7 +59,7 @@ const overrides = computed(() => props.schedule.overrides ?? [])
 
 const memberColorMap = computed(() => {
   const rotationMembers = rotations.value.flatMap(rotation => rotation.members)
-  const overrideMembers = overrides.value.flatMap(override => override.shifts.map(shift => shift.member))
+  const overrideMembers = overrides.value.map(override => override.shift.member)
 
   return [...rotationMembers, ...overrideMembers].reduce(
     (acc, memberId) => {
@@ -79,11 +79,11 @@ const rotationLayers = computed(() => {
     return []
   }
   return rotations.value.map((rotation, index) => ({
-    label: rotation.description,
+    label: rotation.name,
     membersCount: rotation.members.length,
     slots: convertShiftsToSlots(
       rotation.shifts,
-      rotation.description,
+      rotation.name,
       index,
       false,
       props.memberNames,
@@ -100,8 +100,8 @@ const overrideSlots = computed<RotationSlot[]>(() => {
   }
   return overrides.value.flatMap((override, index) =>
     convertShiftsToSlots(
-      override.shifts,
-      override.description,
+      [override.shift],
+      override.name,
       index,
       true,
       props.memberNames,
@@ -119,7 +119,7 @@ const allSlots = computed<RotationSlot[]>(() => {
   const rotationSlots = rotations.value.flatMap((rotation, index) =>
     convertShiftsToSlots(
       rotation.shifts,
-      rotation.description,
+      rotation.name,
       index,
       false,
       props.memberNames,

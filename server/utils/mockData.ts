@@ -123,7 +123,8 @@ export interface MockShift {
 }
 
 export interface MockRotation {
-  description: string
+  name: string
+  number: number
   duration: number
   since: number
   members: string[]
@@ -134,13 +135,14 @@ export interface MockRotation {
 }
 
 export interface MockOverride {
-  description: string
+  name: string
+  number: number
   duration: number
   since: number
   member: string
   created: number
   creator: string
-  shifts: MockShift[]
+  shift: MockShift
 }
 
 export interface MockSchedule {
@@ -210,17 +212,15 @@ const generateShifts = (
   return shifts
 }
 
-const generateOverrideShifts = (
+const generateOverrideShift = (
   since: number,
   duration: number,
   member: string,
-): MockShift[] => {
-  return [{
-    member,
-    since,
-    until: since + duration,
-  }]
-}
+): MockShift => ({
+  member,
+  since,
+  until: since + duration,
+})
 
 const generateVerificationCode = (): string => '12345678'
 
@@ -361,7 +361,8 @@ const defaultState: MockState = {
         creator: 'user-1',
         rotations: [
           {
-            description: 'Дневная смена',
+            name: 'Дневная смена',
+            number: 0,
             duration: 43200,
             since: Math.floor(Date.now() / 1000) - 86400 * 30,
             members: ['user-1', 'user-3'],
@@ -371,7 +372,8 @@ const defaultState: MockState = {
             shifts: generateShifts([1, 2, 3, 4, 5], 43200, Math.floor(Date.now() / 1000) - 86400 * 30, ['user-1', 'user-3']),
           },
           {
-            description: 'Ночная смена',
+            name: 'Ночная смена',
+            number: 1,
             duration: 43200,
             since: Math.floor(Date.now() / 1000) - 86400 * 30 + 43200,
             members: ['user-3', 'user-1'],
@@ -383,13 +385,14 @@ const defaultState: MockState = {
         ],
         overrides: [
           {
-            description: 'Отпуск Василия',
+            name: 'Отпуск Василия',
+            number: 0,
             duration: 86400 * 3,
             since: Math.floor(Date.now() / 1000) + 86400 * 2,
             member: 'user-3',
             created: Math.floor(Date.now() / 1000) - 86400,
             creator: 'user-1',
-            shifts: generateOverrideShifts(Math.floor(Date.now() / 1000) + 86400 * 2, 86400 * 3, 'user-3'),
+            shift: generateOverrideShift(Math.floor(Date.now() / 1000) + 86400 * 2, 86400 * 3, 'user-3'),
           },
         ],
       },
@@ -401,7 +404,8 @@ const defaultState: MockState = {
         creator: 'user-1',
         rotations: [
           {
-            description: 'Круглосуточно',
+            name: 'Круглосуточно',
+            number: 0,
             duration: 86400,
             since: Math.floor(Date.now() / 1000) - 86400 * 30,
             members: ['user-1', 'user-3'],
@@ -423,7 +427,8 @@ const defaultState: MockState = {
         creator: 'user-2',
         rotations: [
           {
-            description: 'Основная ротация',
+            name: 'Основная ротация',
+            number: 0,
             duration: 86400,
             since: Math.floor(Date.now() / 1000) - 86400 * 14,
             members: ['user-2', 'user-1'],
@@ -1175,7 +1180,7 @@ export const deleteMockSchedule = (tenantId: string, scheduleId: string): boolea
 
 export const createMockRotation = (
   scheduleId: string,
-  data: { description: string, duration: number, since: number, members: string[], days: number[] },
+  data: { name: string, duration: number, since: number, members: string[], days: number[] },
 ): MockSchedule | null => {
   const now = Math.floor(Date.now() / 1000)
   for (const [tenantId, schedules] of state.tenantSchedules.entries()) {
@@ -1187,6 +1192,7 @@ export const createMockRotation = (
       }
       const rotation: MockRotation = {
         ...data,
+        number: schedule.rotations.length,
         created: now,
         creator: currentUserId,
         shifts: generateShifts(data.days, data.duration, data.since, data.members),
@@ -1223,7 +1229,7 @@ export const deleteMockRotation = (scheduleId: string, rotationIndex: number): M
 
 export const createMockOverride = (
   scheduleId: string,
-  data: { description: string, duration: number, since: number, member: string },
+  data: { name: string, duration: number, since: number, member: string },
 ): MockSchedule | null => {
   const now = Math.floor(Date.now() / 1000)
   for (const [tenantId, schedules] of state.tenantSchedules.entries()) {
@@ -1235,9 +1241,10 @@ export const createMockOverride = (
       }
       const override: MockOverride = {
         ...data,
+        number: schedule.overrides.length,
         created: now,
         creator: currentUserId,
-        shifts: generateOverrideShifts(data.since, data.duration, data.member),
+        shift: generateOverrideShift(data.since, data.duration, data.member),
       }
       const updatedSchedule: MockSchedule = {
         ...schedule,

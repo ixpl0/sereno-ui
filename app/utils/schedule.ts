@@ -18,7 +18,7 @@ export interface RotationSlot {
   end: Date
   rotationIndex: number
   isOverride: boolean
-  description: string
+  name: string
   colorIndex?: number
 }
 
@@ -96,7 +96,7 @@ export const getTimelineHours = (range: TimelineRange): Date[] => {
 
 export const convertShiftsToSlots = (
   shifts: ReadonlyArray<ShiftData>,
-  description: string,
+  name: string,
   rotationIndex: number,
   isOverride: boolean,
   memberNames: Map<string, string>,
@@ -121,7 +121,7 @@ export const convertShiftsToSlots = (
         end: effectiveEnd,
         rotationIndex,
         isOverride,
-        description,
+        name,
       }
     })
 }

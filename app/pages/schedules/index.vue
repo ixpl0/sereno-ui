@@ -97,14 +97,14 @@ const handleDelete = async (id: string) => {
 }
 
 const handleAddRotation = async (scheduleId: string, data: {
-  description: string
+  name: string
   duration: number
   since: number
   members: string[]
   days: number[]
 }) => {
   const rotation: TenantRequestRotation = {
-    description: data.description,
+    name: data.name,
     duration: data.duration,
     since: data.since,
     members: data.members,
@@ -133,13 +133,13 @@ const handleDeleteRotation = async (scheduleId: string, index: number) => {
 }
 
 const handleAddOverride = async (scheduleId: string, data: {
-  description: string
+  name: string
   duration: number
   since: number
   member: string
 }) => {
   const override: TenantRequestOverride = {
-    description: data.description,
+    name: data.name,
     duration: data.duration,
     since: data.since,
     member: data.member,
