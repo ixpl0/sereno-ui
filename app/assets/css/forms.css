@@ -1,20 +1,20 @@
 .input,
 .select {
-  outline: none;
   border-width: 1px;
-  transition: all 0.2s ease-out;
+  transition:
+    border-color 0.2s ease-out,
+    box-shadow 0.2s ease-out,
+    background-color 0.2s ease-out;
 }
 
 .select {
   padding-right: 2.2rem;
 }
 
-.input:focus {
-  transform: scale(1.01);
-  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-}
-
+.input:focus-visible,
+.select:focus-visible,
 .select-wrapper:focus-within .select {
-  transform: scale(1.01);
-  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  outline: 2px solid color-mix(in oklch, var(--color-primary) 55%, transparent);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-primary) 25%, transparent);
 }

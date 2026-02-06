@@ -165,6 +165,7 @@ const handleSave = async () => {
         <UiButton
           variant="ghost"
           size="sm"
+          :aria-label="escalation.enabled ? 'Отключить эскалацию' : 'Включить эскалацию'"
           @click="emit('toggle')"
         >
           <Icon
@@ -175,6 +176,7 @@ const handleSave = async () => {
         <UiButton
           variant="ghost"
           size="sm"
+          aria-label="Редактировать эскалацию"
           @click="emit('edit')"
         >
           <Icon
@@ -185,6 +187,7 @@ const handleSave = async () => {
         <UiButton
           variant="ghost"
           size="sm"
+          aria-label="Удалить эскалацию"
           @click="emit('delete')"
         >
           <Icon
@@ -288,6 +291,7 @@ const handleSave = async () => {
           <UiButton
             variant="ghost"
             size="sm"
+            aria-label="Удалить шаг"
             @click="removeStep(index)"
           >
             <Icon

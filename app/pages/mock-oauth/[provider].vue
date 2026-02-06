@@ -137,6 +137,7 @@ useSeoMeta({
               v-for="scenario in scenarios"
               :key="scenario.id"
               class="tab gap-1"
+              :aria-label="scenario.name"
               :class="{ 'tab-active': selectedScenario === scenario.id }"
               @click="selectedScenario = scenario.id"
             >

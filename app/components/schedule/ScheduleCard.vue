@@ -111,8 +111,11 @@ const handleCreateOverrideFromSlot = (slot: RotationSlot) => {
 <template>
   <UiCard class="animate-slide-up">
     <div class="flex items-start justify-between gap-4">
-      <div
-        class="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
+      <button
+        type="button"
+        class="flex items-center gap-3 min-w-0 flex-1 text-left rounded-sm focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2"
+        :aria-expanded="expanded"
+        :aria-label="expanded ? 'Свернуть расписание' : 'Развернуть расписание'"
         @click="expanded ? emit('collapse') : emit('expand')"
       >
         <div class="w-10 h-10 flex items-center justify-center rounded-lg shrink-0 bg-primary/10">
@@ -133,12 +136,13 @@ const handleCreateOverrideFromSlot = (slot: RotationSlot) => {
           :name="expanded ? 'lucide:chevron-up' : 'lucide:chevron-down'"
           class="w-4 h-4 text-base-content/40 shrink-0"
         />
-      </div>
+      </button>
 
       <div class="shrink-0 self-center">
         <UiButton
           variant="ghost"
           size="sm"
+          aria-label="Удалить расписание"
           @click="emit('delete')"
         >
           <Icon

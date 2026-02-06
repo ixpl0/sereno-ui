@@ -251,6 +251,7 @@ const handleDeleteToken = async (tokenId: string) => {
                 <UiButton
                   variant="ghost"
                   size="sm"
+                  aria-label="Редактировать название команды"
                   @click="startEditName"
                 >
                   <Icon
@@ -377,6 +378,7 @@ const handleDeleteToken = async (tokenId: string) => {
                     <UiButton
                       variant="ghost"
                       size="sm"
+                      :aria-label="member.role === 'admin' ? 'Понизить до участника' : 'Повысить до администратора'"
                       @click="handleToggleMemberRole(member.id, member.role)"
                     >
                       <Icon
@@ -387,6 +389,7 @@ const handleDeleteToken = async (tokenId: string) => {
                     <UiButton
                       variant="ghost"
                       size="sm"
+                      aria-label="Удалить участника"
                       @click="handleDeleteMember(member.id)"
                     >
                       <Icon
@@ -526,6 +529,7 @@ const handleDeleteToken = async (tokenId: string) => {
                   <UiButton
                     variant="ghost"
                     size="sm"
+                    aria-label="Удалить токен"
                     @click="handleDeleteToken(token.id)"
                   >
                     <Icon

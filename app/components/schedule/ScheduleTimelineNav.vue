@@ -86,6 +86,7 @@ const goToNext = () => {
         <UiButton
           variant="ghost"
           size="sm"
+          aria-label="Предыдущий период"
           @click="goToPrev"
         >
           <Icon
@@ -96,6 +97,7 @@ const goToNext = () => {
         <UiButton
           variant="ghost"
           size="sm"
+          aria-label="Следующий период"
           @click="goToNext"
         >
           <Icon

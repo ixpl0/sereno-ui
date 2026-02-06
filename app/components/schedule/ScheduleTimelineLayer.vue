@@ -64,7 +64,8 @@ const getColorIndex = (memberId: string): number => {
         v-if="!isOverrideLayer"
         variant="ghost"
         size="sm"
-        class="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity bg-base-100 shadow-sm hover:bg-error/10 hover:text-error"
+        class="absolute top-1 right-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 transition-opacity bg-base-100 shadow-sm hover:bg-error/10 hover:text-error"
+        aria-label="Удалить ротацию"
         @click="emit('delete')"
       >
         <Icon

@@ -23,17 +23,19 @@ const getAlertClass = (type: ToastType): string => {
     aria-live="polite"
   >
     <TransitionGroup name="toast">
-      <div
+      <button
         v-for="toast in toasts"
         :key="toast.id"
+        type="button"
         :class="getAlertClass(toast.type)"
         :data-testid="`toast-${toast.type}`"
         :role="toast.type === 'error' ? 'alert' : 'status'"
-        class="alert shadow-lg cursor-pointer"
+        aria-label="Закрыть уведомление"
+        class="alert shadow-lg cursor-pointer text-left w-full"
         @click="removeToast(toast.id)"
       >
         <span>{{ toast.message }}</span>
-      </div>
+      </button>
     </TransitionGroup>
   </div>
 </template>

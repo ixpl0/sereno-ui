@@ -130,6 +130,7 @@ const handleSubmit = () => {
               <button
                 type="button"
                 class="text-base-content/50 hover:text-error transition-colors"
+                aria-label="Удалить участника из ротации"
                 @click="removeMember(element.id)"
               >
                 <Icon

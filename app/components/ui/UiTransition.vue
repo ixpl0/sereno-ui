@@ -183,4 +183,55 @@ const durationClass = computed(() => `ui-duration-${props.duration}`)
   opacity: 0;
   transform: translateX(16px);
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-fade-enter-active,
+  .ui-fade-leave-active,
+  .ui-fade-appear-active,
+  .ui-scale-enter-active,
+  .ui-scale-appear-active,
+  .ui-scale-leave-active,
+  .ui-scale-bounce-enter-active,
+  .ui-scale-bounce-appear-active,
+  .ui-scale-bounce-leave-active,
+  .ui-slide-up-enter-active,
+  .ui-slide-up-leave-active,
+  .ui-slide-up-appear-active,
+  .ui-slide-down-enter-active,
+  .ui-slide-down-leave-active,
+  .ui-slide-down-appear-active,
+  .ui-slide-left-enter-active,
+  .ui-slide-left-leave-active,
+  .ui-slide-left-appear-active,
+  .ui-slide-right-enter-active,
+  .ui-slide-right-leave-active,
+  .ui-slide-right-appear-active {
+    transition: none !important;
+  }
+
+  .ui-fade-enter-from,
+  .ui-fade-leave-to,
+  .ui-fade-appear-from,
+  .ui-scale-enter-from,
+  .ui-scale-appear-from,
+  .ui-scale-leave-to,
+  .ui-scale-bounce-enter-from,
+  .ui-scale-bounce-appear-from,
+  .ui-scale-bounce-leave-to,
+  .ui-slide-up-enter-from,
+  .ui-slide-up-appear-from,
+  .ui-slide-up-leave-to,
+  .ui-slide-down-enter-from,
+  .ui-slide-down-appear-from,
+  .ui-slide-down-leave-to,
+  .ui-slide-left-enter-from,
+  .ui-slide-left-appear-from,
+  .ui-slide-left-leave-to,
+  .ui-slide-right-enter-from,
+  .ui-slide-right-appear-from,
+  .ui-slide-right-leave-to {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
 </style>

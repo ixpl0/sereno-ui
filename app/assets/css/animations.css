@@ -10,6 +10,14 @@
   animation: slide-up 500ms ease-out;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .animate-appear,
+  .animate-fade-in,
+  .animate-slide-up {
+    animation: none !important;
+  }
+}
+
 @keyframes appear {
   from {
     opacity: 0;

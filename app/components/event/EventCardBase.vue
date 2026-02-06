@@ -34,14 +34,28 @@ const handleStatusChange = (event: Event) => {
   }
 }
 
+const handleCardKeydown = (event: KeyboardEvent) => {
+  if (event.target !== event.currentTarget) {
+    return
+  }
+  if (event.key !== 'Enter' && event.key !== ' ') {
+    return
+  }
+  event.preventDefault()
+  emit('click')
+}
+
 const activeLabels = computed(() => props.labels.filter(label => !label.deleted))
 </script>
 
 <template>
-  <div
-    class="bg-base-200/60 backdrop-blur-xl hover:bg-base-200 border border-base-content/10 border-l-4 rounded-lg cursor-pointer transition-all hover:shadow-md overflow-hidden"
+  <article
+    class="bg-base-200/60 backdrop-blur-xl hover:bg-base-200 border border-base-content/10 border-l-4 rounded-lg cursor-pointer transition-all hover:shadow-md overflow-hidden focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2"
     :class="getStatusBorderColor(currentStatus)"
+    role="button"
+    tabindex="0"
     @click="emit('click')"
+    @keydown="handleCardKeydown"
   >
     <div class="flex items-center gap-3 pr-4 pb-2">
       <div class="flex items-center -ml-1 mt-0">
@@ -52,15 +66,21 @@ const activeLabels = computed(() => props.labels.filter(label => !label.deleted)
           {{ formatStatus(currentStatus) }}
         </span>
         <template v-if="nextStatus">
-          <span class="text-base-content/40 px-2 flex items-center">→</span>
-          <span
+          <Icon
+            name="lucide:arrow-right"
+            class="w-3.5 h-3.5 text-base-content/40 mx-2"
+            aria-hidden="true"
+          />
+          <button
+            type="button"
             class="badge font-semibold cursor-pointer hover:opacity-80 transition-opacity border-transparent"
             :class="[getStatusTextColor(nextStatus.status), getStatusBgLight(nextStatus.status)]"
             :title="`Сменить статус на «${formatStatus(nextStatus.status)}»`"
+            :aria-label="`Сменить статус на ${formatStatus(nextStatus.status)}`"
             @click="handleStatusChange"
           >
             {{ formatStatus(nextStatus.status) }}
-          </span>
+          </button>
         </template>
       </div>
       <div class="flex items-center gap-4 text-sm ml-auto pt-0.5">
@@ -94,5 +114,5 @@ const activeLabels = computed(() => props.labels.filter(label => !label.deleted)
 
       <slot name="footer" />
     </div>
-  </div>
+  </article>
 </template>

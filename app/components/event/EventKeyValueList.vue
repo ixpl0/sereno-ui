@@ -143,7 +143,9 @@ const canDelete = (item: KeyValueItem): boolean => {
             <span>{{ item.value }}</span>
             <button
               v-if="canDelete(item)"
+              type="button"
               class="btn btn-ghost btn-xs btn-circle ml-1"
+              :aria-label="`Удалить ${item.key}`"
               @click="handleDelete(item.key)"
             >
               <Icon
@@ -172,7 +174,9 @@ const canDelete = (item: KeyValueItem): boolean => {
             </div>
             <button
               v-if="canDelete(item)"
-              class="btn btn-ghost btn-xs btn-circle opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+              type="button"
+              class="btn btn-ghost btn-xs btn-circle opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 transition-opacity shrink-0"
+              :aria-label="`Удалить ${item.key}`"
               @click="handleDelete(item.key)"
             >
               <Icon

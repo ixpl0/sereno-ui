@@ -124,6 +124,7 @@ const activeComments = computed(() =>
             variant="ghost"
             size="sm"
             class="shrink-0"
+            aria-label="Удалить комментарий"
             @click="handleDelete(comment.id)"
           >
             <Icon

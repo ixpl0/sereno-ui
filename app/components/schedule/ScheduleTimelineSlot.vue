@@ -27,6 +27,7 @@ const style = computed(() => ({
 const colorClass = computed(() => getUserColor(props.colorIndex))
 
 const timeLabel = computed(() => formatTimeRange(props.slotData.start, props.slotData.end))
+const triggerAriaLabel = computed(() => `Открыть слот ${props.slotData.memberName} (${timeLabel.value})`)
 
 const handleClick = () => {
   isOpen.value = !isOpen.value
@@ -49,11 +50,13 @@ const handleDeleteOverride = () => {
     placement="bottom"
   >
     <template #trigger="{ triggerRef }">
-      <div
+      <button
         :ref="triggerRef"
-        class="absolute top-1 bottom-1 rounded px-1 py-0.5 cursor-pointer hover:opacity-90 transition-opacity"
+        type="button"
+        class="absolute top-1 bottom-1 rounded px-1 py-0.5 cursor-pointer hover:opacity-90 transition-opacity text-left border-0 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-1"
         :class="[colorClass, slotData.isOverride ? 'ring-2 ring-warning ring-offset-1' : '']"
         :style="style"
+        :aria-label="triggerAriaLabel"
         @click.stop="handleClick"
       >
         <div class="text-xs font-medium text-white truncate">
@@ -65,7 +68,7 @@ const handleDeleteOverride = () => {
         >
           {{ timeLabel }}
         </div>
-      </div>
+      </button>
     </template>
 
     <div class="p-3 min-w-48 space-y-2">

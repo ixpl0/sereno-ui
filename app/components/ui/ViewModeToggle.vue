@@ -13,10 +13,13 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="flex items-center bg-base-200 rounded p-0.5">
+  <div class="flex items-center bg-base-200 rounded p-1">
     <button
-      class="flex items-center justify-center w-8 h-8 rounded transition-colors"
+      type="button"
+      class="flex items-center justify-center w-10 h-10 rounded transition-colors focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2"
       :class="modelValue === 'cards' ? 'bg-base-100 shadow-sm' : 'hover:bg-base-content/5'"
+      aria-label="Карточки"
+      :aria-pressed="modelValue === 'cards'"
       title="Карточки"
       @click="emit('update:modelValue', 'cards')"
     >
@@ -27,8 +30,11 @@ const emit = defineEmits<{
       />
     </button>
     <button
-      class="flex items-center justify-center w-8 h-8 rounded transition-colors"
+      type="button"
+      class="flex items-center justify-center w-10 h-10 rounded transition-colors focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2"
       :class="modelValue === 'table' ? 'bg-base-100 shadow-sm' : 'hover:bg-base-content/5'"
+      aria-label="Таблица"
+      :aria-pressed="modelValue === 'table'"
       title="Таблица"
       @click="emit('update:modelValue', 'table')"
     >

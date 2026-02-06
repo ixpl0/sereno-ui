@@ -265,6 +265,7 @@ const handleRemoveAlert = async (alertId: string) => {
                 <UiButton
                   variant="ghost"
                   size="sm"
+                  aria-label="Удалить связанный алерт"
                   @click="handleRemoveAlert(linkedAlert.id)"
                 >
                   <Icon

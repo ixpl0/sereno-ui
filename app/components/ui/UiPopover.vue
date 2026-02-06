@@ -84,23 +84,41 @@ const handleEscape = (event: KeyboardEvent) => {
   }
 }
 
+const handleViewportChange = () => {
+  if (!props.open) {
+    return
+  }
+  updatePosition()
+}
+
+const addOpenListeners = () => {
+  document.addEventListener('click', handleDocumentClick, true)
+  document.addEventListener('keydown', handleEscape)
+  window.addEventListener('resize', handleViewportChange)
+  window.addEventListener('scroll', handleViewportChange, true)
+}
+
+const removeOpenListeners = () => {
+  document.removeEventListener('click', handleDocumentClick, true)
+  document.removeEventListener('keydown', handleEscape)
+  window.removeEventListener('resize', handleViewportChange)
+  window.removeEventListener('scroll', handleViewportChange, true)
+}
+
 watch(() => props.open, (isOpen) => {
   if (isOpen) {
     nextTick(() => {
       updatePosition()
     })
-    document.addEventListener('click', handleDocumentClick, true)
-    document.addEventListener('keydown', handleEscape)
+    addOpenListeners()
   }
   else {
-    document.removeEventListener('click', handleDocumentClick, true)
-    document.removeEventListener('keydown', handleEscape)
+    removeOpenListeners()
   }
 })
 
 onUnmounted(() => {
-  document.removeEventListener('click', handleDocumentClick, true)
-  document.removeEventListener('keydown', handleEscape)
+  removeOpenListeners()
 })
 
 type TriggerRefSetter = (el: Element | ComponentPublicInstance | null) => void

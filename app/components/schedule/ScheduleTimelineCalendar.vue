@@ -23,6 +23,10 @@ const calendarCells = computed(() => {
 const getColorIndex = (memberId: string): number => {
   return props.memberColorMap.get(memberId) ?? 0
 }
+
+const getDayAriaLabel = (date: Date): string => {
+  return `Открыть день ${date.toLocaleDateString('ru-RU')}`
+}
 </script>
 
 <template>
@@ -35,14 +39,16 @@ const getColorIndex = (memberId: string): number => {
       {{ day }}
     </div>
 
-    <div
+    <button
       v-for="cell in calendarCells"
       :key="cell.date.toISOString()"
-      class="min-h-24 p-1 bg-base-100 cursor-pointer hover:bg-base-200/50 transition-colors"
+      type="button"
+      class="w-full min-h-24 p-1 bg-base-100 cursor-pointer hover:bg-base-200/50 transition-colors text-left align-top focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-0"
       :class="{
         'bg-primary/5 hover:bg-primary/10': isToday(cell.date),
         'opacity-40': !cell.isCurrentMonth,
       }"
+      :aria-label="getDayAriaLabel(cell.date)"
       @click="emit('selectDay', cell.date)"
     >
       <div
@@ -67,6 +73,6 @@ const getColorIndex = (memberId: string): number => {
           +{{ cell.slots.length - 3 }}
         </div>
       </div>
-    </div>
+    </button>
   </div>
 </template>

@@ -12,6 +12,7 @@ interface Props {
   size?: FormFieldSize
   state?: FormFieldState
   disabled?: boolean
+  readonly?: boolean
   required?: boolean
   autofocus?: boolean
   name?: string
@@ -32,6 +33,7 @@ const props = withDefaults(defineProps<Props>(), {
   size: 'md',
   state: 'default',
   disabled: false,
+  readonly: false,
   required: false,
   autofocus: false,
   name: '',
@@ -131,6 +133,7 @@ defineExpose({ focus, select })
       :value="modelValue"
       :placeholder="placeholder"
       :disabled="disabled"
+      :readonly="readonly"
       :required="required"
       :name="name"
       v-bind="inputAttrs"

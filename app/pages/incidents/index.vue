@@ -35,16 +35,28 @@ const handleStatusChange = async (incidentId: string, newStatus: string) => {
 
   showSuccess(newStatus === 'acknowledged' ? 'Инцидент подтверждён' : 'Инцидент закрыт')
 }
+
+const goToIncidentDetails = (incidentId: string) => {
+  navigateTo(`/incidents/${incidentId}`)
+}
+
+const handleRowKeydown = (event: KeyboardEvent, incidentId: string) => {
+  if (event.key !== 'Enter' && event.key !== ' ') {
+    return
+  }
+  event.preventDefault()
+  goToIncidentDetails(incidentId)
+}
 </script>
 
 <template>
   <div class="p-4 lg:p-6">
     <div class="max-w-5xl mx-auto">
-      <div class="flex items-center justify-between mb-6">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
         <h1 class="text-2xl font-semibold">
           Инциденты
         </h1>
-        <div class="flex items-center gap-3">
+        <div class="flex flex-wrap items-center gap-3">
           <select
             v-model="statusFilter"
             class="select select-bordered select-sm"
@@ -69,6 +81,7 @@ const handleStatusChange = async (incidentId: string, newStatus: string) => {
           <UiButton
             variant="ghost"
             size="sm"
+            aria-label="Обновить список инцидентов"
             @click="handleRefresh"
           >
             <Icon
@@ -113,7 +126,7 @@ const handleStatusChange = async (incidentId: string, newStatus: string) => {
           :incident="incident"
           :current-status="currentStatus(incident)"
           :tenant-name="getTenantName(incident.tenant.id)"
-          @click="navigateTo(`/incidents/${incident.id}`)"
+          @click="goToIncidentDetails(incident.id)"
           @status-change="(newStatus) => handleStatusChange(incident.id, newStatus)"
         />
       </div>
@@ -138,8 +151,12 @@ const handleStatusChange = async (incidentId: string, newStatus: string) => {
               <tr
                 v-for="incident in filteredIncidents"
                 :key="incident.id"
-                class="hover cursor-pointer"
-                @click="navigateTo(`/incidents/${incident.id}`)"
+                class="hover cursor-pointer focus-visible:outline-2 focus-visible:outline-primary"
+                role="link"
+                tabindex="0"
+                :aria-label="`Открыть инцидент ${incident.title}`"
+                @click="goToIncidentDetails(incident.id)"
+                @keydown="(event) => handleRowKeydown(event, incident.id)"
               >
                 <td>
                   <div class="font-medium">

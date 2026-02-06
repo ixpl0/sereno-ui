@@ -460,6 +460,7 @@ const handleCloseAllSessions = async () => {
                   v-if="contact.id"
                   variant="ghost"
                   size="sm"
+                  aria-label="Подтвердить контакт"
                   @click="startVerifyContact(contact.id)"
                 >
                   <Icon
@@ -487,6 +488,7 @@ const handleCloseAllSessions = async () => {
                 <UiButton
                   variant="ghost"
                   size="sm"
+                  aria-label="Отменить подтверждение"
                   @click="cancelVerifyContact"
                 >
                   <Icon
@@ -500,6 +502,7 @@ const handleCloseAllSessions = async () => {
                 v-if="contact.id && verifyingContactId !== contact.id"
                 variant="ghost"
                 size="sm"
+                aria-label="Удалить контакт"
                 @click="handleDeleteContact(contact.id)"
               >
                 <Icon

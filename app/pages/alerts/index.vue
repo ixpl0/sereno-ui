@@ -40,16 +40,28 @@ const handleStatusChange = async (alertId: string, newStatus: string) => {
 
   showSuccess(newStatus === 'acknowledged' ? 'Алерт подтверждён' : 'Алерт закрыт')
 }
+
+const goToAlertDetails = (alertId: string) => {
+  navigateTo(`/alerts/${alertId}`)
+}
+
+const handleRowKeydown = (event: KeyboardEvent, alertId: string) => {
+  if (event.key !== 'Enter' && event.key !== ' ') {
+    return
+  }
+  event.preventDefault()
+  goToAlertDetails(alertId)
+}
 </script>
 
 <template>
   <div class="p-4 lg:p-6">
     <div class="max-w-5xl mx-auto">
-      <div class="flex items-center justify-between mb-6">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
         <h1 class="text-2xl font-semibold">
           Алерты
         </h1>
-        <div class="flex items-center gap-3">
+        <div class="flex flex-wrap items-center gap-3">
           <select
             v-model="statusFilter"
             class="select select-bordered select-sm"
@@ -74,6 +86,7 @@ const handleStatusChange = async (alertId: string, newStatus: string) => {
           <UiButton
             variant="ghost"
             size="sm"
+            aria-label="Обновить список алертов"
             @click="handleRefresh"
           >
             <Icon
@@ -107,7 +120,7 @@ const handleStatusChange = async (alertId: string, newStatus: string) => {
           :alert="alert"
           :current-status="currentStatus(alert)"
           :tenant-name="getTenantName(alert.tenant.id)"
-          @click="navigateTo(`/alerts/${alert.id}`)"
+          @click="goToAlertDetails(alert.id)"
           @status-change="(newStatus) => handleStatusChange(alert.id, newStatus)"
         />
       </div>
@@ -132,8 +145,12 @@ const handleStatusChange = async (alertId: string, newStatus: string) => {
               <tr
                 v-for="alert in filteredAlerts"
                 :key="alert.id"
-                class="hover cursor-pointer"
-                @click="navigateTo(`/alerts/${alert.id}`)"
+                class="hover cursor-pointer focus-visible:outline-2 focus-visible:outline-primary"
+                role="link"
+                tabindex="0"
+                :aria-label="`Открыть алерт ${alert.source}`"
+                @click="goToAlertDetails(alert.id)"
+                @keydown="(event) => handleRowKeydown(event, alert.id)"
               >
                 <td>
                   <div class="font-medium">

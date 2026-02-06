@@ -170,11 +170,11 @@ const handleDeleteOverride = async (scheduleId: string, index: number) => {
 <template>
   <div class="p-4 lg:p-6">
     <div class="max-w-5xl mx-auto">
-      <div class="flex items-center justify-between mb-6">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
         <h1 class="text-2xl font-semibold">
           Расписания
         </h1>
-        <div class="flex items-center gap-3">
+        <div class="flex flex-wrap items-center gap-3">
           <select
             v-if="tenants.length > 1"
             v-model="selectedTenantId"

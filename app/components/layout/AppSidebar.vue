@@ -82,6 +82,7 @@ const isActive = (path: string) => route.path === path || route.path.startsWith(
             <NuxtLink
               :to="item.to"
               class="flex items-center h-10 transition-colors gap-3 px-3 rounded-sm"
+              :aria-label="item.label"
               :class="[
                 collapsed ? 'lg:justify-center lg:w-10 lg:mx-auto lg:gap-0 lg:px-0' : '',
                 isActive(item.to)
@@ -115,6 +116,7 @@ const isActive = (path: string) => route.path === path || route.path.startsWith(
           <NuxtLink
             :to="item.to"
             class="flex items-center h-10 transition-colors gap-3 px-3 rounded-sm"
+            :aria-label="item.label"
             :class="[
               collapsed ? 'lg:justify-center lg:w-10 lg:mx-auto lg:gap-0 lg:px-0' : '',
               isActive(item.to)
@@ -143,6 +145,7 @@ const isActive = (path: string) => route.path === path || route.path.startsWith(
         href="/"
         target="_blank"
         rel="noopener noreferrer"
+        aria-label="Сайт"
         class="flex items-center h-10 transition-colors gap-3 px-3 hover:bg-base-content/5 text-base-content/50 hover:text-base-content rounded-sm"
         :class="collapsed ? 'lg:justify-center lg:w-10 lg:mx-auto lg:gap-0 lg:px-0' : ''"
         @click="closeMobileMenu"
@@ -164,6 +167,7 @@ const isActive = (path: string) => route.path === path || route.path.startsWith(
       <button
         class="hidden lg:flex items-center h-10 hover:bg-base-content/5 text-base-content/60 transition-colors rounded-sm"
         :class="collapsed ? 'justify-center w-10 mx-auto' : 'w-full justify-center gap-2 px-3'"
+        :aria-label="collapsed ? 'Развернуть меню' : 'Свернуть меню'"
         @click="toggleCollapse"
       >
         <Icon
