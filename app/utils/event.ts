@@ -6,6 +6,6 @@ export const getCurrentEventStatus = <T extends EventWithStatuses>(event: T): st
   if (event.statuses.length === 0) {
     return 'created'
   }
-  const sorted = event.statuses.toSorted((a, b) => b.created - a.created)
-  return sorted[0]?.status ?? 'created'
+  const latest = event.statuses.reduce((max, s) => s.created > max.created ? s : max)
+  return latest.status
 }

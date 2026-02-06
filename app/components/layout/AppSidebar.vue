@@ -59,7 +59,7 @@ const isActive = (path: string) => route.path === path || route.path.startsWith(
 
 <template>
   <aside
-    class="fixed top-16 bottom-0 left-0 z-40 flex flex-col bg-base-200 lg:bg-base-200/60 lg:backdrop-blur-xl border-r border-base-content/5 transition-all duration-300"
+    class="fixed top-16 bottom-0 left-0 z-40 flex flex-col bg-base-200 lg:bg-base-200/60 lg:backdrop-blur-sm border-r border-base-content/5 transition-all duration-300"
     :class="[
       collapsed ? 'w-64 lg:w-16' : 'w-64',
       mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',

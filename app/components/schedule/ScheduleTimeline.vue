@@ -111,22 +111,7 @@ const overrideSlots = computed<RotationSlot[]>(() => {
 })
 
 const allSlots = computed<RotationSlot[]>(() => {
-  const currentRange = range.value
-  if (!currentRange) {
-    return []
-  }
-
-  const rotationSlots = rotations.value.flatMap((rotation, index) =>
-    convertShiftsToSlots(
-      rotation.shifts,
-      rotation.name,
-      index,
-      false,
-      props.memberNames,
-      currentRange,
-    ),
-  )
-
+  const rotationSlots = rotationLayers.value.flatMap(layer => layer.slots)
   return [...rotationSlots, ...overrideSlots.value]
 })
 

@@ -14,17 +14,20 @@ const { getTenantName } = useTenants()
 
 const statusFilter = ref<string>('all')
 
+const enrichedAlerts = computed(() =>
+  alerts.value.map(alert => ({
+    ...alert,
+    computedStatus: currentStatus(alert),
+    activeLabels: alert.labels.filter(l => !l.deleted),
+  })),
+)
+
 const filteredAlerts = computed(() => {
   if (statusFilter.value === 'all') {
-    return alerts.value
+    return enrichedAlerts.value
   }
-  return alerts.value.filter(alert => currentStatus(alert) === statusFilter.value)
+  return enrichedAlerts.value.filter(alert => alert.computedStatus === statusFilter.value)
 })
-
-const getAlertLabelsPreview = (alert: typeof alerts.value[0]) => {
-  const activeLabels = alert.labels.filter(l => !l.deleted)
-  return activeLabels.slice(0, 3)
-}
 
 const handleRefresh = async () => {
   await refresh()
@@ -118,7 +121,7 @@ const handleRowKeydown = (event: KeyboardEvent, alertId: string) => {
           v-for="alert in filteredAlerts"
           :key="alert.id"
           :alert="alert"
-          :current-status="currentStatus(alert)"
+          :current-status="alert.computedStatus"
           :tenant-name="getTenantName(alert.tenant.id)"
           @click="goToAlertDetails(alert.id)"
           @status-change="(newStatus) => handleStatusChange(alert.id, newStatus)"
@@ -165,9 +168,9 @@ const handleRowKeydown = (event: KeyboardEvent, alertId: string) => {
                 <td>
                   <span
                     class="badge"
-                    :class="getStatusColor(currentStatus(alert))"
+                    :class="getStatusColor(alert.computedStatus)"
                   >
-                    {{ formatStatus(currentStatus(alert)) }}
+                    {{ formatStatus(alert.computedStatus) }}
                   </span>
                 </td>
                 <td>
@@ -178,17 +181,17 @@ const handleRowKeydown = (event: KeyboardEvent, alertId: string) => {
                 <td>
                   <div class="flex flex-wrap gap-1">
                     <span
-                      v-for="label in getAlertLabelsPreview(alert)"
+                      v-for="label in alert.activeLabels.slice(0, 3)"
                       :key="label.key"
                       class="badge badge-sm badge-ghost"
                     >
                       {{ label.key }}={{ label.value }}
                     </span>
                     <span
-                      v-if="alert.labels.filter(l => !l.deleted).length > 3"
+                      v-if="alert.activeLabels.length > 3"
                       class="badge badge-sm badge-ghost"
                     >
-                      +{{ alert.labels.filter(l => !l.deleted).length - 3 }}
+                      +{{ alert.activeLabels.length - 3 }}
                     </span>
                   </div>
                 </td>

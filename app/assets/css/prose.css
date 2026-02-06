@@ -56,7 +56,12 @@
   border-radius: 0 4px 4px 0;
 }
 
-.prose h1,
+.prose h1 {
+  font-size: 3rem;
+  line-height: 1;
+  font-weight: 400;
+}
+
 .prose h2,
 .prose h3,
 .prose h4 {

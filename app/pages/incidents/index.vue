@@ -14,11 +14,18 @@ const { getTenantName } = useTenants()
 
 const statusFilter = ref<string>('all')
 
+const enrichedIncidents = computed(() =>
+  incidents.value.map(incident => ({
+    ...incident,
+    computedStatus: currentStatus(incident),
+  })),
+)
+
 const filteredIncidents = computed(() => {
   if (statusFilter.value === 'all') {
-    return incidents.value
+    return enrichedIncidents.value
   }
-  return incidents.value.filter(incident => currentStatus(incident) === statusFilter.value)
+  return enrichedIncidents.value.filter(incident => incident.computedStatus === statusFilter.value)
 })
 
 const handleRefresh = async () => {
@@ -124,7 +131,7 @@ const handleRowKeydown = (event: KeyboardEvent, incidentId: string) => {
           v-for="incident in filteredIncidents"
           :key="incident.id"
           :incident="incident"
-          :current-status="currentStatus(incident)"
+          :current-status="incident.computedStatus"
           :tenant-name="getTenantName(incident.tenant.id)"
           @click="goToIncidentDetails(incident.id)"
           @status-change="(newStatus) => handleStatusChange(incident.id, newStatus)"
@@ -177,9 +184,9 @@ const handleRowKeydown = (event: KeyboardEvent, incidentId: string) => {
                 <td>
                   <span
                     class="badge"
-                    :class="getStatusColor(currentStatus(incident))"
+                    :class="getStatusColor(incident.computedStatus)"
                   >
-                    {{ formatStatus(currentStatus(incident)) }}
+                    {{ formatStatus(incident.computedStatus) }}
                   </span>
                 </td>
                 <td>
