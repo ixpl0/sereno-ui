@@ -34,7 +34,6 @@ export default defineNuxtConfig({
     },
   },
   routeRules: {
-    '/': { prerender: true },
     '/about': { prerender: true },
     '/pricing': { prerender: true },
     '/blog': { prerender: true },
@@ -50,11 +49,11 @@ export default defineNuxtConfig({
 
   nitro: {
     prerender: {
-      routes: ['/', '/about', '/pricing', '/blog', '/docs'],
+      routes: ['/about', '/pricing', '/blog', '/docs'],
       crawlLinks: true,
       ignore: [
         (route: string) => {
-          const allowed = ['/', '/about', '/pricing', '/blog', '/docs']
+          const allowed = ['/about', '/pricing', '/blog', '/docs']
           return !allowed.some(prefix =>
             route === prefix || route.startsWith(`${prefix}/`),
           )
