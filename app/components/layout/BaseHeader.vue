@@ -37,16 +37,9 @@ const emit = defineEmits<{
 
       <NuxtLink
         :to="props.logoLink"
-        class="flex items-center gap-3"
+        class="flex items-center"
       >
-        <img
-          src="/logo.png"
-          alt="Sereno"
-          class="h-8 shrink-0"
-        >
-        <span class="font-bold text-lg whitespace-nowrap hidden sm:block">
-          Sereno Systems
-        </span>
+        <LayoutAppLogo class="h-8 shrink-0 text-base-content" />
       </NuxtLink>
     </div>
 
