@@ -12,11 +12,15 @@ defineProps<{
 <template>
   <section class="min-h-[70vh] flex flex-col items-center justify-center text-center py-16 px-4">
     <div
-      class="h-40 lg:h-52 mb-6 aspect-[256/298] bg-base-content"
+      class="mb-6"
       role="img"
       aria-label="Sereno Systems"
-      style="-webkit-mask: url(/logo-vertical.svg) center / contain no-repeat; mask: url(/logo-vertical.svg) center / contain no-repeat;"
-    />
+    >
+      <LayoutAppLogoVertical
+        aria-hidden="true"
+        class="h-40 lg:h-52 w-auto block text-base-content"
+      />
+    </div>
     <p
       v-if="subtitle"
       class="text-xl lg:text-2xl text-base-content/70 max-w-2xl mx-auto mb-10"
