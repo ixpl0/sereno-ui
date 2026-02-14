@@ -12,7 +12,7 @@ defineProps<{
 <template>
   <section class="min-h-[70vh] flex flex-col items-center justify-center text-center py-16 px-4">
     <div
-      class="mb-6"
+      class="mb-16"
       role="img"
       aria-label="Sereno Systems"
     >
