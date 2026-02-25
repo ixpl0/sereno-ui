@@ -1,0 +1,140 @@
+name: Portal CI/CD
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+env:
+  NODE_VERSION: "22"
+  REGISTRY: codeberg.org
+  K8S_NAMESPACE: sereno
+  K8S_DEPLOYMENT: portal
+  K8S_CONTAINER: portal
+
+jobs:
+  checks:
+    runs-on: [pve-fx3, shell]
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Enable pnpm
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack prepare pnpm@latest --activate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Unit tests
+        run: pnpm test:unit:run
+
+      - name: Build
+        env:
+          NUXT_PUBLIC_API_BASE_URL: ${{ vars.NUXT_PUBLIC_API_BASE_URL }}
+        run: pnpm build
+
+  build_push_deploy:
+    name: Build, Push, Deploy
+    needs: checks
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: [pve-fx3, shell]
+    timeout-minutes: 40
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Compute image name and tags
+        id: meta
+        run: |
+          set -euo pipefail
+          repo_owner_lc="$(echo "${GITHUB_REPOSITORY_OWNER}" | tr '[:upper:]' '[:lower:]')"
+          repo_name_lc="$(echo "${GITHUB_REPOSITORY##*/}" | tr '[:upper:]' '[:lower:]')"
+          image_repo="${REGISTRY}/${repo_owner_lc}/${repo_name_lc}"
+          image_tag="${GITHUB_SHA}"
+
+          echo "image_repo=${image_repo}" >> "${GITHUB_OUTPUT}"
+          echo "image_tag=${image_tag}" >> "${GITHUB_OUTPUT}"
+
+      - name: Login to Codeberg Packages
+        env:
+          REGISTRY_USER: ${{ secrets.CODEBERG_USERNAME }}
+          REGISTRY_TOKEN: ${{ secrets.CODEBERG_TOKEN }}
+        run: |
+          set -euo pipefail
+          echo "${REGISTRY_TOKEN}" | docker login "${REGISTRY}" -u "${REGISTRY_USER}" --password-stdin
+
+      - name: Build and push image
+        env:
+          IMAGE_REPO: ${{ steps.meta.outputs.image_repo }}
+          IMAGE_TAG: ${{ steps.meta.outputs.image_tag }}
+          NUXT_PUBLIC_API_BASE_URL: ${{ vars.NUXT_PUBLIC_API_BASE_URL }}
+        run: |
+          set -euo pipefail
+          docker build \
+            --build-arg NUXT_PUBLIC_API_BASE_URL="${NUXT_PUBLIC_API_BASE_URL}" \
+            --build-arg NUXT_PUBLIC_MOCK_API=false \
+            -t "${IMAGE_REPO}:${IMAGE_TAG}" \
+            -t "${IMAGE_REPO}:main" \
+            -t "${IMAGE_REPO}:latest" \
+            .
+
+          docker push "${IMAGE_REPO}:${IMAGE_TAG}"
+          docker push "${IMAGE_REPO}:main"
+          docker push "${IMAGE_REPO}:latest"
+
+      - name: Configure kubeconfig
+        env:
+          KUBECONFIG_DEPOY_B64: ${{ secrets.KUBECONFIG_DEPOY_B64 }}
+        run: |
+          set -euo pipefail
+          echo "${KUBECONFIG_DEPOY_B64}" | base64 -d > "${RUNNER_TEMP}/kubeconfig"
+          chmod 600 "${RUNNER_TEMP}/kubeconfig"
+          echo "KUBECONFIG=${RUNNER_TEMP}/kubeconfig" >> "${GITHUB_ENV}"
+
+      - name: Ensure registry pull secret exists
+        env:
+          REGISTRY_USER: ${{ secrets.CODEBERG_USERNAME }}
+          REGISTRY_TOKEN: ${{ secrets.CODEBERG_TOKEN }}
+        run: |
+          set -euo pipefail
+          kubectl -n "${K8S_NAMESPACE}" create secret docker-registry codeberg-registry \
+            --docker-server="${REGISTRY}" \
+            --docker-username="${REGISTRY_USER}" \
+            --docker-password="${REGISTRY_TOKEN}" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Apply base manifests
+        run: |
+          set -euo pipefail
+          kubectl apply -f k8s/service.yaml
+          kubectl apply -f k8s/deployment.yaml
+
+      - name: Deploy new image
+        env:
+          IMAGE_REPO: ${{ steps.meta.outputs.image_repo }}
+          IMAGE_TAG: ${{ steps.meta.outputs.image_tag }}
+        run: |
+          set -euo pipefail
+          kubectl -n "${K8S_NAMESPACE}" set image \
+            deployment/"${K8S_DEPLOYMENT}" \
+            "${K8S_CONTAINER}"="${IMAGE_REPO}:${IMAGE_TAG}"
+
+          kubectl -n "${K8S_NAMESPACE}" rollout status deployment/"${K8S_DEPLOYMENT}" --timeout=240s
