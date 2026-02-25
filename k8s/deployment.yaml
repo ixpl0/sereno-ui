@@ -1,22 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sereno-portal
+  name: portal
+  namespace: sereno
   labels:
-    app: sereno-portal
+    app: portal
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: sereno-portal
+      app: portal
   template:
     metadata:
       labels:
-        app: sereno-portal
+        app: portal
     spec:
+      imagePullSecrets:
+        - name: codeberg-registry
       containers:
-        - name: sereno-portal
-          image: sereno-portal:latest
+        - name: portal
+          image: codeberg.org/sereno/portal:latest
           ports:
             - containerPort: 3000
               protocol: TCP
