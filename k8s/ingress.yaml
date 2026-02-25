@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: portal
+  namespace: sereno
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - sereno.systems
+      secretName: sereno-tls
+  rules:
+    - host: sereno.systems
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: portal
+                port:
+                  number: 3000
