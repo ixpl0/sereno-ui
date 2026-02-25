@@ -113,6 +113,14 @@ jobs:
           chmod 600 "${RUNNER_TEMP}/kubeconfig"
           echo "KUBECONFIG=${RUNNER_TEMP}/kubeconfig" >> "${GITHUB_ENV}"
 
+      - name: Install kubectl
+        run: |
+          set -euo pipefail
+          KUBECTL_VERSION="v1.30.8"
+          curl -fsSLo "${RUNNER_TEMP}/kubectl" "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
+          chmod +x "${RUNNER_TEMP}/kubectl"
+          echo "${RUNNER_TEMP}" >> "${GITHUB_PATH}"
+
       - name: Ensure registry pull secret exists
         env:
           REGISTRY_USER: ${{ secrets.CODEBERG_USERNAME }}
@@ -130,6 +138,7 @@ jobs:
           set -euo pipefail
           kubectl apply -f k8s/service.yaml
           kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f k8s/ingress.yaml
 
       - name: Deploy new image
         env:
