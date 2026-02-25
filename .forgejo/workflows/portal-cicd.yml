@@ -75,8 +75,8 @@ jobs:
 
       - name: Login to Codeberg Packages
         env:
-          REGISTRY_USER: ${{ secrets.CODEBERG_REGISTRY_USER }}
-          REGISTRY_TOKEN: ${{ secrets.CODEBERG_REGISTRY_TOKEN }}
+          REGISTRY_USER: ${{ secrets.CODEBERG_USERNAME }}
+          REGISTRY_TOKEN: ${{ secrets.CODEBERG_TOKEN }}
         run: |
           set -euo pipefail
           echo "${REGISTRY_TOKEN}" | docker login "${REGISTRY}" -u "${REGISTRY_USER}" --password-stdin
@@ -102,21 +102,19 @@ jobs:
 
       - name: Configure kubeconfig
         env:
-          KUBECONFIG_B64: ${{ secrets.KUBECONFIG_B64 }}
+          KUBECONFIG_DEPOY_B64: ${{ secrets.KUBECONFIG_DEPOY_B64 }}
         run: |
           set -euo pipefail
-          echo "${KUBECONFIG_B64}" | base64 -d > "${RUNNER_TEMP}/kubeconfig"
+          echo "${KUBECONFIG_DEPOY_B64}" | base64 -d > "${RUNNER_TEMP}/kubeconfig"
           chmod 600 "${RUNNER_TEMP}/kubeconfig"
           echo "KUBECONFIG=${RUNNER_TEMP}/kubeconfig" >> "${GITHUB_ENV}"
 
       - name: Ensure registry pull secret exists
         env:
-          REGISTRY_USER: ${{ secrets.CODEBERG_REGISTRY_USER }}
-          REGISTRY_TOKEN: ${{ secrets.CODEBERG_REGISTRY_TOKEN }}
+          REGISTRY_USER: ${{ secrets.CODEBERG_USERNAME }}
+          REGISTRY_TOKEN: ${{ secrets.CODEBERG_TOKEN }}
         run: |
           set -euo pipefail
-          kubectl create namespace "${K8S_NAMESPACE}" --dry-run=client -o yaml | kubectl apply -f -
-
           kubectl -n "${K8S_NAMESPACE}" create secret docker-registry codeberg-registry \
             --docker-server="${REGISTRY}" \
             --docker-username="${REGISTRY_USER}" \
@@ -126,7 +124,6 @@ jobs:
       - name: Apply base manifests
         run: |
           set -euo pipefail
-          kubectl apply -f k8s/namespace.yaml
           kubectl apply -f k8s/service.yaml
           kubectl apply -f k8s/deployment.yaml
 
