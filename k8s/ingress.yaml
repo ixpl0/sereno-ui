@@ -3,12 +3,15 @@ kind: Ingress
 metadata:
   name: portal
   namespace: sereno
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
 spec:
   ingressClassName: traefik
   tls:
     - hosts:
         - sereno.systems
-      secretName: sereno-tls
+      secretName: sereno-systems-tls
   rules:
     - host: sereno.systems
       http:
