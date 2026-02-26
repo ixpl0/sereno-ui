@@ -23,6 +23,9 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
 
   content: {
+    experimental: {
+      sqliteConnector: 'native',
+    },
     database: {
       type: 'sqlite',
       filename: isVercel ? '/tmp/contents.sqlite' : ':memory:',
