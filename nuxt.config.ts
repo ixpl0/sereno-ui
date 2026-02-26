@@ -1,5 +1,7 @@
 import tailwindcss from '@tailwindcss/vite'
 
+const isVercel = process.env.VERCEL === '1' || process.env.NITRO_PRESET?.replace(/_/g, '-').startsWith('vercel')
+
 export default defineNuxtConfig({
 
   modules: [
@@ -23,7 +25,7 @@ export default defineNuxtConfig({
   content: {
     database: {
       type: 'sqlite',
-      filename: ':memory:',
+      filename: isVercel ? '/tmp/contents.sqlite' : ':memory:',
     },
   },
   runtimeConfig: {
