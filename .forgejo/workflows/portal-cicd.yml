@@ -2,6 +2,16 @@ name: Portal CI/CD
 
 on:
   workflow_dispatch:
+    inputs:
+      mock_api:
+        description: "Which deploy jobs to run"
+        required: false
+        default: "true"
+        type: choice
+        options:
+          - "false"
+          - "true"
+          - "both"
   pull_request:
     branches:
       - main
@@ -17,7 +27,33 @@ env:
   K8S_CONTAINER: portal
 
 jobs:
+  validate_workflow:
+    name: Validate workflow
+    runs-on: [pve-fx3, shell]
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install actionlint
+        run: |
+          set -euo pipefail
+          VERSION="1.7.8"
+          curl -fsSL "https://github.com/rhysd/actionlint/releases/download/v${VERSION}/actionlint_${VERSION}_linux_amd64.tar.gz"             | tar -xz -C "${RUNNER_TEMP}" actionlint
+          chmod +x "${RUNNER_TEMP}/actionlint"
+
+      - name: Validate CI workflow syntax
+        run: |
+          set -euo pipefail
+          "${RUNNER_TEMP}/actionlint" -ignore 'label ".*" is unknown' .forgejo/workflows/portal-cicd.yml
+
+      - name: Validate .env.example contains NUXT_PUBLIC_MOCK_API
+        run: |
+          set -euo pipefail
+          grep -q '^NUXT_PUBLIC_MOCK_API=' .env.example
+
   checks:
+    needs: validate_workflow
     runs-on: [pve-fx3, shell]
     timeout-minutes: 30
     steps:
@@ -55,15 +91,27 @@ jobs:
           NUXT_PUBLIC_API_BASE_URL: ${{ vars.NUXT_PUBLIC_API_BASE_URL }}
         run: pnpm build
 
-  build_push_deploy:
-    name: Build, Push, Deploy
+  build_push_deploy_mock_false:
+    name: Build, Push, Deploy (MOCK_API=false)
     needs: checks
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      (inputs.mock_api == 'false' || inputs.mock_api == 'both' || inputs.mock_api == '')
     runs-on: [pve-fx3, shell]
     timeout-minutes: 40
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Create deploy .env from .env.example (mock=false)
+        run: |
+          set -euo pipefail
+          cp .env.example .env
+          if grep -q '^NUXT_PUBLIC_MOCK_API=' .env; then
+            sed -i 's/^NUXT_PUBLIC_MOCK_API=.*/NUXT_PUBLIC_MOCK_API=false/' .env
+          else
+            echo 'NUXT_PUBLIC_MOCK_API=false' >> .env
+          fi
 
       - name: Compute image name and tags
         id: meta
@@ -103,6 +151,114 @@ jobs:
           docker push "${IMAGE_REPO}:${IMAGE_TAG}"
           docker push "${IMAGE_REPO}:main"
           docker push "${IMAGE_REPO}:latest"
+
+      - name: Configure kubeconfig
+        env:
+          KUBECONFIG_DEPOY_B64: ${{ secrets.KUBECONFIG_DEPOY_B64 }}
+        run: |
+          set -euo pipefail
+          echo "${KUBECONFIG_DEPOY_B64}" | base64 -d > "${RUNNER_TEMP}/kubeconfig"
+          chmod 600 "${RUNNER_TEMP}/kubeconfig"
+          echo "KUBECONFIG=${RUNNER_TEMP}/kubeconfig" >> "${GITHUB_ENV}"
+
+      - name: Install kubectl
+        run: |
+          set -euo pipefail
+          KUBECTL_VERSION="v1.30.8"
+          curl -fsSLo "${RUNNER_TEMP}/kubectl" "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
+          chmod +x "${RUNNER_TEMP}/kubectl"
+          echo "${RUNNER_TEMP}" >> "${GITHUB_PATH}"
+
+      - name: Ensure registry pull secret exists
+        env:
+          REGISTRY_USER: ${{ secrets.CODEBERG_USERNAME }}
+          REGISTRY_TOKEN: ${{ secrets.CODEBERG_TOKEN }}
+        run: |
+          set -euo pipefail
+          kubectl -n "${K8S_NAMESPACE}" create secret docker-registry codeberg-registry \
+            --docker-server="${REGISTRY}" \
+            --docker-username="${REGISTRY_USER}" \
+            --docker-password="${REGISTRY_TOKEN}" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Apply base manifests
+        run: |
+          set -euo pipefail
+          kubectl apply -f k8s/service.yaml
+          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f k8s/ingress.yaml
+
+      - name: Deploy new image
+        env:
+          IMAGE_REPO: ${{ steps.meta.outputs.image_repo }}
+          IMAGE_TAG: ${{ steps.meta.outputs.image_tag }}
+        run: |
+          set -euo pipefail
+          kubectl -n "${K8S_NAMESPACE}" set image \
+            deployment/"${K8S_DEPLOYMENT}" \
+            "${K8S_CONTAINER}"="${IMAGE_REPO}:${IMAGE_TAG}"
+
+          kubectl -n "${K8S_NAMESPACE}" rollout status deployment/"${K8S_DEPLOYMENT}" --timeout=240s
+
+  build_push_deploy_mock_true:
+    name: Build, Push, Deploy (MOCK_API=true)
+    needs: checks
+    if: >-
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_dispatch' &&
+      (inputs.mock_api == 'true' || inputs.mock_api == 'both'))
+    runs-on: [pve-fx3, shell]
+    timeout-minutes: 40
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create deploy .env from .env.example (mock=true)
+        run: |
+          set -euo pipefail
+          cp .env.example .env
+          if grep -q '^NUXT_PUBLIC_MOCK_API=' .env; then
+            sed -i 's/^NUXT_PUBLIC_MOCK_API=.*/NUXT_PUBLIC_MOCK_API=true/' .env
+          else
+            echo 'NUXT_PUBLIC_MOCK_API=true' >> .env
+          fi
+
+      - name: Compute image name and tags
+        id: meta
+        run: |
+          set -euo pipefail
+          repo_owner_lc="$(echo "${GITHUB_REPOSITORY_OWNER}" | tr '[:upper:]' '[:lower:]')"
+          repo_name_lc="$(echo "${GITHUB_REPOSITORY##*/}" | tr '[:upper:]' '[:lower:]')"
+          image_repo="${REGISTRY}/${repo_owner_lc}/${repo_name_lc}"
+          image_tag="${GITHUB_SHA}-mock"
+
+          echo "image_repo=${image_repo}" >> "${GITHUB_OUTPUT}"
+          echo "image_tag=${image_tag}" >> "${GITHUB_OUTPUT}"
+
+      - name: Login to Codeberg Packages
+        env:
+          REGISTRY_USER: ${{ secrets.CODEBERG_USERNAME }}
+          REGISTRY_TOKEN: ${{ secrets.CODEBERG_TOKEN }}
+        run: |
+          set -euo pipefail
+          echo "${REGISTRY_TOKEN}" | docker login "${REGISTRY}" -u "${REGISTRY_USER}" --password-stdin
+
+      - name: Build and push image
+        env:
+          IMAGE_REPO: ${{ steps.meta.outputs.image_repo }}
+          IMAGE_TAG: ${{ steps.meta.outputs.image_tag }}
+          NUXT_PUBLIC_API_BASE_URL: ${{ vars.NUXT_PUBLIC_API_BASE_URL }}
+        run: |
+          set -euo pipefail
+          docker build \
+            --build-arg NUXT_PUBLIC_API_BASE_URL="${NUXT_PUBLIC_API_BASE_URL}" \
+            --build-arg NUXT_PUBLIC_MOCK_API=true \
+            -t "${IMAGE_REPO}:${IMAGE_TAG}" \
+            -t "${IMAGE_REPO}:main-mock" \
+            .
+
+          docker push "${IMAGE_REPO}:${IMAGE_TAG}"
+          docker push "${IMAGE_REPO}:main-mock"
 
       - name: Configure kubeconfig
         env:
