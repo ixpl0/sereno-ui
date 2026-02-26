@@ -1,26 +1,10 @@
 import {
   getTenantsByIdEscalations,
+  postEscalationsByIdUpdate,
   postTenantsByIdEscalationsCreate,
   postTenantsByIdEscalationsDelete,
-  postTenantsByIdEscalationsUpdate,
 } from '~/api/sdk.gen'
-import type {
-  TenantRequestEscalation,
-  TenantRequestEscalationStep,
-  TenantRequestEscalationRule,
-} from '~/api/types.gen'
-
-type StepPosition = TenantRequestEscalationStep['position']
-type RuleEvent = TenantRequestEscalationRule['event']
-
-const VALID_POSITIONS: ReadonlyArray<NonNullable<StepPosition>> = ['current', 'next', 'previous', 'all']
-const VALID_EVENTS: ReadonlyArray<NonNullable<RuleEvent>> = ['alert', 'incident']
-
-const isValidPosition = (value: string | undefined): value is StepPosition =>
-  value === undefined || VALID_POSITIONS.includes(value as NonNullable<StepPosition>)
-
-const isValidEvent = (value: string | undefined): value is RuleEvent =>
-  value === undefined || VALID_EVENTS.includes(value as NonNullable<RuleEvent>)
+import type { TenantRequestEscalation } from '~/api/types.gen'
 
 export const useEscalations = (tenantId: Ref<string>) => {
   const { data: response, status: fetchStatus, refresh } = useAsyncData(
@@ -56,9 +40,9 @@ export const useEscalations = (tenantId: Ref<string>) => {
     return result
   }
 
-  const updateEscalation = async (escalation: TenantRequestEscalation) => {
-    const result = await postTenantsByIdEscalationsUpdate({
-      path: { id: tenantId.value },
+  const updateEscalation = async (escalationId: string, escalation: TenantRequestEscalation) => {
+    const result = await postEscalationsByIdUpdate({
+      path: { id: escalationId },
       body: escalation,
     })
 
@@ -86,27 +70,13 @@ export const useEscalations = (tenantId: Ref<string>) => {
     id: string
     name: string
     enabled: boolean
-    steps: ReadonlyArray<{ delay: number, description?: string, member?: string, position?: string, schedule?: string }>
-    rules: ReadonlyArray<{ description?: string, event?: string, labels?: Record<string, string> }>
   }) => {
     const updated: TenantRequestEscalation = {
       name: escalation.name,
       enabled: !escalation.enabled,
-      steps: escalation.steps.map(step => ({
-        delay: step.delay,
-        name: step.description,
-        member: step.member,
-        position: isValidPosition(step.position) ? step.position : undefined,
-        schedule: step.schedule,
-      })),
-      rules: escalation.rules.map(rule => ({
-        name: rule.description,
-        event: isValidEvent(rule.event) ? rule.event : undefined,
-        labels: rule.labels ? { ...rule.labels } : undefined,
-      })),
     }
 
-    return updateEscalation(updated)
+    return updateEscalation(escalation.id, updated)
   }
 
   return {

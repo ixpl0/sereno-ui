@@ -1,54 +1,13 @@
 # Sereno UI
 
-Frontend for Sereno incident management platform built with Nuxt 4.
+Frontend for the Sereno incident management platform, built with Nuxt 4.
 
-**Demo:** [sereno-ui.vercel.app](https://sereno-ui.vercel.app)
+Demo: https://sereno-ui.vercel.app
 
-## Features
+## Prerequisites
 
-- **SSR** — full server-side rendering, cookie-based auth
-- **On-Call Schedules** — interactive timeline with day/week/month views, rotations, overrides
-- **Incident Management** — alerts, incidents, status tracking, comments, labels
-- **Escalation Policies** — configurable escalation rules
-- **Teams** — multi-tenant support, team members, API tokens
-- **Mock API** — run UI without backend (Nuxt server routes)
-- **API Generation** — typed client from swagger.yaml (@hey-api/openapi-ts)
-- **Content** — blog and docs powered by @nuxt/content
-- **Auto-deploy** — Vercel deploys on push to main
-
-## Tech Stack
-
-| Category | Technology |
-|----------|------------|
-| Framework | Nuxt 4 (Vue 3 Composition API) |
-| State | Pinia (SSR-compatible) |
-| Styling | Tailwind CSS 4 + DaisyUI 5 |
-| Icons | @nuxt/icon (heroicons, lucide) |
-| Content | @nuxt/content |
-| Drag & Drop | vuedraggable |
-| Testing | Vitest (unit) + Playwright (e2e) |
-| TypeScript | Strict mode |
-
-## Architecture
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                         Pages                                │
-│  (dashboard, alerts, incidents, schedules, escalations)     │
-├─────────────────────────────────────────────────────────────┤
-│                      Composables                             │
-│  useAuth, useAlerts, useIncidents, useSchedules, etc.       │
-├─────────────────────────────────────────────────────────────┤
-│                       Components                             │
-│  ui/ | layout/ | schedule/ | event/ | escalation/           │
-├─────────────────────────────────────────────────────────────┤
-│                     API Client                               │
-│  Generated from swagger.yaml (@hey-api/openapi-ts)          │
-├─────────────────────────────────────────────────────────────┤
-│                    Pinia Stores                              │
-│  authStore (token, user state)                              │
-└─────────────────────────────────────────────────────────────┘
-```
+- Node.js `>=22.12.0`
+- `pnpm`
 
 ## Setup
 
@@ -59,65 +18,110 @@ pnpm install
 ## Development
 
 ```bash
-pnpm dev        # Real API (requires backend)
-pnpm dev:mock   # Mock API (standalone)
+pnpm dev        # Real backend API
+pnpm dev:mock   # Local mock API (no backend required)
 ```
 
-## Scripts
+## Available Scripts
 
 | Command | Description |
-|---------|-------------|
-| `pnpm dev` | Start dev server |
-| `pnpm dev:mock` | Start with mock API |
-| `pnpm build` | Build for production |
+| --- | --- |
+| `pnpm dev` | Start development server |
+| `pnpm dev:mock` | Start development server with mock API |
+| `pnpm build` | Build production bundle |
+| `pnpm build:mock` | Build production bundle with mock API enabled |
+| `pnpm generate` | Generate static output |
+| `pnpm preview` | Preview production build |
 | `pnpm lint` | Run ESLint |
-| `pnpm lint:fix` | Run ESLint with auto-fix |
-| `pnpm typecheck` | Run TypeScript check |
-| `pnpm generate:api` | Generate API client from swagger |
-| `pnpm storybook` | Start Storybook |
-| `pnpm test:e2e` | Run Playwright e2e tests |
-| `pnpm test:e2e:ui` | Run Playwright with UI |
-| `pnpm test:unit` | Run Vitest unit tests |
+| `pnpm lint:fix` | Run ESLint with autofix |
+| `pnpm typecheck` | Run Nuxt TypeScript checks |
+| `pnpm generate:api` | Regenerate API client from `swagger.yaml` |
+| `pnpm storybook` | Start Storybook on port 6006 |
+| `pnpm build-storybook` | Build Storybook |
+| `pnpm test:unit` | Run Vitest in watch mode |
+| `pnpm test:unit:ui` | Run Vitest UI |
 | `pnpm test:unit:run` | Run unit tests once |
-| `pnpm test:unit:coverage` | Run with coverage |
-
-## Testing Strategy
-
-| Type | Tool | Scope |
-|------|------|-------|
-| Unit | Vitest | Utils, composables, pure functions |
-| E2E | Playwright | User flows, pages, interactions |
-| Visual | Storybook | Component documentation |
-
-## Project Structure
-
-```
-app/
-├── api/           # Generated API client (do not edit)
-├── components/
-│   ├── ui/        # Reusable UI (UiButton, UiInput, etc.)
-│   ├── layout/    # App layout (header, sidebar)
-│   ├── schedule/  # On-call timeline components
-│   ├── event/     # Alert/incident components
-│   └── escalation/# Escalation components
-├── composables/   # Vue composables
-├── pages/         # File-based routing
-├── stores/        # Pinia stores
-└── utils/         # Helper functions
-server/
-└── api/v1/        # Mock API routes
-content/           # Markdown (blog, docs)
-tests/
-├── unit/          # Vitest tests
-└── e2e/           # Playwright tests
-```
+| `pnpm test:unit:coverage` | Run unit tests with coverage |
+| `pnpm test:e2e` | Run Playwright end-to-end tests |
+| `pnpm test:e2e:ui` | Run Playwright in UI mode |
+| `pnpm test:e2e:headed` | Run Playwright in headed mode |
 
 ## Environment Variables
 
+Copy `.env.example` to `.env.local` and adjust values if needed.
+
 | Variable | Description | Default |
-|----------|-------------|---------|
-| `NUXT_PUBLIC_API_BASE_URL` | Backend API URL | - |
-| `NUXT_PUBLIC_MOCK_API` | Enable mock API | `false` |
+| --- | --- | --- |
+| `NUXT_PUBLIC_API_BASE_URL` | Backend API base URL | `http://localhost:8080/api/v1` |
+| `NUXT_PUBLIC_MOCK_API` | Enable local mock API | `false` |
+
+## Tech Stack
+
+- Nuxt 4 (Vue 3 Composition API, SSR)
+- Pinia
+- Tailwind CSS 4 + DaisyUI 5
+- @nuxt/content
+- @nuxt/icon
+- vuedraggable
+- Vitest + Playwright
+- API client generation via `@hey-api/openapi-ts`
+
+## Route Overview
+
+Public:
+
+- `/`
+- `/about`
+- `/pricing`
+- `/blog`
+- `/blog/[...slug]`
+- `/docs`
+- `/docs/[...slug]`
+
+Application:
+
+- `/dashboard`
+- `/profile`
+- `/alerts`
+- `/alerts/[id]`
+- `/incidents`
+- `/incidents/create`
+- `/incidents/[id]`
+- `/schedules`
+- `/escalations`
+- `/teams`
+- `/teams/[id]`
+- `/auth`
+- `/auth/callback/[provider]`
+- `/mock-oauth/[provider]` (dev/testing flow)
+
+## Project Structure
+
+```text
+app/
+  api/              Generated API client (do not edit manually)
+  assets/           Global CSS
+  components/       UI, layout, schedule, event, escalation, content
+  composables/      Business logic composables
+  layouts/          Nuxt layouts
+  middleware/       Route guards
+  pages/            File-based routes
+  plugins/          Nuxt plugins (API setup)
+  stores/           Pinia stores
+  utils/            Utility helpers
+server/
+  api/v1/           Mock API handlers
+content/            Blog and docs markdown
+tests/
+  unit/             Vitest tests
+  e2e/              Playwright tests
+```
+
+## Notes
+
+- `app/api/` is generated from `swagger.yaml`. Run `pnpm generate:api` after API schema updates.
+- The project uses cookie-based authentication for SSR compatibility.
+- Static prerendering is enabled only for public pages (`/`, `/about`, `/pricing`, `/blog/**`, `/docs/**`).
 
 ## License
 

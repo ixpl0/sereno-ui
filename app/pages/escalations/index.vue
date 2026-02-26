@@ -19,14 +19,12 @@ const { tenants, selectedTenantId } = useTenants()
 const {
   escalations,
   loading,
-  refresh: refreshEscalations,
   createEscalation,
   deleteEscalation,
   toggleEscalation,
 } = useEscalations(selectedTenantId)
 
 const isCreating = ref(false)
-const editingId = ref<string | null>(null)
 
 const newEscalationName = ref('')
 const newEscalationInputRef = ref<{ focus: () => void } | null>(null)
@@ -53,7 +51,6 @@ const handleCreate = async () => {
   const escalation: TenantRequestEscalation = {
     name,
     enabled: true,
-    steps: [{ delay: 0 }],
   }
 
   const response = await createEscalation(escalation)
@@ -65,11 +62,6 @@ const handleCreate = async () => {
 
   toast.success('Эскалация создана')
   cancelCreate()
-
-  const created = 'data' in response ? response.data?.escalation : null
-  if (created) {
-    editingId.value = created.id
-  }
 }
 
 const handleDelete = async (id: string) => {
@@ -84,12 +76,7 @@ const handleDelete = async (id: string) => {
 }
 
 const handleToggle = async (escalation: typeof escalations.value[number]) => {
-  const mutableEscalation = {
-    ...escalation,
-    steps: [...escalation.steps],
-    rules: [...escalation.rules],
-  }
-  const response = await toggleEscalation(mutableEscalation)
+  const response = await toggleEscalation(escalation)
 
   if ('error' in response && response.error) {
     toast.error('Не удалось изменить статус')
@@ -119,14 +106,14 @@ const getStepTarget = (step: typeof escalations.value[0]['steps'][0]): string =>
   if (step.member) {
     return step.member
   }
-  if (step.schedule && step.position) {
+  if (step.schedule && step.schedule.position) {
     const positions: Record<string, string> = {
       current: 'текущий дежурный',
       next: 'следующий дежурный',
       previous: 'предыдущий дежурный',
       all: 'все дежурные',
     }
-    return positions[step.position] ?? step.position
+    return positions[step.schedule.position] ?? step.schedule.position
   }
   return 'Не указан'
 }
@@ -229,15 +216,10 @@ const getStepTarget = (step: typeof escalations.value[0]['steps'][0]): string =>
             v-for="escalation in escalations"
             :key="escalation.id"
             :escalation="escalation"
-            :editing="editingId === escalation.id"
-            :tenant-id="selectedTenantId"
             :format-delay="formatDelay"
             :get-step-target="getStepTarget"
             @toggle="handleToggle(escalation)"
             @delete="handleDelete(escalation.id)"
-            @edit="editingId = escalation.id"
-            @close="editingId = null"
-            @updated="refreshEscalations"
           />
         </div>
       </template>

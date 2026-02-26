@@ -82,7 +82,7 @@ const rotationLayers = computed(() => {
     label: rotation.name,
     membersCount: rotation.members.length,
     slots: convertShiftsToSlots(
-      rotation.shifts,
+      rotation.shifts ?? [],
       rotation.name,
       index,
       false,

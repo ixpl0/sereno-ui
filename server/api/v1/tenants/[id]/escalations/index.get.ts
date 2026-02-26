@@ -1,4 +1,5 @@
 import { getMockEscalations, isValidToken } from '../../../../../utils/mockData'
+import { toEscalationResponse } from '../../../../../utils/escalationResponse'
 
 export default defineEventHandler((event) => {
   const token = getCookie(event, 'auth_token')
@@ -20,7 +21,7 @@ export default defineEventHandler((event) => {
     })
   }
 
-  const escalations = getMockEscalations(tenantId)
+  const escalations = getMockEscalations(tenantId).map(toEscalationResponse)
 
   return { escalations }
 })

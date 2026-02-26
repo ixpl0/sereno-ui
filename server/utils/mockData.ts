@@ -140,6 +140,7 @@ export interface MockOverride {
   duration: number
   since: number
   member: string
+  rotation: number
   created: number
   creator: string
   shift: MockShift
@@ -390,6 +391,7 @@ const defaultState: MockState = {
             duration: 86400 * 3,
             since: Math.floor(Date.now() / 1000) + 86400 * 2,
             member: 'user-3',
+            rotation: 0,
             created: Math.floor(Date.now() / 1000) - 86400,
             creator: 'user-1',
             shift: generateOverrideShift(Math.floor(Date.now() / 1000) + 86400 * 2, 86400 * 3, 'user-3'),
@@ -446,58 +448,60 @@ const defaultState: MockState = {
     {
       id: 'alert-1',
       source: 'prometheus',
-      time: Math.floor(Date.now() / 1000) - 3600,
+      time: Math.floor(Date.now() / 1000) - 86400,
       tenantId: 'tenant-1',
       annotations: [
-        { key: 'description', value: 'CPU usage is above 90% for 5 minutes', since: Math.floor(Date.now() / 1000) - 3600, deleted: false },
-        { key: 'summary', value: 'High CPU usage on server-1', since: Math.floor(Date.now() / 1000) - 3600, deleted: false },
+        { key: 'description', value: 'CPU usage is above 90% for 5 minutes', since: Math.floor(Date.now() / 1000) - 86400, deleted: false },
+        { key: 'summary', value: 'High CPU usage on server-1', since: Math.floor(Date.now() / 1000) - 86400, deleted: false },
       ],
       labels: [
-        { key: 'alertname', value: 'HighCpuUsage', since: Math.floor(Date.now() / 1000) - 3600, deleted: false },
-        { key: 'severity', value: 'critical', since: Math.floor(Date.now() / 1000) - 3600, deleted: false },
-        { key: 'instance', value: 'server-1:9090', since: Math.floor(Date.now() / 1000) - 3600, deleted: false },
+        { key: 'alertname', value: 'HighCpuUsage', since: Math.floor(Date.now() / 1000) - 86400, deleted: false },
+        { key: 'severity', value: 'critical', since: Math.floor(Date.now() / 1000) - 86400, deleted: false },
+        { key: 'instance', value: 'server-1:9090', since: Math.floor(Date.now() / 1000) - 86400, deleted: false },
       ],
       comments: [
-        { id: 'comment-1', text: 'Investigating the issue', since: Math.floor(Date.now() / 1000) - 1800, deleted: false },
+        { id: 'comment-1', text: 'Investigating the issue', since: Math.floor(Date.now() / 1000) - 79200, deleted: false },
       ],
       statuses: [
-        { status: 'created', since: Math.floor(Date.now() / 1000) - 3600 },
-        { status: 'acknowledged', since: Math.floor(Date.now() / 1000) - 1800 },
+        { status: 'created', since: Math.floor(Date.now() / 1000) - 86400 },
+        { status: 'acknowledged', since: Math.floor(Date.now() / 1000) - 79200 },
+        { status: 'resolved', since: Math.floor(Date.now() / 1000) - 64800 },
       ],
     },
     {
       id: 'alert-2',
       source: 'alertmanager',
-      time: Math.floor(Date.now() / 1000) - 7200,
+      time: Math.floor(Date.now() / 1000) - 72000,
       tenantId: 'tenant-1',
       annotations: [
-        { key: 'description', value: 'Memory usage is above 85%', since: Math.floor(Date.now() / 1000) - 7200, deleted: false },
+        { key: 'description', value: 'Memory usage is above 85%', since: Math.floor(Date.now() / 1000) - 72000, deleted: false },
       ],
       labels: [
-        { key: 'alertname', value: 'HighMemoryUsage', since: Math.floor(Date.now() / 1000) - 7200, deleted: false },
-        { key: 'severity', value: 'warning', since: Math.floor(Date.now() / 1000) - 7200, deleted: false },
+        { key: 'alertname', value: 'HighMemoryUsage', since: Math.floor(Date.now() / 1000) - 72000, deleted: false },
+        { key: 'severity', value: 'warning', since: Math.floor(Date.now() / 1000) - 72000, deleted: false },
       ],
       comments: [],
       statuses: [
-        { status: 'created', since: Math.floor(Date.now() / 1000) - 7200 },
+        { status: 'created', since: Math.floor(Date.now() / 1000) - 72000 },
+        { status: 'acknowledged', since: Math.floor(Date.now() / 1000) - 57600 },
       ],
     },
     {
       id: 'alert-3',
       source: 'grafana',
-      time: Math.floor(Date.now() / 1000) - 86400,
+      time: Math.floor(Date.now() / 1000) - 108000,
       tenantId: 'tenant-2',
       annotations: [
-        { key: 'description', value: 'Disk space is running low', since: Math.floor(Date.now() / 1000) - 86400, deleted: false },
+        { key: 'description', value: 'Disk space is running low', since: Math.floor(Date.now() / 1000) - 108000, deleted: false },
       ],
       labels: [
-        { key: 'alertname', value: 'LowDiskSpace', since: Math.floor(Date.now() / 1000) - 86400, deleted: false },
-        { key: 'severity', value: 'warning', since: Math.floor(Date.now() / 1000) - 86400, deleted: false },
+        { key: 'alertname', value: 'LowDiskSpace', since: Math.floor(Date.now() / 1000) - 108000, deleted: false },
+        { key: 'severity', value: 'warning', since: Math.floor(Date.now() / 1000) - 108000, deleted: false },
       ],
       comments: [],
       statuses: [
-        { status: 'created', since: Math.floor(Date.now() / 1000) - 86400 },
-        { status: 'resolved', since: Math.floor(Date.now() / 1000) - 43200 },
+        { status: 'created', since: Math.floor(Date.now() / 1000) - 108000 },
+        { status: 'resolved', since: Math.floor(Date.now() / 1000) - 104400 },
       ],
     },
   ],
@@ -520,6 +524,52 @@ const defaultState: MockState = {
       statuses: [
         { status: 'created', since: Math.floor(Date.now() / 1000) - 3600 },
         { status: 'acknowledged', since: Math.floor(Date.now() / 1000) - 1800 },
+      ],
+    },
+    {
+      id: 'incident-3',
+      title: 'Database connection pool saturation',
+      description: 'Application reports intermittent DB timeout errors',
+      time: Math.floor(Date.now() / 1000) - 5400,
+      tenantId: 'tenant-1',
+      alertIds: ['alert-1'],
+      labels: [
+        { key: 'priority', value: 'high', since: Math.floor(Date.now() / 1000) - 5400, deleted: false },
+      ],
+      comments: [],
+      statuses: [
+        { status: 'created', since: Math.floor(Date.now() / 1000) - 5400 },
+      ],
+    },
+    {
+      id: 'incident-4',
+      title: 'Background worker queue delay',
+      description: 'Queue processing delay exceeded threshold',
+      time: Math.floor(Date.now() / 1000) - 10800,
+      tenantId: 'tenant-2',
+      alertIds: [],
+      labels: [
+        { key: 'priority', value: 'medium', since: Math.floor(Date.now() / 1000) - 10800, deleted: false },
+      ],
+      comments: [],
+      statuses: [
+        { status: 'created', since: Math.floor(Date.now() / 1000) - 10800 },
+      ],
+    },
+    {
+      id: 'incident-5',
+      title: 'API latency spike on public endpoint',
+      description: 'P95 latency increased above SLO',
+      time: Math.floor(Date.now() / 1000) - 21600,
+      tenantId: 'tenant-1',
+      alertIds: ['alert-2'],
+      labels: [
+        { key: 'priority', value: 'high', since: Math.floor(Date.now() / 1000) - 21600, deleted: false },
+      ],
+      comments: [],
+      statuses: [
+        { status: 'created', since: Math.floor(Date.now() / 1000) - 21600 },
+        { status: 'acknowledged', since: Math.floor(Date.now() / 1000) - 18000 },
       ],
     },
     {
@@ -1229,7 +1279,7 @@ export const deleteMockRotation = (scheduleId: string, rotationIndex: number): M
 
 export const createMockOverride = (
   scheduleId: string,
-  data: { name: string, duration: number, since: number, member: string },
+  data: { name: string, duration: number, since: number, member: string, rotation: number },
 ): MockSchedule | null => {
   const now = Math.floor(Date.now() / 1000)
   for (const [tenantId, schedules] of state.tenantSchedules.entries()) {

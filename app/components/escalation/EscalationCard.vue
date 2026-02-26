@@ -1,34 +1,21 @@
 <script setup lang="ts">
 import type {
-  TenantResponseEscalationStep,
-  TenantRequestEscalation,
-  TenantRequestEscalationStep,
-  TenantRequestEscalationRule,
+  TenantResponseCondition,
+  TenantResponseStep,
 } from '~/api/types.gen'
-
-type RuleEvent = TenantRequestEscalationRule['event']
-const VALID_EVENTS: ReadonlyArray<NonNullable<RuleEvent>> = ['alert', 'incident']
-const isValidEvent = (value: string | undefined): value is RuleEvent =>
-  value === undefined || VALID_EVENTS.includes(value as NonNullable<RuleEvent>)
 
 interface EscalationData {
   id: string
   name: string
   enabled: boolean
-  steps: ReadonlyArray<TenantResponseEscalationStep>
-  rules: ReadonlyArray<{
-    description?: string
-    event?: string
-    labels?: Record<string, string>
-  }>
+  steps: ReadonlyArray<TenantResponseStep>
+  conditions: ReadonlyArray<TenantResponseCondition>
 }
 
 interface Props {
   escalation: EscalationData
-  editing: boolean
-  tenantId: string
   formatDelay: (seconds: number) => string
-  getStepTarget: (step: TenantResponseEscalationStep) => string
+  getStepTarget: (step: TenantResponseStep) => string
 }
 
 const props = defineProps<Props>()
@@ -36,96 +23,39 @@ const props = defineProps<Props>()
 const emit = defineEmits<{
   toggle: []
   delete: []
-  edit: []
-  close: []
-  updated: []
 }>()
-
-const toast = useToast()
-const { updateEscalation } = useEscalations(ref(props.tenantId))
-
-const editName = ref(props.escalation.name)
-const editSteps = ref<Array<{
-  delay: number
-  delayMinutes: number
-  member: string
-  name: string
-}>>([])
 
 const sortedSteps = computed(() =>
   [...props.escalation.steps].sort((a, b) => a.delay - b.delay),
 )
 
-const initEditSteps = () => {
-  editSteps.value = [...props.escalation.steps]
-    .sort((a, b) => a.delay - b.delay)
-    .map(step => ({
-      delay: step.delay,
-      delayMinutes: Math.floor(step.delay / 60),
-      member: step.member ?? '',
-      name: step.description ?? '',
-    }))
-}
+const sortedConditions = computed(() =>
+  [...props.escalation.conditions].sort((a, b) => a.number - b.number),
+)
 
-watch(() => props.editing, (value) => {
-  if (value) {
-    editName.value = props.escalation.name
-    initEditSteps()
-  }
-})
+const formatCondition = (condition: TenantResponseCondition): string => {
+  const parts: string[] = []
 
-const addStep = () => {
-  const lastStep = editSteps.value[editSteps.value.length - 1]
-  const lastDelay = lastStep?.delayMinutes ?? 0
-  editSteps.value = [
-    ...editSteps.value,
-    { delay: (lastDelay + 5) * 60, delayMinutes: lastDelay + 5, member: '', name: '' },
-  ]
-}
-
-const removeStep = (index: number) => {
-  editSteps.value = editSteps.value.filter((_, i) => i !== index)
-}
-
-const handleSave = async () => {
-  const name = editName.value.trim()
-  if (!name) {
-    toast.error('Введите название')
-    return
+  if (condition.event) {
+    parts.push(condition.event === 'alert' ? 'Алерт' : 'Инцидент')
   }
 
-  if (editSteps.value.length === 0) {
-    toast.error('Добавьте хотя бы один шаг')
-    return
+  if (condition.labels) {
+    const labels = Object.entries(condition.labels).map(([key, value]) => `${key}=${value}`)
+    if (labels.length > 0) {
+      parts.push(labels.join(', '))
+    }
   }
 
-  const steps: Array<TenantRequestEscalationStep> = editSteps.value.map(step => ({
-    delay: step.delayMinutes * 60,
-    member: step.member || undefined,
-    name: step.name || undefined,
-  }))
-
-  const escalation: TenantRequestEscalation = {
-    name,
-    enabled: props.escalation.enabled,
-    steps,
-    rules: props.escalation.rules.map(rule => ({
-      name: rule.description,
-      event: isValidEvent(rule.event) ? rule.event : undefined,
-      labels: rule.labels,
-    })),
+  if (condition.name) {
+    parts.push(condition.name)
   }
 
-  const response = await updateEscalation(escalation)
-
-  if ('error' in response && response.error) {
-    toast.error('Не удалось сохранить')
-    return
+  if (parts.length === 0) {
+    return 'Без условий'
   }
 
-  toast.success('Сохранено')
-  emit('close')
-  emit('updated')
+  return parts.join(' • ')
 }
 </script>
 
@@ -176,17 +106,6 @@ const handleSave = async () => {
         <UiButton
           variant="ghost"
           size="sm"
-          aria-label="Редактировать эскалацию"
-          @click="emit('edit')"
-        >
-          <Icon
-            name="lucide:pencil"
-            class="w-4 h-4"
-          />
-        </UiButton>
-        <UiButton
-          variant="ghost"
-          size="sm"
           aria-label="Удалить эскалацию"
           @click="emit('delete')"
         >
@@ -199,12 +118,12 @@ const handleSave = async () => {
     </div>
 
     <div
-      v-if="!editing"
+      v-if="sortedSteps.length > 0"
       class="mt-6"
     >
       <div
         v-for="(step, index) in sortedSteps"
-        :key="index"
+        :key="`${escalation.id}-${step.number}-${index}`"
         class="flex gap-3"
       >
         <div class="relative flex flex-col items-center w-3">
@@ -228,129 +147,30 @@ const handleSave = async () => {
             </span>
           </div>
           <div
-            v-if="step.description"
+            v-if="step.name"
             class="text-xs text-base-content/50 mt-1"
           >
-            {{ step.description }}
+            {{ step.name }}
           </div>
         </div>
       </div>
     </div>
 
     <div
-      v-else
-      class="mt-6 space-y-4"
-    >
-      <UiInput
-        v-model="editName"
-        placeholder="Название эскалации"
-      />
-
-      <div class="space-y-3">
-        <div class="flex items-center justify-between">
-          <h4 class="font-medium text-sm">
-            Шаги эскалации
-          </h4>
-          <UiButton
-            variant="ghost"
-            size="sm"
-            @click="addStep"
-          >
-            <Icon
-              name="lucide:plus"
-              class="w-4 h-4 mr-1"
-            />
-            Добавить шаг
-          </UiButton>
-        </div>
-
-        <div
-          v-for="(step, index) in editSteps"
-          :key="index"
-          class="flex items-center gap-3 p-3 bg-base-200/50 rounded-lg"
-        >
-          <div class="flex items-center gap-2">
-            <span class="text-sm text-base-content/60 whitespace-nowrap">Через</span>
-            <input
-              v-model.number="step.delayMinutes"
-              type="number"
-              min="0"
-              class="input input-bordered input-sm w-20"
-            >
-            <span class="text-sm text-base-content/60">мин</span>
-          </div>
-          <Icon
-            name="lucide:arrow-right"
-            class="w-4 h-4 text-base-content/40 shrink-0"
-          />
-          <UiInput
-            v-model="step.member"
-            placeholder="ID участника"
-            class="flex-1"
-          />
-          <UiButton
-            variant="ghost"
-            size="sm"
-            aria-label="Удалить шаг"
-            @click="removeStep(index)"
-          >
-            <Icon
-              name="lucide:x"
-              class="w-4 h-4"
-            />
-          </UiButton>
-        </div>
-
-        <div
-          v-if="editSteps.length === 0"
-          class="text-center py-4 text-base-content/50 text-sm"
-        >
-          Добавьте хотя бы один шаг
-        </div>
-      </div>
-
-      <div class="flex gap-2 justify-end pt-2">
-        <UiButton
-          variant="primary"
-          size="sm"
-          @click="handleSave"
-        >
-          Сохранить
-        </UiButton>
-        <UiButton
-          variant="ghost"
-          size="sm"
-          @click="emit('close')"
-        >
-          Отмена
-        </UiButton>
-      </div>
-    </div>
-
-    <div
-      v-if="escalation.rules.length > 0 && !editing"
+      v-if="sortedConditions.length > 0"
       class="mt-4 pt-4 border-t border-base-content/10"
     >
       <div class="text-xs text-base-content/50 mb-2">
-        Правила срабатывания
+        Условия срабатывания
       </div>
       <div class="flex flex-wrap gap-2">
-        <div
-          v-for="(rule, index) in escalation.rules"
-          :key="index"
+        <span
+          v-for="condition in sortedConditions"
+          :key="`${escalation.id}-condition-${condition.number}`"
           class="badge badge-ghost badge-sm"
         >
-          <span v-if="rule.event">{{ rule.event === 'alert' ? 'Алерт' : 'Инцидент' }}</span>
-          <template v-if="rule.labels">
-            <span
-              v-for="(value, key) in rule.labels"
-              :key="String(key)"
-              class="ml-1"
-            >
-              {{ key }}={{ value }}
-            </span>
-          </template>
-        </div>
+          {{ formatCondition(condition) }}
+        </span>
       </div>
     </div>
   </UiCard>

@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import type { TenantResponseMember } from '~/api/types.gen'
+import type { TenantResponseMember, TenantResponseRotation } from '~/api/types.gen'
 import { formatDateTimeLocal } from '~/utils/formatters'
 
 interface Props {
   members: ReadonlyArray<TenantResponseMember>
-  prefill?: { since: Date, duration: number } | null
+  rotations: ReadonlyArray<TenantResponseRotation>
+  prefill?: { since: Date, duration: number, rotation: number } | null
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -17,6 +18,7 @@ const emit = defineEmits<{
     duration: number
     since: number
     member: string
+    rotation: number
   }]
   cancel: []
 }>()
@@ -39,11 +41,15 @@ const durationValue = ref(initialDuration.value)
 const durationUnit = ref<'hours' | 'days'>(initialDuration.unit)
 const since = ref(props.prefill ? formatDateTimeLocal(props.prefill.since) : new Date().toISOString().slice(0, 16))
 const selectedMember = ref('')
+const selectedRotation = ref(
+  props.prefill ? String(props.prefill.rotation) : (props.rotations[0]?.number !== undefined ? String(props.rotations[0].number) : ''),
+)
 
 const isValid = computed(() => {
   return name.value.trim() !== ''
     && durationValue.value > 0
     && selectedMember.value !== ''
+    && selectedRotation.value !== ''
 })
 
 const handleSubmit = () => {
@@ -62,6 +68,7 @@ const handleSubmit = () => {
     duration: durationSeconds,
     since: sinceTimestamp,
     member: selectedMember.value,
+    rotation: Number.parseInt(selectedRotation.value, 10),
   })
 }
 </script>
@@ -74,6 +81,31 @@ const handleSubmit = () => {
         v-model="name"
         placeholder="Например: Отпуск Ивана"
       />
+    </div>
+
+    <div>
+      <UiLabel>Ротация</UiLabel>
+      <select
+        v-model="selectedRotation"
+        class="select select-bordered w-full"
+      >
+        <option value="">
+          Выберите ротацию
+        </option>
+        <option
+          v-for="rotation in rotations"
+          :key="rotation.number"
+          :value="String(rotation.number)"
+        >
+          {{ rotation.name }}
+        </option>
+      </select>
+      <div
+        v-if="rotations.length === 0"
+        class="text-sm text-base-content/50 pt-1"
+      >
+        Сначала добавьте хотя бы одну ротацию
+      </div>
     </div>
 
     <div>

@@ -21,11 +21,11 @@ export default defineEventHandler(async (event) => {
   }
 
   const body = await readBody(event)
-  if (!body.name || !body.duration || body.since === undefined || !body.member) {
+  if (!body.name || !body.duration || body.since === undefined || !body.member || body.rotation === undefined) {
     throw createError({
       statusCode: 400,
       statusMessage: 'Bad Request',
-      data: { error: { code: 'invalid_request', message: 'name, duration, since, and member are required' } },
+      data: { error: { code: 'invalid_request', message: 'name, duration, since, member, and rotation are required' } },
     })
   }
 
@@ -34,6 +34,7 @@ export default defineEventHandler(async (event) => {
     duration: body.duration,
     since: body.since,
     member: body.member,
+    rotation: body.rotation,
   })
 
   if (!schedule) {
@@ -56,6 +57,7 @@ export default defineEventHandler(async (event) => {
   const override = {
     name: mockOverride.name,
     number: mockOverride.number,
+    rotation: mockOverride.rotation,
     created: mockOverride.created,
     creator: mockOverride.creator,
     shift: mockOverride.shift,

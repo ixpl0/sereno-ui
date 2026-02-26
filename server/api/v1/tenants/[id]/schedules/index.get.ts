@@ -42,6 +42,7 @@ export default defineEventHandler((event) => {
     overrides: s.overrides.map(o => ({
       name: o.name,
       number: o.number,
+      rotation: o.rotation,
       created: o.created,
       creator: o.creator,
       shift: o.shift,

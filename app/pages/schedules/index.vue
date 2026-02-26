@@ -137,12 +137,14 @@ const handleAddOverride = async (scheduleId: string, data: {
   duration: number
   since: number
   member: string
+  rotation: number
 }) => {
   const override: TenantRequestOverride = {
     name: data.name,
     duration: data.duration,
     since: data.since,
     member: data.member,
+    rotation: data.rotation,
   }
 
   const response = await createOverride(scheduleId, override)

@@ -37,13 +37,14 @@ const emit = defineEmits<{
     duration: number
     since: number
     member: string
+    rotation: number
   }]
   deleteOverride: [index: number]
 }>()
 
 const showRotationForm = ref(false)
 const showOverrideForm = ref(false)
-const prefillOverride = ref<{ since: Date, duration: number } | null>(null)
+const prefillOverride = ref<{ since: Date, duration: number, rotation: number } | null>(null)
 
 const memberNames = computed(() =>
   props.members.reduce(
@@ -84,6 +85,7 @@ const handleAddOverride = (data: {
   duration: number
   since: number
   member: string
+  rotation: number
 }) => {
   emit('addOverride', data)
   showOverrideForm.value = false
@@ -103,6 +105,7 @@ const handleCreateOverrideFromSlot = (slot: RotationSlot) => {
   prefillOverride.value = {
     since: slot.start,
     duration: Math.floor(durationMs / 1000),
+    rotation: slot.rotationIndex,
   }
   showOverrideForm.value = true
 }
@@ -213,6 +216,7 @@ const handleCreateOverrideFromSlot = (slot: RotationSlot) => {
         </h4>
         <ScheduleOverrideForm
           :members="members"
+          :rotations="rotations"
           :prefill="prefillOverride"
           @submit="handleAddOverride"
           @cancel="showOverrideForm = false; prefillOverride = null"
