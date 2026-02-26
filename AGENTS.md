@@ -111,6 +111,20 @@ Configuration in `nuxt.config.ts`:
 
 If adding new static public pages, add them to the `allowed` array in `nitro.prerender.ignore`.
 
+#### Nuxt Content on Vercel (SSR without prerender)
+
+If markdown pages render correctly only after SPA navigation, but direct open returns empty/404 content, check Nuxt Content SQL queries on SSR.
+
+Known symptom:
+- `POST /__nuxt_content/content/query` returns `500` on Vercel
+
+Required `nuxt.config.ts` setup:
+- `content.experimental.sqliteConnector: 'native'`
+- `content.database.filename: isVercel ? '/tmp/contents.sqlite' : ':memory:'`
+
+Reason:
+- Vercel runtime allows writes only in `/tmp`. Nuxt Content needs a writable SQLite file during SSR request handling.
+
 Auth middleware (`app/middleware/auth.ts`):
 - Uses `parseCookies` from `h3` to read cookies on server (must be imported!)
 - Uses `useCookie` on client
