@@ -1,9 +1,15 @@
 :root {
+  color-scheme: light dark;
   --glow-1: oklch(0.75 0.15 280 / 0.15);
   --glow-2: oklch(0.7 0.14 220 / 0.14);
 }
 
+[data-theme="dark"] {
+  color-scheme: dark;
+}
+
 [data-theme="light"] {
+  color-scheme: light;
   --color-base-content: oklch(0.32 0.11 245.56 / 0.92);
 
   --glow-1: oklch(0.68 0.27 34.61 / 0.07);

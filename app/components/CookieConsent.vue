@@ -6,6 +6,7 @@ const COOKIE_KEY = 'cookie_consent'
 const consentCookie = useCookie<CookieConsentValue>(COOKIE_KEY, {
   default: () => null,
   maxAge: 60 * 60 * 24 * 365,
+  sameSite: 'lax',
 })
 
 const isVisible = ref(false)
@@ -46,7 +47,7 @@ onMounted(() => {
         v-if="isVisible"
         class="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:max-w-md z-50"
       >
-        <div class="bg-base-100 shadow-2xl rounded-lg p-5 border border-base-300">
+        <div class="relative card-glass backdrop-blur-sm shadow-2xl ring-1 rounded-lg p-5 border border-base-content/10">
           <button
             type="button"
             class="absolute top-3 right-3 w-6 h-6 flex items-center justify-center text-base-content/50 hover:text-base-content transition-colors"

@@ -105,3 +105,18 @@ export const formatDateTimeLocal = (date: Date): string => {
   const minutes = date.getMinutes().toString().padStart(2, '0')
   return `${year}-${month}-${day}T${hours}:${minutes}`
 }
+
+export const roundDateToMinuteStep = (date: Date, stepMinutes: number): Date => {
+  const next = new Date(date)
+  const minute = next.getMinutes()
+  const roundedMinute = Math.ceil(minute / stepMinutes) * stepMinutes
+
+  if (roundedMinute >= 60) {
+    next.setHours(next.getHours() + 1)
+    next.setMinutes(0, 0, 0)
+    return next
+  }
+
+  next.setMinutes(roundedMinute, 0, 0)
+  return next
+}

@@ -13,8 +13,6 @@ interface ScheduleData {
 
 interface Props {
   schedule: ScheduleData
-  expanded: boolean
-  tenantId: string
   members: ReadonlyArray<TenantResponseMember>
 }
 
@@ -22,8 +20,6 @@ const props = defineProps<Props>()
 
 const emit = defineEmits<{
   delete: []
-  expand: []
-  collapse: []
   addRotation: [data: {
     name: string
     duration: number
@@ -114,13 +110,7 @@ const handleCreateOverrideFromSlot = (slot: RotationSlot) => {
 <template>
   <UiCard class="animate-slide-up">
     <div class="flex items-start justify-between gap-4">
-      <button
-        type="button"
-        class="flex items-center gap-3 min-w-0 flex-1 text-left rounded-sm focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2"
-        :aria-expanded="expanded"
-        :aria-label="expanded ? 'Свернуть расписание' : 'Развернуть расписание'"
-        @click="expanded ? emit('collapse') : emit('expand')"
-      >
+      <div class="flex items-center gap-3 min-w-0 flex-1">
         <div class="w-10 h-10 flex items-center justify-center rounded-lg shrink-0 bg-primary/10">
           <Icon
             name="lucide:calendar-clock"
@@ -135,11 +125,7 @@ const handleCreateOverrideFromSlot = (slot: RotationSlot) => {
             {{ rotationsSummary }}
           </div>
         </div>
-        <Icon
-          :name="expanded ? 'lucide:chevron-up' : 'lucide:chevron-down'"
-          class="w-4 h-4 text-base-content/40 shrink-0"
-        />
-      </button>
+      </div>
 
       <div class="shrink-0 self-center">
         <UiButton
@@ -156,10 +142,7 @@ const handleCreateOverrideFromSlot = (slot: RotationSlot) => {
       </div>
     </div>
 
-    <div
-      v-if="expanded"
-      class="mt-6 space-y-4"
-    >
+    <div class="mt-6 space-y-4">
       <ScheduleTimeline
         :schedule="schedule"
         :member-names="memberNames"

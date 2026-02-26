@@ -9,14 +9,12 @@ interface Props {
   view: TimelineView
   range: TimelineRange
   memberColorMap: Map<string, number>
-  nowPosition?: number | null
   isOverrideLayer?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   isOverrideLayer: false,
   membersCount: undefined,
-  nowPosition: null,
 })
 
 const emit = defineEmits<{
@@ -84,14 +82,6 @@ const getColorIndex = (memberId: string): number => {
         class="border-l border-base-content/10 first:border-l-0"
         :class="isToday(item) ? 'bg-primary/5' : ''"
       />
-
-      <div
-        v-if="nowPosition !== null"
-        class="absolute top-0 bottom-0 w-0 border-l-2 border-dashed border-error z-10 pointer-events-none"
-        :style="{ left: `${nowPosition}%` }"
-      >
-        <div class="absolute -top-1 -left-[5px] w-2 h-2 rounded-full bg-error" />
-      </div>
 
       <ScheduleTimelineSlot
         v-for="(slotItem, index) in slots"

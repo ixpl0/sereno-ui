@@ -36,7 +36,7 @@ const navigationGroups: ReadonlyArray<NavigationGroup> = [
   {
     items: [
       { label: 'Расписания', to: '/schedules', icon: 'lucide:calendar-clock' },
-      { label: 'Эскалации', to: '/escalations', icon: 'lucide:git-branch' },
+      { label: 'Политики эскалаций', to: '/escalations', icon: 'lucide:git-branch' },
       { label: 'Команды', to: '/teams', icon: 'lucide:users' },
     ],
   },

@@ -184,12 +184,19 @@ const handleSubmit = () => {
 
       <div>
         <UiLabel>Время начала</UiLabel>
-        <input
-          v-model="startTime"
-          type="time"
-          step="600"
-          class="input input-bordered w-28"
-        >
+        <div class="relative w-28">
+          <input
+            v-model="startTime"
+            type="time"
+            step="600"
+            class="input input-bordered w-full ui-picker-input"
+          >
+          <Icon
+            name="lucide:clock-3"
+            class="ui-picker-icon text-base-content/60"
+            aria-hidden="true"
+          />
+        </div>
       </div>
 
       <div>

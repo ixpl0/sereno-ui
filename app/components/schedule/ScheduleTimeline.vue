@@ -131,6 +131,17 @@ const nowPosition = computed(() => {
   return (currentOffset / totalMs) * 100
 })
 
+const nowLabel = computed(() => {
+  const now = currentTime.value
+  const hours = now.getHours().toString().padStart(2, '0')
+  const minutes = now.getMinutes().toString().padStart(2, '0')
+  return `${hours}:${minutes}`
+})
+
+const hasTimelineRows = computed(() => {
+  return rotationLayers.value.length > 0 || hasOverrides.value
+})
+
 const handleDeleteOverrideFromSlot = (slot: RotationSlot) => {
   emit('deleteOverride', slot.rotationIndex)
 }
@@ -186,7 +197,7 @@ const handleSelectDay = (date: Date) => {
               </div>
             </div>
 
-            <div>
+            <div class="relative">
               <ScheduleTimelineLayer
                 v-for="layer in rotationLayers"
                 :key="layer.index"
@@ -196,7 +207,6 @@ const handleSelectDay = (date: Date) => {
                 :view="view"
                 :range="range"
                 :member-color-map="memberColorMap"
-                :now-position="nowPosition"
                 @delete="emit('deleteRotation', layer.index)"
                 @create-override="handleCreateOverrideFromSlot"
               />
@@ -208,10 +218,23 @@ const handleSelectDay = (date: Date) => {
                 :view="view"
                 :range="range"
                 :member-color-map="memberColorMap"
-                :now-position="nowPosition"
                 :is-override-layer="true"
                 @delete-override="handleDeleteOverrideFromSlot"
               />
+
+              <div
+                v-if="nowPosition !== null && hasTimelineRows"
+                class="pointer-events-none absolute top-0 bottom-0 left-32 right-0 z-20"
+              >
+                <div
+                  class="absolute top-0 bottom-0 w-0 border-l-2 border-error"
+                  :style="{ left: `${nowPosition}%` }"
+                >
+                  <div class="absolute bottom-1 -translate-x-1/2 rounded bg-base-100/90 px-1 py-0.5 text-[10px] leading-none text-error">
+                    {{ nowLabel }}
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div

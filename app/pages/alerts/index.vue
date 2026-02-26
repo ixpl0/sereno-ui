@@ -64,10 +64,10 @@ const handleRowKeydown = (event: KeyboardEvent, alertId: string) => {
         <h1 class="text-2xl font-semibold">
           Алерты
         </h1>
-        <div class="flex flex-wrap items-center gap-3">
+        <div class="flex w-full sm:w-auto flex-wrap items-center gap-3 sm:justify-end">
           <select
             v-model="statusFilter"
-            class="select select-bordered select-sm"
+            class="select select-bordered select-sm w-44 shrink-0"
           >
             <option value="all">
               Все статусы

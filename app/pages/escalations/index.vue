@@ -4,11 +4,11 @@ import type { TenantRequestEscalation } from '~/api/types.gen'
 definePageMeta({
   middleware: 'auth',
   layout: 'default',
-  title: 'Эскалации',
+  title: 'Политики эскалаций',
 })
 
 useSeoMeta({
-  title: 'Эскалации',
+  title: 'Политики эскалаций',
   description: 'Управление политиками эскалаций',
 })
 
@@ -27,11 +27,13 @@ const {
 const isCreating = ref(false)
 
 const newEscalationName = ref('')
+const newEscalationTenantId = ref('')
 const newEscalationInputRef = ref<{ focus: () => void } | null>(null)
 
 const startCreate = () => {
   isCreating.value = true
   newEscalationName.value = ''
+  newEscalationTenantId.value = selectedTenantId.value || tenants.value[0]?.id || ''
   nextTick(() => {
     newEscalationInputRef.value?.focus()
   })
@@ -40,13 +42,23 @@ const startCreate = () => {
 const cancelCreate = () => {
   isCreating.value = false
   newEscalationName.value = ''
+  newEscalationTenantId.value = ''
 }
 
 const handleCreate = async () => {
   const name = newEscalationName.value.trim()
+  const tenantId = newEscalationTenantId.value
+
   if (!name) {
     return
   }
+
+  if (!tenantId) {
+    toast.error('Выберите команду')
+    return
+  }
+
+  selectedTenantId.value = tenantId
 
   const escalation: TenantRequestEscalation = {
     name,
@@ -56,11 +68,11 @@ const handleCreate = async () => {
   const response = await createEscalation(escalation)
 
   if ('error' in response && response.error) {
-    toast.error('Не удалось создать эскалацию')
+    toast.error('Не удалось создать политику эскалации')
     return
   }
 
-  toast.success('Эскалация создана')
+  toast.success('Политика эскалации создана')
   cancelCreate()
 }
 
@@ -68,11 +80,11 @@ const handleDelete = async (id: string) => {
   const response = await deleteEscalation(id)
 
   if ('error' in response && response.error) {
-    toast.error('Не удалось удалить эскалацию')
+    toast.error('Не удалось удалить политику эскалации')
     return
   }
 
-  toast.success('Эскалация удалена')
+  toast.success('Политика эскалации удалена')
 }
 
 const handleToggle = async (escalation: typeof escalations.value[number]) => {
@@ -83,7 +95,7 @@ const handleToggle = async (escalation: typeof escalations.value[number]) => {
     return
   }
 
-  toast.success(escalation.enabled ? 'Эскалация отключена' : 'Эскалация включена')
+  toast.success(escalation.enabled ? 'Политика эскалации отключена' : 'Политика эскалации включена')
 }
 
 const formatDelay = (seconds: number): string => {
@@ -124,22 +136,9 @@ const getStepTarget = (step: typeof escalations.value[0]['steps'][0]): string =>
     <div class="max-w-5xl mx-auto">
       <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
         <h1 class="text-2xl font-semibold">
-          Эскалации
+          Политики эскалаций
         </h1>
         <div class="flex flex-wrap items-center gap-3">
-          <select
-            v-if="tenants.length > 1"
-            v-model="selectedTenantId"
-            class="select select-bordered select-sm max-w-64"
-          >
-            <option
-              v-for="tenant in tenants"
-              :key="tenant.id"
-              :value="tenant.id"
-            >
-              {{ tenant.name }}
-            </option>
-          </select>
           <UiButton
             v-if="!isCreating && selectedTenantId"
             variant="primary"
@@ -182,10 +181,28 @@ const getStepTarget = (step: typeof escalations.value[0]['steps'][0]): string =>
             <UiInput
               ref="newEscalationInputRef"
               v-model="newEscalationName"
-              placeholder="Название эскалации"
+              placeholder="Название политики эскалации"
               @keyup.enter="handleCreate"
               @keyup.escape="cancelCreate"
             />
+            <div>
+              <UiLabel>Команда</UiLabel>
+              <select
+                v-model="newEscalationTenantId"
+                class="select select-bordered w-full"
+              >
+                <option value="">
+                  Выберите команду
+                </option>
+                <option
+                  v-for="tenant in tenants"
+                  :key="tenant.id"
+                  :value="tenant.id"
+                >
+                  {{ tenant.name }}
+                </option>
+              </select>
+            </div>
             <div class="flex gap-2 justify-end">
               <UiButton
                 variant="primary"
@@ -207,8 +224,8 @@ const getStepTarget = (step: typeof escalations.value[0]['steps'][0]): string =>
           <UiEmptyState
             v-if="escalations.length === 0 && !isCreating"
             icon="lucide:git-branch"
-            title="Нет эскалаций"
-            action-text="Создать первую эскалацию"
+            title="Нет политик эскалаций"
+            action-text="Создать первую политику эскалации"
             @action="startCreate"
           />
 

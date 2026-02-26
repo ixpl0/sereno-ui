@@ -33,35 +33,10 @@ export default defineNuxtConfig({
       allowedRedirectHosts: ['oauth.example.com', 'oauth.yandex.ru', 'oauth.vk.com', 'id.vk.com'],
     },
   },
-  routeRules: {
-    '/': { prerender: true },
-    '/about': { prerender: true },
-    '/pricing': { prerender: true },
-    '/blog': { prerender: true },
-    '/blog/**': { prerender: true },
-    '/docs': { prerender: true },
-    '/docs/**': { prerender: true },
-  },
-
   future: {
     compatibilityVersion: 4,
   },
   compatibilityDate: '2025-07-15',
-
-  nitro: {
-    prerender: {
-      routes: ['/', '/about', '/pricing', '/blog', '/docs'],
-      crawlLinks: true,
-      ignore: [
-        (route: string) => {
-          const allowed = ['/', '/about', '/pricing', '/blog', '/docs']
-          return !allowed.some(prefix =>
-            route === prefix || route.startsWith(`${prefix}/`),
-          )
-        },
-      ],
-    },
-  },
 
   vite: {
     plugins: [tailwindcss()],

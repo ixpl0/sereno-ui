@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { TenantResponseMember, TenantResponseRotation } from '~/api/types.gen'
-import { formatDateTimeLocal } from '~/utils/formatters'
+import { formatDateTimeLocal, roundDateToMinuteStep } from '~/utils/formatters'
 
 interface Props {
   members: ReadonlyArray<TenantResponseMember>
@@ -39,7 +39,11 @@ const initialDuration = getInitialDuration()
 const name = ref('')
 const durationValue = ref(initialDuration.value)
 const durationUnit = ref<'hours' | 'days'>(initialDuration.unit)
-const since = ref(props.prefill ? formatDateTimeLocal(props.prefill.since) : new Date().toISOString().slice(0, 16))
+const since = ref(
+  props.prefill
+    ? formatDateTimeLocal(props.prefill.since)
+    : formatDateTimeLocal(roundDateToMinuteStep(new Date(), 10)),
+)
 const selectedMember = ref('')
 const selectedRotation = ref(
   props.prefill ? String(props.prefill.rotation) : (props.rotations[0]?.number !== undefined ? String(props.rotations[0].number) : ''),
@@ -129,11 +133,19 @@ const handleSubmit = () => {
 
     <div>
       <UiLabel>Начало</UiLabel>
-      <input
-        v-model="since"
-        type="datetime-local"
-        class="input input-bordered w-full"
-      >
+      <div class="relative">
+        <input
+          v-model="since"
+          type="datetime-local"
+          step="600"
+          class="input input-bordered w-full ui-picker-input"
+        >
+        <Icon
+          name="lucide:calendar-days"
+          class="ui-picker-icon text-base-content/60"
+          aria-hidden="true"
+        />
+      </div>
     </div>
 
     <div>

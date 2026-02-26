@@ -50,35 +50,45 @@ const handleGoBack = () => {
 </script>
 
 <template>
-  <main class="min-h-screen flex items-center justify-center bg-base-200 p-4">
-    <article class="text-center max-w-md">
-      <div class="mb-8">
-        <span class="text-8xl font-bold text-error">{{ statusCode }}</span>
-      </div>
+  <main class="min-h-screen flex items-center justify-center bg-base-100 p-4">
+    <article class="w-full max-w-lg">
+      <UiCard>
+        <div class="text-center">
+          <div class="mx-auto mb-4 w-12 h-12 rounded-lg bg-error/10 text-error flex items-center justify-center">
+            <Icon
+              name="lucide:triangle-alert"
+              class="w-6 h-6"
+            />
+          </div>
+          <div class="mb-2">
+            <span class="text-6xl font-semibold text-error">{{ statusCode }}</span>
+          </div>
 
-      <h1 class="text-2xl font-bold mb-4">
-        {{ errorInfo.title }}
-      </h1>
+          <h1 class="text-2xl font-semibold mb-3">
+            {{ errorInfo.title }}
+          </h1>
 
-      <p class="text-base-content/70 mb-8">
-        {{ errorInfo.description }}
-      </p>
+          <p class="text-base-content/70 mb-6">
+            {{ errorInfo.description }}
+          </p>
 
-      <nav class="flex flex-col sm:flex-row gap-3 justify-center">
-        <UiButton
-          variant="primary"
-          @click="handleGoHome"
-        >
-          На главную
-        </UiButton>
+          <nav class="flex flex-col sm:flex-row gap-3 justify-center">
+            <UiButton
+              variant="primary"
+              @click="handleGoHome"
+            >
+              На главную
+            </UiButton>
 
-        <UiButton
-          variant="ghost"
-          @click="handleGoBack"
-        >
-          Назад
-        </UiButton>
-      </nav>
+            <UiButton
+              variant="ghost"
+              @click="handleGoBack"
+            >
+              Назад
+            </UiButton>
+          </nav>
+        </div>
+      </UiCard>
     </article>
   </main>
 </template>

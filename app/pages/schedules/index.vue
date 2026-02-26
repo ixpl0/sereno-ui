@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { TenantRequestNewSchedule, TenantRequestRotation, TenantRequestOverride } from '~/api/types.gen'
-import { formatDateTimeLocal } from '~/utils/formatters'
+import { formatDateTimeLocal, roundDateToMinuteStep } from '~/utils/formatters'
 
 definePageMeta({
   middleware: 'auth',
@@ -31,16 +31,19 @@ const {
 const { members } = useTenantMembers(selectedTenantId)
 
 const isCreating = ref(false)
-const expandedId = ref<string | null>(null)
 
 const newScheduleName = ref('')
 const newScheduleSince = ref('')
+const newScheduleUntil = ref('')
+const newScheduleTenantId = ref('')
 const newScheduleInputRef = ref<{ focus: () => void } | null>(null)
 
 const startCreate = () => {
   isCreating.value = true
   newScheduleName.value = ''
-  newScheduleSince.value = formatDateTimeLocal(new Date())
+  newScheduleTenantId.value = selectedTenantId.value || tenants.value[0]?.id || ''
+  newScheduleSince.value = formatDateTimeLocal(roundDateToMinuteStep(new Date(), 10))
+  newScheduleUntil.value = ''
   nextTick(() => {
     newScheduleInputRef.value?.focus()
   })
@@ -50,20 +53,52 @@ const cancelCreate = () => {
   isCreating.value = false
   newScheduleName.value = ''
   newScheduleSince.value = ''
+  newScheduleUntil.value = ''
+  newScheduleTenantId.value = ''
 }
 
 const handleCreate = async () => {
   const name = newScheduleName.value.trim()
+  const tenantId = newScheduleTenantId.value
+
   if (!name) {
     return
   }
 
-  const sinceDate = newScheduleSince.value ? new Date(newScheduleSince.value) : new Date()
+  if (!tenantId) {
+    toast.error('Выберите команду')
+    return
+  }
+
+  const sinceDate = new Date(newScheduleSince.value)
+  if (Number.isNaN(sinceDate.getTime())) {
+    toast.error('Укажите корректное время начала')
+    return
+  }
+
   const sinceTimestamp = Math.floor(sinceDate.getTime() / 1000)
+
+  let untilTimestamp: number | undefined
+  if (newScheduleUntil.value) {
+    const untilDate = new Date(newScheduleUntil.value)
+    if (Number.isNaN(untilDate.getTime())) {
+      toast.error('Укажите корректное время окончания')
+      return
+    }
+
+    untilTimestamp = Math.floor(untilDate.getTime() / 1000)
+    if (untilTimestamp <= sinceTimestamp) {
+      toast.error('Окончание должно быть позже начала')
+      return
+    }
+  }
+
+  selectedTenantId.value = tenantId
 
   const schedule: TenantRequestNewSchedule = {
     name,
     since: sinceTimestamp,
+    until: untilTimestamp,
   }
 
   const response = await createSchedule(schedule)
@@ -75,11 +110,6 @@ const handleCreate = async () => {
 
   toast.success('Расписание создано')
   cancelCreate()
-
-  const created = 'data' in response ? response.data?.schedule : null
-  if (created) {
-    expandedId.value = created.id
-  }
 }
 
 const handleDelete = async (id: string) => {
@@ -91,9 +121,6 @@ const handleDelete = async (id: string) => {
   }
 
   toast.success('Расписание удалено')
-  if (expandedId.value === id) {
-    expandedId.value = null
-  }
 }
 
 const handleAddRotation = async (scheduleId: string, data: {
@@ -177,19 +204,6 @@ const handleDeleteOverride = async (scheduleId: string, index: number) => {
           Расписания
         </h1>
         <div class="flex flex-wrap items-center gap-3">
-          <select
-            v-if="tenants.length > 1"
-            v-model="selectedTenantId"
-            class="select select-bordered select-sm max-w-64"
-          >
-            <option
-              v-for="tenant in tenants"
-              :key="tenant.id"
-              :value="tenant.id"
-            >
-              {{ tenant.name }}
-            </option>
-          </select>
           <UiButton
             v-if="!isCreating && selectedTenantId"
             variant="primary"
@@ -237,13 +251,54 @@ const handleDeleteOverride = async (scheduleId: string, index: number) => {
               @keyup.escape="cancelCreate"
             />
             <div>
-              <UiLabel>Дата начала</UiLabel>
-              <input
-                v-model="newScheduleSince"
-                type="datetime-local"
-                step="600"
-                class="input input-bordered w-full"
+              <UiLabel>Команда</UiLabel>
+              <select
+                v-model="newScheduleTenantId"
+                class="select select-bordered w-full"
               >
+                <option value="">
+                  Выберите команду
+                </option>
+                <option
+                  v-for="tenant in tenants"
+                  :key="tenant.id"
+                  :value="tenant.id"
+                >
+                  {{ tenant.name }}
+                </option>
+              </select>
+            </div>
+            <div>
+              <UiLabel>Начало</UiLabel>
+              <div class="relative">
+                <input
+                  v-model="newScheduleSince"
+                  type="datetime-local"
+                  step="600"
+                  class="input input-bordered w-full ui-picker-input"
+                >
+                <Icon
+                  name="lucide:calendar-days"
+                  class="ui-picker-icon text-base-content/60"
+                  aria-hidden="true"
+                />
+              </div>
+            </div>
+            <div>
+              <UiLabel>Конец (опционально)</UiLabel>
+              <div class="relative">
+                <input
+                  v-model="newScheduleUntil"
+                  type="datetime-local"
+                  step="600"
+                  class="input input-bordered w-full ui-picker-input"
+                >
+                <Icon
+                  name="lucide:calendar-days"
+                  class="ui-picker-icon text-base-content/60"
+                  aria-hidden="true"
+                />
+              </div>
             </div>
             <div class="flex gap-2 justify-end">
               <UiButton
@@ -275,12 +330,8 @@ const handleDeleteOverride = async (scheduleId: string, index: number) => {
             v-for="schedule in schedules"
             :key="schedule.id"
             :schedule="schedule"
-            :expanded="expandedId === schedule.id"
-            :tenant-id="selectedTenantId"
             :members="members"
             @delete="handleDelete(schedule.id)"
-            @expand="expandedId = schedule.id"
-            @collapse="expandedId = null"
             @add-rotation="handleAddRotation(schedule.id, $event)"
             @delete-rotation="handleDeleteRotation(schedule.id, $event)"
             @add-override="handleAddOverride(schedule.id, $event)"

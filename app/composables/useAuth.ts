@@ -44,6 +44,7 @@ export const useAuth = () => {
   const logout = async () => {
     const response = await postAuthLogout()
     store.clearToken()
+    await clearNuxtData('user')
     return response
   }
 
