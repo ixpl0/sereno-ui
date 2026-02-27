@@ -4,14 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       mock_api:
-        description: "Which deploy jobs to run"
+        description: "MOCK_API_ENABLED"
         required: false
         default: "true"
         type: choice
         options:
           - "false"
           - "true"
-          - "both"
   pull_request:
     branches:
       - main
