@@ -41,3 +41,6 @@ coverage/
 
 # Claude temp files
 tmpclaude-*
+
+# pnpm
+.pnpm-store
