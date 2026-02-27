@@ -143,6 +143,7 @@ jobs:
           docker build \
             --build-arg NUXT_PUBLIC_API_BASE_URL="${NUXT_PUBLIC_API_BASE_URL}" \
             --build-arg NUXT_PUBLIC_MOCK_API=false \
+            --build-arg PORTAL_VERSION="${IMAGE_TAG}" \
             -t "${IMAGE_REPO}:${IMAGE_TAG}" \
             -t "${IMAGE_REPO}:main" \
             -t "${IMAGE_REPO}:latest" \
@@ -253,6 +254,7 @@ jobs:
           docker build \
             --build-arg NUXT_PUBLIC_API_BASE_URL="${NUXT_PUBLIC_API_BASE_URL}" \
             --build-arg NUXT_PUBLIC_MOCK_API=true \
+            --build-arg PORTAL_VERSION="${IMAGE_TAG}" \
             -t "${IMAGE_REPO}:${IMAGE_TAG}" \
             -t "${IMAGE_REPO}:main-mock" \
             .
