@@ -27,6 +27,15 @@ const style = computed(() => ({
 const colorClass = computed(() => getUserColor(props.colorIndex))
 
 const timeLabel = computed(() => formatTimeRange(props.slotData.start, props.slotData.end))
+const compactTimeLabel = computed(() => {
+  const formatTime = (date: Date) => {
+    const hours = date.getHours().toString().padStart(2, '0')
+    const minutes = date.getMinutes().toString().padStart(2, '0')
+    return `${hours}:${minutes}`
+  }
+
+  return `${formatTime(props.slotData.start)}-${formatTime(props.slotData.end)}`
+})
 const triggerAriaLabel = computed(() => `Открыть слот ${props.slotData.memberName} (${timeLabel.value})`)
 
 const handleClick = () => {
@@ -62,11 +71,8 @@ const handleDeleteOverride = () => {
         <div class="text-xs font-medium text-white truncate">
           {{ slotData.memberName }}
         </div>
-        <div
-          v-if="position.width > 8"
-          class="text-xs text-white/80 truncate"
-        >
-          {{ timeLabel }}
+        <div class="text-[9px] leading-none text-white/80 truncate">
+          {{ compactTimeLabel }}
         </div>
       </button>
     </template>

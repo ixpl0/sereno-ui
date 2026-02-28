@@ -227,13 +227,21 @@ const handleSelectDay = (date: Date) => {
                 class="pointer-events-none absolute top-0 bottom-0 left-32 right-0 z-20"
               >
                 <div
-                  class="absolute top-0 bottom-0 w-0 border-l-2 border-error"
+                  class="absolute top-0 bottom-0 w-0.5 -translate-x-1/2 bg-error"
                   :style="{ left: `${nowPosition}%` }"
-                >
-                  <div class="absolute bottom-1 -translate-x-1/2 rounded bg-base-100/90 px-1 py-0.5 text-[10px] leading-none text-error">
-                    {{ nowLabel }}
-                  </div>
-                </div>
+                />
+              </div>
+            </div>
+
+            <div
+              v-if="nowPosition !== null && hasTimelineRows"
+              class="pointer-events-none relative ml-32 h-5"
+            >
+              <div
+                class="absolute top-1 -translate-x-1/2 whitespace-nowrap text-[10px] leading-none text-error"
+                :style="{ left: `${nowPosition}%` }"
+              >
+                {{ nowLabel }}
               </div>
             </div>
 
