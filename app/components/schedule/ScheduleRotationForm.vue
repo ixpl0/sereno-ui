@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { TenantResponseMember } from '~/api/types.gen'
 import draggable from 'vuedraggable'
+import { TIME_PICKER_MINUTE_STEP, TIME_PICKER_OPTIONS } from '~/utils/formatters'
 
 interface Props {
   members: ReadonlyArray<TenantResponseMember>
@@ -36,7 +37,7 @@ const dayLabels = [
   { value: 7, label: 'Вс' },
 ]
 
-const minuteOptions = [0, 10, 20, 30, 40, 50]
+const minuteOptions = Array.from({ length: 60 / TIME_PICKER_MINUTE_STEP }, (_, index) => index * TIME_PICKER_MINUTE_STEP)
 
 const availableMembers = computed(() => {
   const selectedIds = selectedMembers.value.map(m => m.id)
@@ -184,19 +185,18 @@ const handleSubmit = () => {
 
       <div>
         <UiLabel>Время начала</UiLabel>
-        <div class="relative w-28">
-          <input
-            v-model="startTime"
-            type="time"
-            step="600"
-            class="input input-bordered w-full ui-picker-input"
+        <select
+          v-model="startTime"
+          class="select select-bordered w-28"
+        >
+          <option
+            v-for="option in TIME_PICKER_OPTIONS"
+            :key="option.value"
+            :value="option.value"
           >
-          <Icon
-            name="lucide:clock-3"
-            class="ui-picker-icon text-base-content/60"
-            aria-hidden="true"
-          />
-        </div>
+            {{ option.label }}
+          </option>
+        </select>
       </div>
 
       <div>

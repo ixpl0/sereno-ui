@@ -97,13 +97,43 @@ export const getStatusTextColor = (status: string | undefined): string =>
 export const getStatusBgLight = (status: string | undefined): string =>
   getStatusStyle(status, 'bg')
 
-export const formatDateTimeLocal = (date: Date): string => {
+export const formatDateLocal = (date: Date): string => {
   const year = date.getFullYear()
   const month = (date.getMonth() + 1).toString().padStart(2, '0')
   const day = date.getDate().toString().padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+export const formatTimeLocal = (date: Date): string => {
   const hours = date.getHours().toString().padStart(2, '0')
   const minutes = date.getMinutes().toString().padStart(2, '0')
-  return `${year}-${month}-${day}T${hours}:${minutes}`
+  return `${hours}:${minutes}`
+}
+
+export const formatDateTimeLocal = (date: Date): string => {
+  return `${formatDateLocal(date)}T${formatTimeLocal(date)}`
+}
+
+export const TIME_PICKER_MINUTE_STEP = 10
+
+export const TIME_PICKER_OPTIONS = Array.from({ length: (24 * 60) / TIME_PICKER_MINUTE_STEP }, (_, index) => {
+  const totalMinutes = index * TIME_PICKER_MINUTE_STEP
+  const hours = Math.floor(totalMinutes / 60).toString().padStart(2, '0')
+  const minutes = (totalMinutes % 60).toString().padStart(2, '0')
+  const value = `${hours}:${minutes}`
+
+  return {
+    value,
+    label: value,
+  }
+})
+
+export const combineDateTimeLocal = (date: string, time: string): string => {
+  if (!date || !time) {
+    return ''
+  }
+
+  return `${date}T${time}`
 }
 
 export const roundDateToMinuteStep = (date: Date, stepMinutes: number): Date => {

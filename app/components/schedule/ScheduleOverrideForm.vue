@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { TenantResponseMember, TenantResponseRotation } from '~/api/types.gen'
-import { formatDateTimeLocal, roundDateToMinuteStep } from '~/utils/formatters'
+import { combineDateTimeLocal, formatDateLocal, formatTimeLocal, roundDateToMinuteStep, TIME_PICKER_MINUTE_STEP, TIME_PICKER_OPTIONS } from '~/utils/formatters'
 
 interface Props {
   members: ReadonlyArray<TenantResponseMember>
@@ -35,15 +35,13 @@ const getInitialDuration = (): { value: number, unit: 'hours' | 'days' } => {
 }
 
 const initialDuration = getInitialDuration()
+const initialSince = props.prefill ? props.prefill.since : roundDateToMinuteStep(new Date(), TIME_PICKER_MINUTE_STEP)
 
 const name = ref('')
 const durationValue = ref(initialDuration.value)
 const durationUnit = ref<'hours' | 'days'>(initialDuration.unit)
-const since = ref(
-  props.prefill
-    ? formatDateTimeLocal(props.prefill.since)
-    : formatDateTimeLocal(roundDateToMinuteStep(new Date(), 10)),
-)
+const sinceDate = ref(formatDateLocal(initialSince))
+const sinceTime = ref(formatTimeLocal(initialSince))
 const selectedMember = ref('')
 const selectedRotation = ref(
   props.prefill ? String(props.prefill.rotation) : (props.rotations[0]?.number !== undefined ? String(props.rotations[0].number) : ''),
@@ -52,6 +50,8 @@ const selectedRotation = ref(
 const isValid = computed(() => {
   return name.value.trim() !== ''
     && durationValue.value > 0
+    && sinceDate.value !== ''
+    && sinceTime.value !== ''
     && selectedMember.value !== ''
     && selectedRotation.value !== ''
 })
@@ -65,7 +65,7 @@ const handleSubmit = () => {
     ? durationValue.value * 86400
     : durationValue.value * 3600
 
-  const sinceTimestamp = Math.floor(new Date(since.value).getTime() / 1000)
+  const sinceTimestamp = Math.floor(new Date(combineDateTimeLocal(sinceDate.value, sinceTime.value)).getTime() / 1000)
 
   emit('submit', {
     name: name.value.trim(),
@@ -133,18 +133,31 @@ const handleSubmit = () => {
 
     <div>
       <UiLabel>Начало</UiLabel>
-      <div class="relative">
-        <input
-          v-model="since"
-          type="datetime-local"
-          step="600"
-          class="input input-bordered w-full ui-picker-input"
+      <div class="grid gap-2 sm:grid-cols-[minmax(0,1fr)_7rem]">
+        <div class="relative">
+          <input
+            v-model="sinceDate"
+            type="date"
+            class="input input-bordered w-full ui-picker-input"
+          >
+          <Icon
+            name="lucide:calendar-days"
+            class="ui-picker-icon text-base-content/60"
+            aria-hidden="true"
+          />
+        </div>
+        <select
+          v-model="sinceTime"
+          class="select select-bordered w-full"
         >
-        <Icon
-          name="lucide:calendar-days"
-          class="ui-picker-icon text-base-content/60"
-          aria-hidden="true"
-        />
+          <option
+            v-for="option in TIME_PICKER_OPTIONS"
+            :key="option.value"
+            :value="option.value"
+          >
+            {{ option.label }}
+          </option>
+        </select>
       </div>
     </div>
 

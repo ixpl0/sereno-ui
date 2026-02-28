@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { TenantRequestNewSchedule, TenantRequestRotation, TenantRequestOverride } from '~/api/types.gen'
-import { formatDateTimeLocal, roundDateToMinuteStep } from '~/utils/formatters'
+import { combineDateTimeLocal, formatDateLocal, formatTimeLocal, roundDateToMinuteStep, TIME_PICKER_MINUTE_STEP, TIME_PICKER_OPTIONS } from '~/utils/formatters'
 
 definePageMeta({
   middleware: 'auth',
@@ -31,19 +31,37 @@ const {
 const { members } = useTenantMembers(selectedTenantId)
 
 const isCreating = ref(false)
+const defaultTimeOption = TIME_PICKER_OPTIONS[0]?.value ?? '00:00'
+const selectTenantMessage = '\u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u043a\u043e\u043c\u0430\u043d\u0434\u0443'
+const invalidSinceMessage = '\u0423\u043a\u0430\u0436\u0438\u0442\u0435 \u043a\u043e\u0440\u0440\u0435\u043a\u0442\u043d\u043e\u0435 \u0432\u0440\u0435\u043c\u044f \u043d\u0430\u0447\u0430\u043b\u0430'
+const invalidUntilMessage = '\u0423\u043a\u0430\u0436\u0438\u0442\u0435 \u043a\u043e\u0440\u0440\u0435\u043a\u0442\u043d\u043e\u0435 \u0432\u0440\u0435\u043c\u044f \u043e\u043a\u043e\u043d\u0447\u0430\u043d\u0438\u044f'
+const untilAfterSinceMessage = '\u041e\u043a\u043e\u043d\u0447\u0430\u043d\u0438\u0435 \u0434\u043e\u043b\u0436\u043d\u043e \u0431\u044b\u0442\u044c \u043f\u043e\u0437\u0436\u0435 \u043d\u0430\u0447\u0430\u043b\u0430'
+const createScheduleFailedMessage = '\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u0441\u043e\u0437\u0434\u0430\u0442\u044c \u0440\u0430\u0441\u043f\u0438\u0441\u0430\u043d\u0438\u0435'
+const createScheduleSuccessMessage = '\u0420\u0430\u0441\u043f\u0438\u0441\u0430\u043d\u0438\u0435 \u0441\u043e\u0437\u0434\u0430\u043d\u043e'
+
+const showInvalidUntilMessage = (): void => {
+  toast.error(invalidUntilMessage)
+}
 
 const newScheduleName = ref('')
-const newScheduleSince = ref('')
-const newScheduleUntil = ref('')
+const newScheduleSinceDate = ref('')
+const newScheduleSinceTime = ref(defaultTimeOption)
+const newScheduleUntilDate = ref('')
+const newScheduleUntilTime = ref('')
 const newScheduleTenantId = ref('')
 const newScheduleInputRef = ref<{ focus: () => void } | null>(null)
 
 const startCreate = () => {
+  const roundedNow = roundDateToMinuteStep(new Date(), TIME_PICKER_MINUTE_STEP)
+
   isCreating.value = true
   newScheduleName.value = ''
   newScheduleTenantId.value = selectedTenantId.value || tenants.value[0]?.id || ''
-  newScheduleSince.value = formatDateTimeLocal(roundDateToMinuteStep(new Date(), 10))
-  newScheduleUntil.value = ''
+  newScheduleSinceDate.value = formatDateLocal(roundedNow)
+  newScheduleSinceTime.value = formatTimeLocal(roundedNow)
+  newScheduleUntilDate.value = ''
+  newScheduleUntilTime.value = ''
+
   nextTick(() => {
     newScheduleInputRef.value?.focus()
   })
@@ -52,8 +70,10 @@ const startCreate = () => {
 const cancelCreate = () => {
   isCreating.value = false
   newScheduleName.value = ''
-  newScheduleSince.value = ''
-  newScheduleUntil.value = ''
+  newScheduleSinceDate.value = ''
+  newScheduleSinceTime.value = defaultTimeOption
+  newScheduleUntilDate.value = ''
+  newScheduleUntilTime.value = ''
   newScheduleTenantId.value = ''
 }
 
@@ -66,29 +86,42 @@ const handleCreate = async () => {
   }
 
   if (!tenantId) {
-    toast.error('Выберите команду')
+    toast.error(selectTenantMessage)
     return
   }
 
-  const sinceDate = new Date(newScheduleSince.value)
+  const sinceValue = combineDateTimeLocal(newScheduleSinceDate.value, newScheduleSinceTime.value)
+  const sinceDate = new Date(sinceValue)
+
   if (Number.isNaN(sinceDate.getTime())) {
-    toast.error('Укажите корректное время начала')
+    toast.error(invalidSinceMessage)
     return
   }
 
   const sinceTimestamp = Math.floor(sinceDate.getTime() / 1000)
 
   let untilTimestamp: number | undefined
-  if (newScheduleUntil.value) {
-    const untilDate = new Date(newScheduleUntil.value)
+  const hasUntilDate = newScheduleUntilDate.value !== ''
+  const hasUntilTime = newScheduleUntilTime.value !== ''
+
+  if (hasUntilDate || hasUntilTime) {
+    if (!hasUntilDate || !hasUntilTime) {
+      showInvalidUntilMessage()
+      return
+    }
+
+    const untilValue = combineDateTimeLocal(newScheduleUntilDate.value, newScheduleUntilTime.value)
+    const untilDate = new Date(untilValue)
+
     if (Number.isNaN(untilDate.getTime())) {
-      toast.error('Укажите корректное время окончания')
+      showInvalidUntilMessage()
       return
     }
 
     untilTimestamp = Math.floor(untilDate.getTime() / 1000)
+
     if (untilTimestamp <= sinceTimestamp) {
-      toast.error('Окончание должно быть позже начала')
+      toast.error(untilAfterSinceMessage)
       return
     }
   }
@@ -104,11 +137,11 @@ const handleCreate = async () => {
   const response = await createSchedule(schedule)
 
   if ('error' in response && response.error) {
-    toast.error('Не удалось создать расписание')
+    toast.error(createScheduleFailedMessage)
     return
   }
 
-  toast.success('Расписание создано')
+  toast.success(createScheduleSuccessMessage)
   cancelCreate()
 }
 
@@ -270,34 +303,63 @@ const handleDeleteOverride = async (scheduleId: string, index: number) => {
             </div>
             <div>
               <UiLabel>Начало</UiLabel>
-              <div class="relative">
-                <input
-                  v-model="newScheduleSince"
-                  type="datetime-local"
-                  step="600"
-                  class="input input-bordered w-full ui-picker-input"
+              <div class="grid gap-2 sm:grid-cols-[minmax(0,1fr)_7rem]">
+                <div class="relative">
+                  <input
+                    v-model="newScheduleSinceDate"
+                    type="date"
+                    class="input input-bordered w-full ui-picker-input"
+                  >
+                  <Icon
+                    name="lucide:calendar-days"
+                    class="ui-picker-icon text-base-content/60"
+                    aria-hidden="true"
+                  />
+                </div>
+                <select
+                  v-model="newScheduleSinceTime"
+                  class="select select-bordered w-full"
                 >
-                <Icon
-                  name="lucide:calendar-days"
-                  class="ui-picker-icon text-base-content/60"
-                  aria-hidden="true"
-                />
+                  <option
+                    v-for="option in TIME_PICKER_OPTIONS"
+                    :key="option.value"
+                    :value="option.value"
+                  >
+                    {{ option.label }}
+                  </option>
+                </select>
               </div>
             </div>
             <div>
               <UiLabel>Конец (опционально)</UiLabel>
-              <div class="relative">
-                <input
-                  v-model="newScheduleUntil"
-                  type="datetime-local"
-                  step="600"
-                  class="input input-bordered w-full ui-picker-input"
+              <div class="grid gap-2 sm:grid-cols-[minmax(0,1fr)_7rem]">
+                <div class="relative">
+                  <input
+                    v-model="newScheduleUntilDate"
+                    type="date"
+                    class="input input-bordered w-full ui-picker-input"
+                  >
+                  <Icon
+                    name="lucide:calendar-days"
+                    class="ui-picker-icon text-base-content/60"
+                    aria-hidden="true"
+                  />
+                </div>
+                <select
+                  v-model="newScheduleUntilTime"
+                  class="select select-bordered w-full"
                 >
-                <Icon
-                  name="lucide:calendar-days"
-                  class="ui-picker-icon text-base-content/60"
-                  aria-hidden="true"
-                />
+                  <option value="">
+                    --:--
+                  </option>
+                  <option
+                    v-for="option in TIME_PICKER_OPTIONS"
+                    :key="option.value"
+                    :value="option.value"
+                  >
+                    {{ option.label }}
+                  </option>
+                </select>
               </div>
             </div>
             <div class="flex gap-2 justify-end">
