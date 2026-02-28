@@ -2,6 +2,29 @@ name: Portal CI/CD
 
 on:
   workflow_dispatch:
+    inputs:
+      stage:
+        description: "Pipeline stage"
+        required: true
+        default: "build_and_deploy"
+        type: choice
+        options:
+          - build
+          - deploy
+          - build_and_deploy
+      image_tag:
+        description: "Existing image tag for deploy stage (e.g. <sha> or <sha>-mock)"
+        required: false
+        default: ""
+        type: string
+      deploy_mock_api:
+        description: "NUXT_PUBLIC_MOCK_API for deploy jobs"
+        required: true
+        default: "true"
+        type: choice
+        options:
+          - "false"
+          - "true"
   pull_request:
     branches:
       - main
@@ -17,7 +40,31 @@ env:
   K8S_CONTAINER: portal
 
 jobs:
+  validate_workflow:
+    name: Validate workflow
+    runs-on: [pve-fx3, shell]
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install actionlint
+        run: |
+          set -euo pipefail
+          VERSION="1.7.8"
+          curl -fsSL "https://github.com/rhysd/actionlint/releases/download/v${VERSION}/actionlint_${VERSION}_linux_amd64.tar.gz" \
+            | tar -xz -C "${RUNNER_TEMP}" actionlint
+          chmod +x "${RUNNER_TEMP}/actionlint"
+
+      - name: Validate CI workflow syntax
+        run: |
+          set -euo pipefail
+          "${RUNNER_TEMP}/actionlint" -ignore 'label ".*" is unknown' .forgejo/workflows/portal-cicd.yml
+
   checks:
+    name: Checks
+    needs: validate_workflow
+    if: github.event_name != 'workflow_dispatch' || inputs.stage != 'deploy'
     runs-on: [pve-fx3, shell]
     timeout-minutes: 30
     steps:
@@ -51,19 +98,24 @@ jobs:
         run: pnpm test:unit:run
 
       - name: Build
-        env:
-          NUXT_PUBLIC_API_BASE_URL: ${{ vars.NUXT_PUBLIC_API_BASE_URL }}
         run: pnpm build
 
-  build_push_deploy:
-    name: Build, Push, Deploy
+  build_push:
+    name: Build & Push Image
     needs: checks
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: >-
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_dispatch' &&
+      (inputs.stage == 'build' || inputs.stage == 'build_and_deploy'))
     runs-on: [pve-fx3, shell]
     timeout-minutes: 40
+    outputs:
+      image_repo: ${{ steps.meta.outputs.image_repo }}
+      image_tag: ${{ steps.meta.outputs.image_tag }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
 
       - name: Compute image name and tags
         id: meta
@@ -85,24 +137,48 @@ jobs:
           set -euo pipefail
           echo "${REGISTRY_TOKEN}" | docker login "${REGISTRY}" -u "${REGISTRY_USER}" --password-stdin
 
-      - name: Build and push image
+      - name: Build image
         env:
           IMAGE_REPO: ${{ steps.meta.outputs.image_repo }}
           IMAGE_TAG: ${{ steps.meta.outputs.image_tag }}
-          NUXT_PUBLIC_API_BASE_URL: ${{ vars.NUXT_PUBLIC_API_BASE_URL }}
         run: |
           set -euo pipefail
           docker build \
-            --build-arg NUXT_PUBLIC_API_BASE_URL="${NUXT_PUBLIC_API_BASE_URL}" \
-            --build-arg NUXT_PUBLIC_MOCK_API=false \
+            --build-arg PORTAL_VERSION="${IMAGE_TAG}" \
             -t "${IMAGE_REPO}:${IMAGE_TAG}" \
-            -t "${IMAGE_REPO}:main" \
-            -t "${IMAGE_REPO}:latest" \
             .
 
+      - name: Push immutable image tag
+        env:
+          IMAGE_REPO: ${{ steps.meta.outputs.image_repo }}
+          IMAGE_TAG: ${{ steps.meta.outputs.image_tag }}
+        run: |
+          set -euo pipefail
           docker push "${IMAGE_REPO}:${IMAGE_TAG}"
+
+      - name: Push branch aliases on main
+        if: github.ref == 'refs/heads/main'
+        env:
+          IMAGE_REPO: ${{ steps.meta.outputs.image_repo }}
+          IMAGE_TAG: ${{ steps.meta.outputs.image_tag }}
+        run: |
+          set -euo pipefail
+          docker tag "${IMAGE_REPO}:${IMAGE_TAG}" "${IMAGE_REPO}:main"
+          docker tag "${IMAGE_REPO}:${IMAGE_TAG}" "${IMAGE_REPO}:latest"
           docker push "${IMAGE_REPO}:main"
           docker push "${IMAGE_REPO}:latest"
+
+  deploy_from_build:
+    name: Deploy Built Image
+    needs: build_push
+    if: >-
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_dispatch' && inputs.stage == 'build_and_deploy')
+    runs-on: [pve-fx3, shell]
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Configure kubeconfig
         env:
@@ -140,12 +216,99 @@ jobs:
           kubectl apply -f k8s/deployment.yaml
           kubectl apply -f k8s/ingress.yaml
 
-      - name: Deploy new image
+      - name: Deploy image from build job
         env:
-          IMAGE_REPO: ${{ steps.meta.outputs.image_repo }}
-          IMAGE_TAG: ${{ steps.meta.outputs.image_tag }}
+          IMAGE_REPO: ${{ needs.build_push.outputs.image_repo }}
+          IMAGE_TAG: ${{ needs.build_push.outputs.image_tag }}
         run: |
           set -euo pipefail
+          if [ "${GITHUB_EVENT_NAME}" = "push" ]; then
+            deploy_mock_api="true"
+          else
+            deploy_mock_api="${{ inputs.deploy_mock_api }}"
+          fi
+
+          kubectl -n "${K8S_NAMESPACE}" set env deployment/"${K8S_DEPLOYMENT}" \
+            NUXT_PUBLIC_MOCK_API="${deploy_mock_api}"
+
+          kubectl -n "${K8S_NAMESPACE}" set image \
+            deployment/"${K8S_DEPLOYMENT}" \
+            "${K8S_CONTAINER}"="${IMAGE_REPO}:${IMAGE_TAG}"
+
+          kubectl -n "${K8S_NAMESPACE}" rollout status deployment/"${K8S_DEPLOYMENT}" --timeout=240s
+
+  deploy_existing_image:
+    name: Deploy Existing Image Tag
+    needs: validate_workflow
+    if: github.event_name == 'workflow_dispatch' && inputs.stage == 'deploy'
+    runs-on: [pve-fx3, shell]
+    timeout-minutes: 20
+    steps:
+      - name: Validate image_tag input
+        run: |
+          set -euo pipefail
+          if [ -z "${{ inputs.image_tag }}" ]; then
+            echo "workflow_dispatch input 'image_tag' is required for stage=deploy"
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Compute image repository
+        id: meta
+        run: |
+          set -euo pipefail
+          repo_owner_lc="$(echo "${GITHUB_REPOSITORY_OWNER}" | tr '[:upper:]' '[:lower:]')"
+          repo_name_lc="$(echo "${GITHUB_REPOSITORY##*/}" | tr '[:upper:]' '[:lower:]')"
+          image_repo="${REGISTRY}/${repo_owner_lc}/${repo_name_lc}"
+          echo "image_repo=${image_repo}" >> "${GITHUB_OUTPUT}"
+
+      - name: Configure kubeconfig
+        env:
+          KUBECONFIG_DEPOY_B64: ${{ secrets.KUBECONFIG_DEPOY_B64 }}
+        run: |
+          set -euo pipefail
+          echo "${KUBECONFIG_DEPOY_B64}" | base64 -d > "${RUNNER_TEMP}/kubeconfig"
+          chmod 600 "${RUNNER_TEMP}/kubeconfig"
+          echo "KUBECONFIG=${RUNNER_TEMP}/kubeconfig" >> "${GITHUB_ENV}"
+
+      - name: Install kubectl
+        run: |
+          set -euo pipefail
+          KUBECTL_VERSION="v1.30.8"
+          curl -fsSLo "${RUNNER_TEMP}/kubectl" "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
+          chmod +x "${RUNNER_TEMP}/kubectl"
+          echo "${RUNNER_TEMP}" >> "${GITHUB_PATH}"
+
+      - name: Ensure registry pull secret exists
+        env:
+          REGISTRY_USER: ${{ secrets.CODEBERG_USERNAME }}
+          REGISTRY_TOKEN: ${{ secrets.CODEBERG_TOKEN }}
+        run: |
+          set -euo pipefail
+          kubectl -n "${K8S_NAMESPACE}" create secret docker-registry codeberg-registry \
+            --docker-server="${REGISTRY}" \
+            --docker-username="${REGISTRY_USER}" \
+            --docker-password="${REGISTRY_TOKEN}" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Apply base manifests
+        run: |
+          set -euo pipefail
+          kubectl apply -f k8s/service.yaml
+          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f k8s/ingress.yaml
+
+      - name: Deploy existing image tag
+        env:
+          IMAGE_REPO: ${{ steps.meta.outputs.image_repo }}
+          IMAGE_TAG: ${{ inputs.image_tag }}
+        run: |
+          set -euo pipefail
+          kubectl -n "${K8S_NAMESPACE}" set env deployment/"${K8S_DEPLOYMENT}" \
+            NUXT_PUBLIC_MOCK_API="${{ inputs.deploy_mock_api }}"
+
           kubectl -n "${K8S_NAMESPACE}" set image \
             deployment/"${K8S_DEPLOYMENT}" \
             "${K8S_CONTAINER}"="${IMAGE_REPO}:${IMAGE_TAG}"
